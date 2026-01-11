@@ -1,0 +1,182 @@
+DB used:plsql
+Tables created:11/01 for user mgmt module
+
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role VARCHAR(20)
+        CHECK (role IN ('CLIENT', 'ADVOCATE', 'ADMIN')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE cases (
+    case_id SERIAL PRIMARY KEY,
+    client_id INT REFERENCES users(user_id),
+    case_title VARCHAR(200) NOT NULL,
+    case_type VARCHAR(50),
+    case_description TEXT,
+    status VARCHAR(20)
+        DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE admin_case_review (
+    review_id SERIAL PRIMARY KEY,
+    case_id INT REFERENCES cases(case_id),
+    admin_id INT REFERENCES users(user_id),
+    decision VARCHAR(20)
+        CHECK (decision IN ('APPROVED', 'REJECTED')),
+    remarks TEXT,
+    reviewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE case_assignments (
+    assignment_id SERIAL PRIMARY KEY,
+    case_id INT REFERENCES cases(case_id),
+    advocate_id INT REFERENCES users(user_id),
+    assigned_by INT REFERENCES users(user_id), -- admin
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE advocate_profiles (
+    advocate_id INT PRIMARY KEY REFERENCES users(user_id),
+    bar_enrollment_no VARCHAR(50) UNIQUE NOT NULL,
+    specialization TEXT,
+    experience_years INT
+);
+CREATE TABLE documents (
+    document_id SERIAL PRIMARY KEY,
+    case_id INT REFERENCES cases(case_id),
+    uploaded_by INT REFERENCES users(user_id),
+    file_path TEXT NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE notifications (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(user_id),
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE OR REPLACE FUNCTION handle_admin_review()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE cases
+    SET status = NEW.decision
+    WHERE case_id = NEW.case_id;
+
+    INSERT INTO notifications (user_id, message)
+    VALUES (
+        (SELECT client_id FROM cases WHERE case_id = NEW.case_id),
+        'Your case has been ' || NEW.decision
+    );
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS handle_admin_review();
+
+
+CREATE OR REPLACE FUNCTION handle_admin_review()
+RETURNS TRIGGER
+AS $$
+BEGIN
+    UPDATE cases
+    SET status = NEW.decision
+    WHERE case_id = NEW.case_id;
+
+    INSERT INTO notifications (user_id, message)
+    VALUES (
+        (SELECT client_id FROM cases WHERE case_id = NEW.case_id),
+        'Your case has been ' || NEW.decision
+    );
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_admin_review ON admin_case_review;
+
+CREATE TRIGGER trg_admin_review
+AFTER INSERT ON admin_case_review
+FOR EACH ROW
+EXECUTE FUNCTION handle_admin_review();
+
+DROP FUNCTION IF EXISTS handle_case_assignment();
+
+CREATE OR REPLACE FUNCTION handle_case_assignment()
+RETURNS TRIGGER
+AS $$
+BEGIN
+    INSERT INTO notifications (user_id, message)
+    VALUES (
+        NEW.advocate_id,
+        'A new case has been assigned to you.'
+    );
+
+    INSERT INTO notifications (user_id, message)
+    VALUES (
+        (SELECT client_id FROM cases WHERE case_id = NEW.case_id),
+        'An advocate has been assigned to your case.'
+    );
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_case_assignment
+AFTER INSERT ON case_assignments
+FOR EACH ROW
+EXECUTE FUNCTION handle_case_assignment();
+
+
+-- Client
+INSERT INTO users (full_name, email, password_hash, role)
+VALUES ('Client One', 'client@test.com', 'pass', 'CLIENT');
+
+-- Advocate
+INSERT INTO users (full_name, email, password_hash, role)
+VALUES ('Advocate One', 'advocate@test.com', 'pass', 'ADVOCATE');
+
+-- Admin
+INSERT INTO users (full_name, email, password_hash, role)
+VALUES ('Admin One', 'admin@test.com', 'pass', 'ADMIN');
+
+SELECT user_id, full_name, role FROM users;
+
+CREATE OR REPLACE FUNCTION public.file_case(
+    p_client_id INT,
+    p_title TEXT,
+    p_type TEXT,
+    p_description TEXT
+)
+RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO cases (
+        client_id,
+        case_title,
+        case_type,
+        case_description
+    )
+    VALUES (
+        p_client_id,
+        p_title,
+        p_type,
+        p_description
+    );
+END;
+$$;
+
+SELECT public.file_case(
+    1,
+    'Property Dispute',
+    'Civil',
+    'Dispute regarding land ownership'
+);
+
+SELECT case_id, case_title, status
+FROM cases;
