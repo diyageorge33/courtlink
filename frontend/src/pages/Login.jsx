@@ -1,13 +1,25 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
+import { useRef } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function Login() {
 const navigate = useNavigate();
 const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const [password, setPassword] = useState("");
+const [captchaToken, setCaptchaToken] = useState(null);
+const captchaRef = useRef(null);
 
-  const handleLogin = async (e) => {
+const handleLogin = async (e) => {
   e.preventDefault();
+
+  if (!captchaToken) {
+    toast.error("Please verify reCAPTCHA");
+    return;
+  }
 
   try {
     const response = await fetch("http://localhost:5000/api/auth/login", {
@@ -18,18 +30,22 @@ const [email, setEmail] = useState("");
       body: JSON.stringify({
         email,
         password,
+        captchaToken,
       }),
     });
 
     if (!response.ok) {
-      alert("Invalid credentials");
+      toast.error("Invalid email or password");
+      captchaRef.current.reset();
+      setCaptchaToken(null);
       return;
     }
 
     const data = await response.json();
-    console.log("Login success:", data);
 
-    // role-based redirect
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("role", data.role);
+
     if (data.role === "CLIENT") {
       navigate("/dashboard/client");
     } else if (data.role === "ADVOCATE") {
@@ -39,7 +55,8 @@ const [email, setEmail] = useState("");
     }
   } catch (err) {
     console.error(err);
-    alert("Server error");
+    toast.error("Server error. Please try again.");
+
   }
 };
 
@@ -54,7 +71,7 @@ const [email, setEmail] = useState("");
         </div>
 
         <div className="login-form">
-          <label>Email address or Mobile number</label>
+          <label>Email address </label>
           <input
             type="email"
             placeholder="Email"
@@ -71,13 +88,27 @@ const [email, setEmail] = useState("");
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <a href="#" className="forgot-password">
+          {/* <a href="#" className="forgot-password">
             Forgot Password?
-          </a>
+          </a> */}
 
-          <div className="captcha">
+          <span onClick={() => navigate("/forgot-password")}>
+            Forgot Password?
+          </span>
+
+
+          {/* <div className="captcha">
             <input type="checkbox" />
             <span>I&apos;m not a robot</span>
+          </div> */}
+
+          {/* reCAPTCHA */}
+          <div className="mb-3 d-flex justify-content-center">
+            <ReCAPTCHA
+              ref={captchaRef}
+              sitekey="6Lf1FUMsAAAAAKfWHknTejm6JzixL_E6JBEfH-bX"
+              onChange={(token) => setCaptchaToken(token)}
+            />
           </div>
 
             <button
