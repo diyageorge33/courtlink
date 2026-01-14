@@ -1,50 +1,21 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 function AdvocateRegister() {
   const navigate = useNavigate();
 
-  return (
-    <div className="info-page">
-      <div className="info-container">
-        {/* Header */}
-        <div className="register-header">
-          <div className="register-logo">⚖️</div>
-          <h2>Advocate Registration</h2>
-          <p>
-            Join CourtLink as an Advocate to manage your cases efficiently.
-          </p>
-        </div>
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [barEnrollmentNo, setBarEnrollmentNo] = useState("");
+  const [experienceYears, setExperienceYears] = useState("");
+  const [specializations, setSpecializations] = useState([]);
+  const [role, setRole] = useState("ADVOCATE"); // default
 
-        {/* FORM */}
-        <div className="register-form">
-          <label>Full Name *</label>
-          <input type="text" placeholder="Enter your full name" />
-
-          <label>Email Address *</label>
-          <input type="email" placeholder="Enter your email address" />
-
-          <label>Phone Number *</label>
-          <input type="tel" placeholder="+1 (555) 123-4567" />
-
-          <label>Employee ID (Firm ID)</label>
-          <input
-            type="text"
-            placeholder="Enter your employee or firm ID"
-          />
-          
-
-          <label>Bar Enrollment Number *</label>
-          <input type="text" placeholder="e.g., AB123456" />
-
-          <label>Years of Experience *</label>
-          <input type="number" placeholder="Enter your years of experience" />
-
-          {/* Case Specialization */}
-          <p className="section-label">Case Type Specialization *</p>
-
-<div className="checkbox-grid">
-  {[
+  const specializationList = [
     "Criminal",
     "Civil",
     "Family",
@@ -59,27 +30,135 @@ function AdvocateRegister() {
     "Environmental",
     "Arbitration & Mediation",
     "Other",
-  ].map((item) => (
-    <label className="checkbox-item" key={item}>
-      <input type="checkbox" />
-      <span>{item}</span>
-    </label>
-  ))}
-</div>
+  ];
 
+  const handleCheckboxChange = (value) => {
+    setSpecializations((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
 
+  const handleRegister = async () => {
+    if (
+      !fullName ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !barEnrollmentNo ||
+      !experienceYears ||
+      specializations.length === 0
+    ) {
+      toast.error("Please fill all required fields");
+      return;
+    }
 
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
 
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName,
+          email: email.trim().toLowerCase(),
+          password,
+          role: "ADVOCATE",
+          barEnrollmentNo,
+          experienceYears: Number(experienceYears),
+          specialization: specializations.join(", "),
+        }),
+      });
 
-          <button className="register-btn">
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Registration failed");
+        return;
+      }
+
+      toast.success("OTP sent to your email");
+      localStorage.setItem("pendingOtpEmail", email);
+      navigate("/verify-otp");
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error");
+    }
+  };
+
+  return (
+    <div className="info-page">
+      <div className="info-container">
+        <div className="register-header">
+          <div className="register-logo">⚖️</div>
+          <h2>Advocate Registration</h2>
+          <p>Join CourtLink as an Advocate</p>
+        </div>
+
+        <div className="register-form">
+
+          
+          <label>I am *</label>
+            <select
+            value={role}
+            onChange={(e) => {
+            const selectedRole = e.target.value;
+            setRole(selectedRole);
+
+            if (selectedRole === "CLIENT") {
+            navigate("/register");
+          }
+        }}
+        >
+        <option value="CLIENT">Client</option>
+        <option value="ADVOCATE">Advocate</option>
+        </select>
+
+          <label>Full Name *</label>
+          <input value={fullName} placeholder="Full Name" onChange={(e) => setFullName(e.target.value)} />
+
+          <label>Email *</label>
+          <input value={email} placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+
+          <label>Password *</label>
+          <input type="password" value={password} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+
+          <label>Confirm Password *</label>
+          <input type="password" value={confirmPassword} placeholder="Confirm Password" onChange={(e) => setConfirmPassword(e.target.value)} />
+
+          <label>Bar Enrollment Number *</label>
+          <input value={barEnrollmentNo} placeholder="Bar Enrollment Number" onChange={(e) => setBarEnrollmentNo(e.target.value)} />
+
+          <label>Years of Experience *</label>
+          <input
+            type="number"
+            placeholder="Years of Experience"
+            value={experienceYears}
+            onChange={(e) => setExperienceYears(e.target.value)}
+          />
+
+          <p className="section-label">Case Specialization *</p>
+          <div className="checkbox-grid">
+            {specializationList.map((item) => (
+              <label className="checkbox-item" key={item}>
+                <input
+                  type="checkbox"
+                  checked={specializations.includes(item)}
+                  onChange={() => handleCheckboxChange(item)}
+                />
+                <span>{item}</span>
+              </label>
+            ))}
+          </div>
+
+          <button className="register-btn" onClick={handleRegister}>
             Register
-            {/* BACKEND: POST /api/auth/register/advocate */}
           </button>
-
-          <p className="login-redirect">
-            Already have an account?{" "}
-            <span onClick={() => navigate("/login")}>Login</span>
-          </p>
         </div>
       </div>
     </div>
