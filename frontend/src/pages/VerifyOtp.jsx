@@ -107,30 +107,30 @@ function VerifyOtp() {
           Verify OTP
         </button>
         {canResend ? (
-  <p
-    onClick={handleResend}
-    style={{
-      cursor: "pointer",
-      color: "#2563eb",
-      marginTop: "12px",
-      fontSize: "14px",
-      textAlign: "center",
-    }}
-  >
-    Resend OTP
-  </p>
-) : (
-  <p
-    style={{
-      marginTop: "12px",
-      fontSize: "13px",
-      color: "#6b7280",
-      textAlign: "center",
-    }}
-  >
-    Resend OTP in {timer}s
-  </p>
-)}
+            <p
+                onClick={handleResend}
+                style={{
+                cursor: "pointer",
+                color: "#2563eb",
+                marginTop: "12px",
+                fontSize: "14px",
+                textAlign: "center",
+                }}
+            >
+                Resend OTP
+            </p>
+            ) : (
+            <p
+                style={{
+                marginTop: "12px",
+                fontSize: "13px",
+                color: "#6b7280",
+                textAlign: "center",
+                }}
+            >
+                Resend OTP in {timer}s
+            </p>
+        )}
 
 
 
