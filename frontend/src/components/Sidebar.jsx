@@ -1,37 +1,29 @@
-function Sidebar({ role }) {
+import { useNavigate } from "react-router-dom";
+
+function Sidebar() {
+  const navigate = useNavigate();
+
   return (
-    <aside className="sidebar">
-      <h2 className="sidebar-logo">⚖️ CourtLink</h2>
+    <div className="sidebar">
+      <h3 className="sidebar-title">Menu</h3>
 
-      <nav>
-        <ul>
-          <li>Dashboard</li>
-
-          {role === "client" && (
-            <>
-              <li>My Cases</li>
-              <li>Advocate Services</li>
-              <li>Notifications</li>
-            </>
-          )}
-
-          {role === "advocate" && (
-            <>
-              <li>My Cases</li>
-              <li>Clients</li>
-              <li>Calendar</li>
-              <li>Case Search</li>
-              <li>Documents</li>
-            </>
-          )}
-        </ul>
-      </nav>
-
-      <div className="sidebar-footer">
-        <p>Settings</p>
-        <p>Logout</p>
-      </div>
-    </aside>
+      <ul className="sidebar-links">
+        <li onClick={() => navigate("/dashboard/client")}>Dashboard</li>
+        <li onClick={() => navigate("/dashboard/client/aiassistant")}>AI Assistant</li>
+        <li onClick={() => navigate("/track-case")}>My Cases</li>
+        <li onClick={() => navigate("/orders")}>Documents</li>
+        <li onClick={() => navigate("/services")}>Payment History</li>
+        <li onClick={() => navigate("/privacy")}>Settings</li>
+        <li
+          onClick={() => {
+            localStorage.clear();
+            navigate("/login");
+          }}
+        >
+          Logout
+        </li>
+      </ul>
+    </div>
   );
 }
 
