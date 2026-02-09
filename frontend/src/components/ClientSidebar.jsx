@@ -10,10 +10,11 @@ function Sidebar() {
       <ul className="sidebar-links">
         <li onClick={() => navigate("/dashboard/client")}>Dashboard</li>
         <li onClick={() => navigate("/dashboard/client/aiassistant")}>AI Assistant</li>
-        <li onClick={() => navigate("/track-case")}>My Cases</li>
-        <li onClick={() => navigate("/orders")}>Documents</li>
-        <li onClick={() => navigate("/services")}>Payment History</li>
-        <li onClick={() => navigate("/privacy")}>Settings</li>
+        <li onClick={() => navigate("/dashboard/client/aisummarizer")}>AI Summarizer</li>
+        <li onClick={() => navigate("/Mycase")}>My Cases</li>
+        <li onClick={() => navigate("/Document")}>Documents</li>
+        <li onClick={() => navigate("/Paymentshistory")}>Payment History</li>
+        <li onClick={() => navigate("/Clientsetting")}>Settings</li>
         <li
           onClick={() => {
             localStorage.clear();

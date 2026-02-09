@@ -1,4 +1,4 @@
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/ClientSidebar";
 import Topbar from "../components/Topbar";
 
 function DashboardLayout({ children, role }) {

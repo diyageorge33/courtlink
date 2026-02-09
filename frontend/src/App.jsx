@@ -18,6 +18,7 @@ import Terms from "./pages/Terms";
 import AdvocateRegister from "./pages/AdvocateRegister";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import Aiassistant from "./pages/client/Aiassistant";
+import Aisummarizer from "./pages/client/Aisummarizer";
 import AdvocateDashboard from "./pages/advocate/AdvocateDashboard";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -29,6 +30,10 @@ import ResetPassword from "./pages/ResetPassword";
 
 import VerifyOtp from "./pages/VerifyOtp";
 import Bookappointment from "./pages/Bookappointment";
+import Clientsetting from "./pages/Clientsetting";
+import Paymentshistory from "./pages/Paymentshistory";
+import Document from "./pages/Document";
+import Mycase from "./pages/Mycase";
 
 function App() {
   return (
@@ -66,10 +71,15 @@ function App() {
             <Route path="/register/advocate" element={<AdvocateRegister />} />
             <Route path="/dashboard/client" element={<ClientDashboard />} />
             <Route path="/dashboard/client/aiassistant" element={<Aiassistant />} />
+            <Route path="/dashboard/client/aisummarizer" element={<Aisummarizer />} />
             <Route path="/dashboard/advocate" element={<AdvocateDashboard />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
+            <Route path="/clientsetting" element={<Clientsetting />} />
+            <Route path="/paymentshistory" element={<Paymentshistory />} />
+            <Route path="/document" element={<Document />} />
+            <Route path="/mycase" element={<Mycase />} />
           </Routes>
         </div>
       </BrowserRouter>

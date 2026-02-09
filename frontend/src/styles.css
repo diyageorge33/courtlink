@@ -257,21 +257,21 @@ body {
 
 /*.about-intro → styles the introduction paragraph below the heading.*/
 .about-intro {
-  font-size: 18px;
+  font-size: 17px;
   color: #262d37;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   line-height: 1.7;
 }
 
 /*.about-section → creates spacing between each section like Mission, Vision, etc.*/
 .about-section {
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 /*.about-section h2 → styles the section headings like “Our Mission”.*/
 .about-section h2 {
-  font-size: 22px;
-  margin-bottom: 5px;
+  font-size: 18px;
+  margin-bottom: 3px;
   color: #111827;
 }
 
@@ -923,3 +923,52 @@ body {
   line-height: 1.6;
 }
 
+/*ai summarizer*/
+.summarizer-page {
+  padding: 30px;
+  text-align: center;
+}
+
+.summarizer-box {
+  background: white;
+  padding: 25px;
+  width: 80%;
+  max-width: 600px;
+  margin: 20px auto;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.summarizer-box input {
+  padding: 10px;
+}
+
+.summarize-btn {
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #0F317C;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.summary-output {
+  background: white;
+  width: 80%;
+  max-width: 700px;
+  margin: 25px auto;
+  padding: 20px;
+  border-radius: 18px;
+  text-align: left;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.summary-output pre {
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.6;
+}
