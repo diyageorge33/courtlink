@@ -14,7 +14,3 @@ function Home() {
 
 export default Home;
 
-//Why we do this
-//Confirms React is working
-//Confirms file paths are correct
-//Gives you instant feedback

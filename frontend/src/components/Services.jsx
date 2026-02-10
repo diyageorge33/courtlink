@@ -34,12 +34,12 @@ function Services() {
 
         <div
             className="service-card"
-            onClick={() => navigate("/advocate")}
+            onClick={() => navigate("/Practice")}
         >
 
-          <h3>Advocate Services</h3>
+          <h3>Practice areas</h3>
           <p>
-            Dedicated tools for advocates to manage their case load.
+            You can see what kind of case you are into.
           </p>
           {/* BACKEND: GET /api/advocate/dashboard */}
         </div>

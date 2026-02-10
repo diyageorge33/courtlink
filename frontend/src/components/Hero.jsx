@@ -24,9 +24,9 @@ const navigate = useNavigate();
 
 
             <button className="btn-outline"
-            onClick={() => navigate("/track-case")}
+            onClick={() => navigate("/Bookappointment")}
             >
-              Check Case Status
+              Book Appointment
               {/* BACKEND: GET /api/cases/:caseId */}
             </button>
           </div>

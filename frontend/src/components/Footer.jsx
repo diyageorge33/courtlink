@@ -5,25 +5,11 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="footer-content">
+        
         <div className="footer-section">
           <h4>CourtLink</h4>
           <p>Your link to judicial services.</p>
         </div>
-
-
-        <div className="footer-section">
-        <h4>Services</h4>
-        <p>
-            <Link to="/track-case">Track Case Status</Link>
-        </p>
-        <p>
-            <Link to="/orders">Download Orders</Link>
-        </p>
-        <p>
-            <Link to="/advocate">Advocate Services</Link>
-        </p>
-        </div>
-
 
         <div className="footer-section">
             <h4>About</h4>
@@ -41,10 +27,17 @@ function Footer() {
 
         <div className="footer-section">
           <h4>Support</h4>
-          <p>Help Center</p>
-          <p>Contact Us</p>
-          <p>FAQs</p>
+          <p>
+                <Link to="/help">Help Center</Link>
+            </p>
+            <p>
+                <Link to="/contact">Contact Us</Link>
+            </p>
+            <p>
+                <Link to="/faq">FAQs</Link>
+            </p>
         </div>
+
       </div>
 
       <div className="footer-bottom">

@@ -88,11 +88,11 @@ const handleLogin = async (e) => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          {/* <a href="#" className="forgot-password">
-            Forgot Password?
-          </a> */}
 
-          <span onClick={() => navigate("/forgot-password")}>
+          <span
+            className="forgot-password"
+            onClick={() => navigate("/forgot-password")}
+          >
             Forgot Password?
           </span>
 
@@ -102,11 +102,12 @@ const handleLogin = async (e) => {
             <span>I&apos;m not a robot</span>
           </div> */}
 
+          
           {/* reCAPTCHA */}
           <div className="mb-3 d-flex justify-content-center">
             <ReCAPTCHA
               ref={captchaRef}
-              sitekey="6Lf1FUMsAAAAAKfWHknTejm6JzixL_E6JBEfH-bX"
+              sitekey="6LfUiEksAAAAADag55ZIgvka96w1QzPvdJjscUb2"
               onChange={(token) => setCaptchaToken(token)}
             />
           </div>

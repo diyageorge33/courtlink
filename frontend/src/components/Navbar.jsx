@@ -9,7 +9,7 @@ function Navbar() {
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     setIsLoggedIn(loggedIn);
-  }, [location.pathname]); 
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
@@ -17,32 +17,35 @@ function Navbar() {
     navigate("/login");
   };
 
+  // check if current page is dashboard
+  const isDashboardPage = location.pathname.startsWith("/dashboard");
+
   return (
     <nav className="navbar">
-      <div className="logo">⚖️ CourtLink</div>
+      <div className="logo" onClick={() => navigate("/")}>
+        ⚖️ CourtLink
+      </div>
 
+      {/* ALWAYS show these 4 options */}
       <ul className="nav-links">
         <li><Link to="/">Home</Link></li>
         <li><Link to="/services">Services</Link></li>
-        <li><Link to="/case-status">Case Status</Link></li>
+        <li><Link to="/Legalexperts">Legal Experts</Link></li>
         <li><Link to="/help">Help</Link></li>
       </ul>
 
-      {!isLoggedIn ? (
-        // <button className="btn-primary" onClick={() => navigate("/login")}>
-        //   Login / Sign Up
-        // </button>
-         <div className="auth-links">
+      {/* Right side */}
+      {!isLoggedIn && !isDashboardPage ? (
+        <div className="auth-links">
           <span onClick={() => navigate("/login")}>Login</span>
           <span className="separator">/</span>
           <span onClick={() => navigate("/register")}>Sign Up</span>
         </div>
-
-      ) : (
+      ) : isLoggedIn ? (
         <button className="btn-primary" onClick={handleLogout}>
           Logout
         </button>
-      )}
+      ) : null}
     </nav>
   );
 }
