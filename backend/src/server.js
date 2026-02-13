@@ -15,6 +15,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/payment", require("./routes/payment.routes"));
+
 
 
 app.get("/", (req, res) => {

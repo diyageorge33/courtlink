@@ -17,6 +17,7 @@
     "express": "^5.2.1",
     "nodemailer": "^7.0.12",
     "pg": "^8.16.3",
+    "razorpay": "^2.9.6",
     "react-google-recaptcha": "^3.1.0"
   },
   "devDependencies": {},

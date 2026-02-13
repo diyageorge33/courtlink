@@ -34,6 +34,8 @@ import Clientsetting from "./pages/Clientsetting";
 import Paymentshistory from "./pages/Paymentshistory";
 import Document from "./pages/Document";
 import Mycase from "./pages/Mycase";
+import PaymentTest from "./pages/PaymentTest";
+
 
 function App() {
   return (
@@ -80,6 +82,9 @@ function App() {
             <Route path="/paymentshistory" element={<Paymentshistory />} />
             <Route path="/document" element={<Document />} />
             <Route path="/mycase" element={<Mycase />} />
+            <Route path="/payment-test" element={<PaymentTest />} />
+
+
           </Routes>
         </div>
       </BrowserRouter>
