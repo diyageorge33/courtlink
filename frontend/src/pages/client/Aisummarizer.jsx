@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Sidebar from "../../components/ClientSidebar";
 
 function Aisummarizer() {
   const [file, setFile] = useState(null);
@@ -13,7 +14,6 @@ function Aisummarizer() {
 
     setLoading(true);
 
-    // Dummy summary (later AI will replace this)
     setTimeout(() => {
       setSummary(
         `Summary of Court Order:\n\n` +
@@ -29,31 +29,36 @@ function Aisummarizer() {
   };
 
   return (
-    <div className="summarizer-page">
-      <h1 className="ai-title">AI Court Order Summarizer</h1>
+    <div className="client-layout">
+      <Sidebar />
 
-      <p className="ai-tagline">
-        Upload your court order or judgement document and get a simplified summary.
-      </p>
+      <main className="client-content">
+        <h1 className="ai-title">AI Court Order Summarizer</h1>
 
-      <div className="summarizer-box">
-        <input
-          type="file"
-          accept=".pdf,.txt,.doc,.docx"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
+        <p className="ai-tagline">
+          Upload your court order or judgement document and get a simplified
+          summary.
+        </p>
 
-        <button className="summarize-btn" onClick={handleSummarize}>
-          {loading ? "Summarizing..." : "Summarize"}
-        </button>
-      </div>
+        <div className="summarizer-box">
+          <input
+            type="file"
+            accept=".pdf,.txt,.doc,.docx"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
 
-      {summary && (
-        <div className="summary-output">
-          <h3>Generated Summary</h3>
-          <pre>{summary}</pre>
+          <button className="summarize-btn" onClick={handleSummarize}>
+            {loading ? "Summarizing..." : "Summarize"}
+          </button>
         </div>
-      )}
+
+        {summary && (
+          <div className="summary-output">
+            <h3>Generated Summary</h3>
+            <pre>{summary}</pre>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

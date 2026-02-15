@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Sidebar from "../../components/ClientSidebar";
 
-function ClientProfile() {
+function Clientprofile() {
   const [profile, setProfile] = useState({
     clientId: "CL1001",
     fullName: "Diya George",
@@ -73,4 +73,4 @@ function ClientProfile() {
   );
 }
 
-export default ClientProfile;
+export default Clientprofile;

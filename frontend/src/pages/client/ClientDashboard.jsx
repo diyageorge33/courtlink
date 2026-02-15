@@ -1,11 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/ClientSidebar";
 
 function ClientDashboard() {
+  const navigate = useNavigate();
+
   return (
-    <div className="dashboard-body">
+    <div className="client-layout">
       <Sidebar />
 
-      <main className="dashboard-content">
+      <main className="client-content">
         <h1>Client Dashboard</h1>
         <p className="dashboard-subtitle">
           Welcome back! Here you can manage your cases, documents, and payments.
@@ -40,43 +43,45 @@ function ClientDashboard() {
             <div className="action-card">
               <h3>File a New Case Request</h3>
               <p>Submit a new legal case request to the firm.</p>
-              <button className="action-btn">File Case</button>
+              <button
+                className="action-btn"
+                onClick={() => navigate("/dashboard/client/filecase")}
+              >
+                File Case
+              </button>
             </div>
 
             <div className="action-card">
               <h3>Track Case Status</h3>
               <p>Check updates and current progress of your cases.</p>
-              <button className="action-btn">Track</button>
+              <button
+                className="action-btn"
+                onClick={() => navigate("/dashboard/client/mycases")}
+              >
+                Track
+              </button>
             </div>
 
             <div className="action-card">
               <h3>Upload Documents</h3>
               <p>Upload supporting documents for your case.</p>
-              <button className="action-btn">Upload</button>
+              <button
+                className="action-btn"
+                onClick={() => navigate("/dashboard/client/uploaddocuments")}
+              >
+                Upload
+              </button>
             </div>
 
             <div className="action-card">
               <h3>Download Orders</h3>
               <p>Download court orders and judgement documents.</p>
-              <button className="action-btn">Download</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="dashboard-section">
-          <h2>Recent Case Updates</h2>
-
-          <div className="case-updates">
-            <div className="case-update-card">
-              <h4>Case ID: CL1023</h4>
-              <p>Status: Hearing Scheduled</p>
-              <p>Next Date: 15 Feb 2026</p>
-            </div>
-
-            <div className="case-update-card">
-              <h4>Case ID: CL1020</h4>
-              <p>Status: Advocate Assigned</p>
-              <p>Advocate: Adv. Rahul Menon</p>
+              <button
+                className="action-btn"
+                onClick={() => navigate("/dashboard/client/downloadorders")}
+              >
+                Download
+              </button>
             </div>
           </div>
         </div>
