@@ -17,6 +17,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AdvocateRegister from "./pages/AdvocateRegister";
 import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientProfile from "./pages/client/Clientprofiles";
 import Aiassistant from "./pages/client/Aiassistant";
 import Aisummarizer from "./pages/client/Aisummarizer";
 import AdvocateDashboard from "./pages/advocate/AdvocateDashboard";
@@ -72,6 +73,7 @@ function App() {
             <Route path="/dashboard/client" element={<ClientDashboard />} />
             <Route path="/dashboard/client/aiassistant" element={<Aiassistant />} />
             <Route path="/dashboard/client/aisummarizer" element={<Aisummarizer />} />
+            <Route path="/dashboard/client/clientprofile" element={<ClientProfile />} />
             <Route path="/dashboard/advocate" element={<AdvocateDashboard />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />

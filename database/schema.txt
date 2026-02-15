@@ -1,85 +1,128 @@
 DB used:plsql
-Tables created:11/01 for user mgmt module
+CREATE DATABASE courtlink;
 
+1.uers Tables
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    role VARCHAR(20)
+    role VARCHAR(20) NOT NULL
         CHECK (role IN ('CLIENT', 'ADVOCATE', 'ADMIN')),
+    otp VARCHAR(6),
+    otp_expiry TIMESTAMP,
+    is_verified BOOLEAN DEFAULT false,
+    reset_token TEXT,
+    reset_token_expiry TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE cases (
-    case_id SERIAL PRIMARY KEY,
-    client_id INT REFERENCES users(user_id),
-    case_title VARCHAR(200) NOT NULL,
-    case_type VARCHAR(50),
-    case_description TEXT,
-    status VARCHAR(20)
-        DEFAULT 'PENDING'
-        CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+2.client_profiles
+CREATE TABLE client_profiles (
+    client_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    address TEXT,
+    dob DATE,
+    gender VARCHAR(10)
 );
-CREATE TABLE admin_case_review (
-    review_id SERIAL PRIMARY KEY,
-    case_id INT REFERENCES cases(case_id),
-    admin_id INT REFERENCES users(user_id),
-    decision VARCHAR(20)
-        CHECK (decision IN ('APPROVED', 'REJECTED')),
-    remarks TEXT,
-    reviewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TABLE case_assignments (
-    assignment_id SERIAL PRIMARY KEY,
-    case_id INT REFERENCES cases(case_id),
-    advocate_id INT REFERENCES users(user_id),
-    assigned_by INT REFERENCES users(user_id), -- admin
-    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TABLE advocate_profiles (
-    advocate_id INT PRIMARY KEY REFERENCES users(user_id),
+
+3.advocate client_profilesCREATE TABLE advocate_profiles (
+    advocate_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     bar_enrollment_no VARCHAR(50) UNIQUE NOT NULL,
     specialization TEXT,
     experience_years INT
 );
-CREATE TABLE documents (
+
+4.cases
+CREATE TABLE cases (
+    case_id SERIAL PRIMARY KEY,
+    client_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    advocate_id INT REFERENCES users(user_id) ON DELETE SET NULL,
+
+    case_title VARCHAR(200) NOT NULL,
+    case_type VARCHAR(50),
+    case_description TEXT,
+
+    status VARCHAR(20) DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'ONGOING', 'CLOSED')),
+
+    next_hearing_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+5.admin_case_review
+CREATE TABLE admin_case_review (
+    review_id SERIAL PRIMARY KEY,
+    case_id INT NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
+    admin_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+
+    decision VARCHAR(20) NOT NULL
+        CHECK (decision IN ('APPROVED', 'REJECTED')),
+
+    remarks TEXT,
+    reviewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+6.case_assignments
+CREATE TABLE case_assignments (
+    assignment_id SERIAL PRIMARY KEY,
+    case_id INT NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
+    advocate_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    assigned_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+7.CREATE TABLE documents (
     document_id SERIAL PRIMARY KEY,
-    case_id INT REFERENCES cases(case_id),
-    uploaded_by INT REFERENCES users(user_id),
-    file_path TEXT NOT NULL,
+    case_id INT NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
+    uploaded_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+
+    file_name TEXT,
+    file_url TEXT NOT NULL,
+
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE notifications (
-    notification_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(user_id),
-    message TEXT NOT NULL,
-    is_read BOOLEAN DEFAULT FALSE,
+
+8.payments
+CREATE TABLE payments (
+    payment_id SERIAL PRIMARY KEY,
+    case_id INT NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
+
+    payment_type VARCHAR(30) NOT NULL
+        CHECK (payment_type IN ('CONSULTATION', 'CASE_FEE', 'DOCUMENT_FEE')),
+
+    amount NUMERIC(10,2) NOT NULL,
+
+    status VARCHAR(20) DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'PAID')),
+
+    transaction_id VARCHAR(100) UNIQUE,
+
+    payment_date TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
-CREATE OR REPLACE FUNCTION handle_admin_review()
-RETURNS TRIGGER AS $$
-BEGIN
-    UPDATE cases
-    SET status = NEW.decision
-    WHERE case_id = NEW.case_id;
+9.case updates
+CREATE TABLE case_updates (
+    update_id SERIAL PRIMARY KEY,
+    case_id INT NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
+    updated_by INT REFERENCES users(user_id) ON DELETE SET NULL,
 
-    INSERT INTO notifications (user_id, message)
-    VALUES (
-        (SELECT client_id FROM cases WHERE case_id = NEW.case_id),
-        'Your case has been ' || NEW.decision
-    );
+    update_message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+10.notificationsCREATE TABLE notifications (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 
-DROP FUNCTION IF EXISTS handle_admin_review();
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE OR REPLACE FUNCTION handle_admin_review()
+11.CREATE OR REPLACE FUNCTION handle_admin_review()
 RETURNS TRIGGER
 AS $$
 BEGIN
@@ -97,19 +140,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trg_admin_review ON admin_case_review;
-
-CREATE TRIGGER trg_admin_review
+12.CREATE TRIGGER trg_admin_review
 AFTER INSERT ON admin_case_review
 FOR EACH ROW
 EXECUTE FUNCTION handle_admin_review();
 
-DROP FUNCTION IF EXISTS handle_case_assignment();
-
-CREATE OR REPLACE FUNCTION handle_case_assignment()
+13.CREATE OR REPLACE FUNCTION handle_case_assignment()
 RETURNS TRIGGER
 AS $$
 BEGIN
+    UPDATE cases
+    SET advocate_id = NEW.advocate_id,
+        status = 'ONGOING'
+    WHERE case_id = NEW.case_id;
+
     INSERT INTO notifications (user_id, message)
     VALUES (
         NEW.advocate_id,
@@ -126,57 +170,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_case_assignment
+14.CREATE TRIGGER trg_case_assignment
 AFTER INSERT ON case_assignments
 FOR EACH ROW
 EXECUTE FUNCTION handle_case_assignment();
-
-
--- Client
-INSERT INTO users (full_name, email, password_hash, role)
-VALUES ('Client One', 'client@test.com', 'pass', 'CLIENT');
-
--- Advocate
-INSERT INTO users (full_name, email, password_hash, role)
-VALUES ('Advocate One', 'advocate@test.com', 'pass', 'ADVOCATE');
-
--- Admin
-INSERT INTO users (full_name, email, password_hash, role)
-VALUES ('Admin One', 'admin@test.com', 'pass', 'ADMIN');
-
-SELECT user_id, full_name, role FROM users;
-
-CREATE OR REPLACE FUNCTION public.file_case(
-    p_client_id INT,
-    p_title TEXT,
-    p_type TEXT,
-    p_description TEXT
-)
-RETURNS VOID
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    INSERT INTO cases (
-        client_id,
-        case_title,
-        case_type,
-        case_description
-    )
-    VALUES (
-        p_client_id,
-        p_title,
-        p_type,
-        p_description
-    );
-END;
-$$;
-
-SELECT public.file_case(
-    1,
-    'Property Dispute',
-    'Civil',
-    'Dispute regarding land ownership'
-);
-
-SELECT case_id, case_title, status
-FROM cases;

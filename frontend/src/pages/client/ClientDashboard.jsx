@@ -38,7 +38,7 @@ function ClientDashboard() {
 
           <div className="actions-grid">
             <div className="action-card">
-              <h3>File a New Case</h3>
+              <h3>File a New Case Request</h3>
               <p>Submit a new legal case request to the firm.</p>
               <button className="action-btn">File Case</button>
             </div>

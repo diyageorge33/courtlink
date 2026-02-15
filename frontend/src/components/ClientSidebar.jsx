@@ -9,6 +9,7 @@ function Sidebar() {
 
       <ul className="sidebar-links">
         <li onClick={() => navigate("/dashboard/client")}>Dashboard</li>
+        <li onClick={() => navigate("/dashboard/client/clientprofile")}>Profile</li>
         <li onClick={() => navigate("/dashboard/client/aiassistant")}>AI Assistant</li>
         <li onClick={() => navigate("/dashboard/client/aisummarizer")}>AI Summarizer</li>
         <li onClick={() => navigate("/Mycase")}>My Cases</li>
