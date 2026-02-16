@@ -9,13 +9,11 @@ function Aiassistant() {
   const handleSend = async () => {
     if (message.trim() === "") return;
 
-    const userMsg = { sender: "user", text: message };
-
-    setChat((prev) => [...prev, userMsg]);
+    setChat((prev) => [...prev, { sender: "user", text: message }]);
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/ai/ask", {
+      const response = await fetch("http://localhost:5000/ai/ask", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -25,12 +23,10 @@ function Aiassistant() {
 
       const data = await response.json();
 
-      const botMsg = {
-        sender: "bot",
-        text: data.answer || "No response received from AI.",
-      };
-
-      setChat((prev) => [...prev, botMsg]);
+      setChat((prev) => [
+        ...prev,
+        { sender: "bot", text: data.answer || "No response from AI." },
+      ]);
     } catch (error) {
       setChat((prev) => [
         ...prev,
@@ -49,13 +45,13 @@ function Aiassistant() {
       <main className="client-content">
         <h1 className="ai-title">AI Legal Assistant</h1>
         <p className="ai-tagline">
-          Ask any questions related to your case, documents, or legal process.
+          Ask questions related to CourtLink and Indian legal procedures.
         </p>
 
         <div className="chat-box">
           {chat.length === 0 && (
             <p style={{ color: "gray", fontStyle: "italic" }}>
-              Ask something like: "What documents are required for divorce case?"
+              Example: "What documents are required for a consumer complaint?"
             </p>
           )}
 
@@ -64,7 +60,7 @@ function Aiassistant() {
               key={index}
               className={msg.sender === "user" ? "chat-user" : "chat-bot"}
             >
-              {msg.text}
+              <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{msg.text}</pre>
             </div>
           ))}
         </div>
@@ -77,7 +73,6 @@ function Aiassistant() {
             onChange={(e) => setMessage(e.target.value)}
             disabled={loading}
           />
-
           <button onClick={handleSend} disabled={loading}>
             {loading ? "Thinking..." : "Send"}
           </button>
