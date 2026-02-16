@@ -48,7 +48,6 @@ function Aiassistant() {
 
       <main className="client-content">
         <h1 className="ai-title">AI Legal Assistant</h1>
-
         <p className="ai-tagline">
           Ask any questions related to your case, documents, or legal process.
         </p>

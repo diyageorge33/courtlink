@@ -849,7 +849,7 @@ body {
 /*CHATBOT*/
 .chat-box {
   height: 255px;
-  width: 900px;
+  width: 950px;
   background: white;
   padding: 15px;
   border-radius: 18px;
@@ -924,9 +924,31 @@ body {
 }
 
 /*ai summarizer*/
-.summarizer-page {
+.client-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f8f9fb;
+}
+
+.client-content {
+  flex: 1;
   padding: 30px;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #a2c0fd, #88898b);
+}
+
+.ai-title {
   text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.ai-tagline {
+  text-align: center;
+  font-size: 15px;
+  color: #444;
+  margin-bottom: 25px;
 }
 
 .summarizer-box {
@@ -944,6 +966,8 @@ body {
 
 .summarizer-box input {
   padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
 }
 
 .summarize-btn {
@@ -954,6 +978,10 @@ body {
   color: white;
   font-weight: bold;
   cursor: pointer;
+}
+
+.summarize-btn:hover {
+  background: #0b255c;
 }
 
 .summary-output {
@@ -973,13 +1001,4 @@ body {
   line-height: 1.6;
 }
 
-.client-layout {
-  display: flex;
-  min-height: 100vh;
-  background: #f5f6fa;
-}
 
-.client-content {
-  flex: 1;
-  padding: 30px;
-}
