@@ -24,7 +24,8 @@ exports.createOrder = async (req, res) => {
 
 
 exports.verifyPayment = async (req, res) => {
-    console.log("Verifying payment with data:", req.body);
+  console.log("Verifying payment with data:", req.body);
+
   const {
     razorpay_order_id,
     razorpay_payment_id,
@@ -33,6 +34,7 @@ exports.verifyPayment = async (req, res) => {
   } = req.body;
 
   const sign = razorpay_order_id + "|" + razorpay_payment_id;
+
   const expectedSign = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
     .update(sign)
@@ -46,14 +48,38 @@ exports.verifyPayment = async (req, res) => {
     return res.status(400).json({ message: "Invalid payment signature" });
   }
 
-  await pool.query(
-    `UPDATE cases
-     SET consultation_paid=true,
-         payment_id=$1,
-         payment_date=NOW()
-     WHERE case_id=$2`,
-    [razorpay_payment_id, caseId]
+  try {
+    await pool.query(
+      `INSERT INTO payments (
+          case_id,
+          payment_type,
+          amount,
+          status,
+          transaction_id,
+          payment_date
+       )
+       VALUES ($1, 'CONSULTATION', 500, 'PAID', $2, NOW())`,
+      [caseId, razorpay_payment_id]
+    );
+
+    res.json({ message: "Payment verified successfully" });
+
+  } catch (err) {
+    console.error("DB error:", err);
+    res.status(500).json({ message: "Payment verification failed" });
+  }
+};
+
+exports.checkConsultationPaid = async (req, res) => {
+  const { caseId } = req.params;
+
+  const result = await pool.query(
+    `SELECT * FROM payments
+     WHERE case_id = $1
+     AND payment_type = 'CONSULTATION'
+     AND status = 'PAID'`,
+    [caseId]
   );
 
-  res.json({ message: "Payment verified successfully" });
+  res.json({ paid: result.rows.length > 0 });
 };

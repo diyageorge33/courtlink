@@ -17,24 +17,48 @@ function Navbar() {
     navigate("/login");
   };
 
-  // check if current page is dashboard
+  const handleHomeClick = () => {
+    const role = localStorage.getItem("role");
+
+    if (!isLoggedIn) {
+      navigate("/");
+      return;
+    }
+
+    if (role === "CLIENT") {
+      navigate("/dashboard/client");
+    } else if (role === "ADVOCATE") {
+      navigate("/dashboard/advocate");
+    } else if (role === "ADMIN") {
+      navigate("/dashboard/admin");
+    } else {
+      navigate("/");
+    }
+  };
+
   const isDashboardPage = location.pathname.startsWith("/dashboard");
 
   return (
     <nav className="navbar">
-      <div className="logo" onClick={() => navigate("/")}>
+      
+      {/* LOGO */}
+      <div className="logo" onClick={handleHomeClick} style={{ cursor: "pointer" }}>
         ⚖️ CourtLink
       </div>
 
-      {/* ALWAYS show these 4 options */}
+      {/* NAV LINKS */}
       <ul className="nav-links">
-        <li><Link to="/">Home</Link></li>
+        <li>
+          <a onClick={handleHomeClick} style={{ cursor: "pointer" }}>
+            Home
+          </a>
+        </li>
         <li><Link to="/services">Services</Link></li>
         <li><Link to="/Legalexperts">Legal Experts</Link></li>
         <li><Link to="/help">Help</Link></li>
       </ul>
 
-      {/* Right side */}
+      {/* RIGHT SIDE */}
       {!isLoggedIn && !isDashboardPage ? (
         <div className="auth-links">
           <span onClick={() => navigate("/login")}>Login</span>
