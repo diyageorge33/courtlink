@@ -45,6 +45,7 @@ const handleLogin = async (e) => {
 
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("role", data.role);
+    localStorage.setItem("user_id", data.user_id); 
 
     if (data.role === "CLIENT") {
       navigate("/dashboard/client");
@@ -107,7 +108,7 @@ const handleLogin = async (e) => {
           <div className="mb-3 d-flex justify-content-center">
             <ReCAPTCHA
               ref={captchaRef}
-              sitekey="6LfUiEksAAAAADag55ZIgvka96w1QzPvdJjscUb2"
+              sitekey="6LckgG4sAAAAACF359UsLAbM7mzq5l8BLKNOhatm"
               onChange={(token) => setCaptchaToken(token)}
             />
           </div>

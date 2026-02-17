@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import StatCard from "../../components/StatCard";
+import { useNavigate } from "react-router-dom";
 
 function AdvocateDashboard() {
 
+  const navigate = useNavigate(); 
   const [stats, setStats] = useState({
     totalCases: 0,
     openCases: 0,
@@ -15,9 +17,11 @@ function AdvocateDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5000/api/advocate/dashboard/1"
-        );
+        const userId = localStorage.getItem("user_id");
+
+      const res = await axios.get(
+        `http://localhost:5000/api/advocate/dashboard/${userId}`
+      );
         setStats(res.data);
       } catch (err) {
         console.error("Error fetching dashboard stats:", err);
@@ -52,6 +56,14 @@ function AdvocateDashboard() {
             <li>New hearing scheduled</li>
             <li>Document uploaded</li>
           </ul>
+        </div>
+
+        <div className="card">
+         <h3>My Cases</h3>
+          <p>View and manage your assigned cases</p>
+          <button onClick={() => navigate("/dashboard/advocate/cases")}>
+            View Cases
+          </button>
         </div>
 
         <div className="card">

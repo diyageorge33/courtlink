@@ -6,6 +6,8 @@ const transporter = require("../utils/mailer");
 
 /* LOGIN */
 exports.login = async (req, res) => {
+  console.log("LOGIN API HIT");
+  console.log("Request body:", req.body);
   const { email, password, captchaToken } = req.body;
 
   if (!captchaToken) {
@@ -26,16 +28,24 @@ exports.login = async (req, res) => {
     );
 
     if (!captchaResponse.data.success) {
+      console.log("Captcha failed");
       return res.status(403).json({ message: "Captcha verification failed" });
     }
+
+    // Normalize email
+    const normalizedEmail = email.trim().toLowerCase();
 
     // Fetch user by email
     const result = await pool.query(
       "SELECT user_id, role, password_hash, is_verified FROM users WHERE email = $1",
-      [email]
+      [normalizedEmail]
     );
 
+    console.log("User fetched:", result.rows[0]);
+
+
     if (result.rows.length === 0) {
+      console.log("User not found in DB");
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -47,12 +57,18 @@ exports.login = async (req, res) => {
     });
 }
 
-    // Compare hashed password
+   // Compare hashed password
+    console.log("Entered password:", password);
+    console.log("Stored hash:", user.password_hash);
+
     const isMatch = await bcrypt.compare(password, user.password_hash);
+
+    console.log("Password match result:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
-    }
+}
+
 
     // Login success
     res.json({
@@ -61,9 +77,10 @@ exports.login = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
+  console.error("FULL ERROR DETAILS:", err);
+  res.status(500).json({ message: err.message });
+}
+
 };
 
 /* =========================
