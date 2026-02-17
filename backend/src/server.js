@@ -7,6 +7,9 @@ const pool = require("./db");
 
 const authRoutes = require("./routes/auth.routes");
 const aiRoutes = require("./routes/ai.routes");
+const clientRoutes = require("./routes/clientRoutes");
+
+
 
 app.use(
   cors({
@@ -16,9 +19,12 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/api/client", clientRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/ai", aiRoutes);
+app.use("/uploads", express.static("src/uploads"));
+
 
 app.get("/", (req, res) => {
   res.send("CourtLink backend running");
