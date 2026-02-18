@@ -204,20 +204,23 @@ router.get("/settings/:clientId", async (req, res) => {
     const { clientId } = req.params;
 
     const result = await pool.query(
-      `
-      SELECT 
-        u.user_id,
-        u.full_name,
-        u.email,
-        cp.address,
-        cp.dob,
-        cp.gender
-      FROM users u
-      LEFT JOIN client_profiles cp ON u.user_id = cp.client_id
-      WHERE u.user_id = $1
-      `,
-      [clientId]
-    );
+    `
+    SELECT 
+      u.user_id,
+      u.full_name,
+      u.email,
+      u.role,
+      cp.address,
+      cp.dob,
+      cp.gender,
+      cp.phone
+    FROM users u
+    LEFT JOIN client_profiles cp ON u.user_id = cp.client_id
+    WHERE u.user_id = $1
+    `,
+    [clientId]
+  );
+
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Client not found" });
@@ -235,26 +238,35 @@ router.get("/settings/:clientId", async (req, res) => {
 router.put("/settings/:clientId", async (req, res) => {
   try {
     const { clientId } = req.params;
-    const { full_name, address, dob, gender } = req.body;
+    let { full_name, address, dob, gender, phone } = req.body;
 
-    // update users table
+    if (!full_name || full_name.trim() === "") {
+      return res.status(400).json({ message: "Full name is required" });
+    }
+
+    if (!dob || dob === "") dob = null;
+    if (!gender || gender === "") gender = null;
+    if (!address || address === "") address = null;
+    if (!phone || phone === "") phone = null;
+
     await pool.query(
       `UPDATE users SET full_name = $1 WHERE user_id = $2`,
       [full_name, clientId]
     );
 
-    // insert if profile doesn't exist, else update
     const profileResult = await pool.query(
       `
-      INSERT INTO client_profiles (client_id, address, dob, gender)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO client_profiles (client_id, address, dob, gender, phone)
+      VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (client_id)
-      DO UPDATE SET address = EXCLUDED.address,
-                    dob = EXCLUDED.dob,
-                    gender = EXCLUDED.gender
+      DO UPDATE SET 
+        address = EXCLUDED.address,
+        dob = EXCLUDED.dob,
+        gender = EXCLUDED.gender,
+        phone = EXCLUDED.phone
       RETURNING *
       `,
-      [clientId, address, dob, gender]
+      [clientId, address, dob, gender, phone]
     );
 
     res.json({
@@ -266,6 +278,8 @@ router.put("/settings/:clientId", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
 
 
 
