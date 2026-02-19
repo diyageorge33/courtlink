@@ -25,6 +25,9 @@ CREATE TABLE client_profiles (
     gender VARCHAR(10)
 );
 
+ALTER TABLE client_profiles
+ADD COLUMN phone VARCHAR(15);
+
 3.advocate client_profilesCREATE TABLE advocate_profiles (
     advocate_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     bar_enrollment_no VARCHAR(50) UNIQUE NOT NULL,

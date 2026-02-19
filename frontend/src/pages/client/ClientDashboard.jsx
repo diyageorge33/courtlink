@@ -1,8 +1,42 @@
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/ClientSidebar";
+import { fetchClientDashboardStats } from "../../api/clientApi";
+import { useEffect, useState } from "react";
 
 function ClientDashboard() {
   const navigate = useNavigate();
+
+  const [stats, setStats] = useState({
+    ongoingCases: 0,
+    upcomingHearings: 0,
+    closedCases: 0,
+    pendingPayments: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  const loadStats = async () => {
+    try {
+      const clientId = localStorage.getItem("userId");
+
+      if (!clientId) {
+        console.log("Client not logged in");
+        return;
+      }
+
+      const data = await fetchClientDashboardStats(clientId);
+      setStats(data);
+    } catch (err) {
+      console.error("Error fetching dashboard stats:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadStats();
+}, []);
+
 
   return (
     <div className="client-layout">
@@ -14,27 +48,31 @@ function ClientDashboard() {
           Welcome back! Here you can manage your cases, documents, and payments.
         </p>
 
-        <div className="stats-grid">
-          <div className="stat-card">
-            <h3>Ongoing Cases</h3>
-            <p>5</p>
-          </div>
+        {loading ? (
+          <p>Loading dashboard...</p>
+        ) : (
+          <div className="stats-grid">
+            <div className="stat-card">
+              <h3>Ongoing Cases</h3>
+              <p>{stats.ongoingCases}</p>
+            </div>
 
-          <div className="stat-card">
-            <h3>Upcoming Hearings</h3>
-            <p>2</p>
-          </div>
+            <div className="stat-card">
+              <h3>Upcoming Hearings</h3>
+              <p>{stats.upcomingHearings}</p>
+            </div>
 
-          <div className="stat-card">
-            <h3>Closed Cases</h3>
-            <p>12</p>
-          </div>
+            <div className="stat-card">
+              <h3>Closed Cases</h3>
+              <p>{stats.closedCases}</p>
+            </div>
 
-          <div className="stat-card">
-            <h3>Pending Payments</h3>
-            <p>₹ 1500</p>
+            <div className="stat-card">
+              <h3>Pending Payments</h3>
+              <p>₹ {stats.pendingPayments}</p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="dashboard-section">
           <h2>Quick Actions</h2>

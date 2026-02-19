@@ -12,17 +12,20 @@ function Sidebar() {
         <li onClick={() => navigate("/dashboard/client/aiassistant")}>AI Assistant</li>
         <li onClick={() => navigate("/dashboard/client/aisummarizer")}>AI Summarizer</li>
         <li onClick={() => navigate("/Mycase")}>My Cases</li>
-        <li onClick={() => navigate("/Document")}>Documents</li>
+        <li onClick={() => navigate("/dashboard/client/document")}>Documents</li>
         <li onClick={() => navigate("/Paymentshistory")}>Payment History</li>
         <li onClick={() => navigate("/Clientsetting")}>Settings</li>
         <li
           onClick={() => {
-            localStorage.clear();
-            navigate("/login");
+          localStorage.removeItem("token");
+          localStorage.removeItem("userId");
+          localStorage.removeItem("role");
+          navigate("/login");
           }}
-        >
+          >
           Logout
         </li>
+
       </ul>
     </div>
   );

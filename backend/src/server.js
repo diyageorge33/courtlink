@@ -1,24 +1,29 @@
-
-require("dotenv").config({ path: "../.env" });
-
-
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-
 const app = express();
 const pool = require("./db");
+
 const authRoutes = require("./routes/auth.routes");
-const advocateRoutes = require("./routes/advocate.routes");
+const aiRoutes = require("./routes/ai.routes");
+const clientRoutes = require("./routes/clientRoutes");
 
 
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
+app.use("/api/client", clientRoutes);
 
 app.use("/api/auth", authRoutes);
-app.use("/api/advocate", advocateRoutes);
-
+app.use("/ai", aiRoutes);
+app.use("/uploads", express.static("src/uploads"));
 
 
 app.get("/", (req, res) => {
@@ -26,14 +31,14 @@ app.get("/", (req, res) => {
 });
 
 const PORT = 5000;
-pool.query("SELECT NOW()", (err, res) => {
+
+pool.query("SELECT NOW()", (err, result) => {
   if (err) {
     console.error("DB connection failed", err);
   } else {
-    console.log("DB connected at:", res.rows[0].now);
+    console.log("DB connected at:", result.rows[0].now);
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
