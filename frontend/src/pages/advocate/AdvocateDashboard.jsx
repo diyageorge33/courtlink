@@ -31,65 +31,52 @@ function AdvocateDashboard() {
     fetchStats();
   }, []);
 
-  return (
-    <DashboardLayout role="advocate">
-      <h2>Welcome Back!</h2>
+    return (
+  <DashboardLayout role="advocate">
+    
+
+      <h1>Advocate Dashboard</h1>
 
       <div className="stats-grid">
         <StatCard title="Total Cases" value={stats.totalCases} />
         <StatCard title="Open Cases" value={stats.openCases} />
-        <StatCard title="Cases This Week" value={stats.weeklyCases} />
+        <StatCard title="Cases Due This Week" value={stats.weeklyCases} />
         <StatCard title="Clients Managed" value={stats.clients} />
       </div>
 
-      <div className="dashboard-grid">
-        <div className="card">
+      <div className="dashboard-row">
+        <div className="card large-card">
           <h3>Upcoming Hearings</h3>
-          <p>View upcoming court schedules</p>
-          <button>View All</button>
         </div>
 
-        <div className="card">
+        <div className="card large-card">
           <h3>Recent Activities</h3>
-          <ul>
-            <li>Case updated</li>
-            <li>New hearing scheduled</li>
-            <li>Document uploaded</li>
-          </ul>
-        </div>
-
-        <div className="card">
-         <h3>My Cases</h3>
-          <p>View and manage your assigned cases</p>
-          <button onClick={() => navigate("/dashboard/advocate/cases")}>
-            View Cases
-          </button>
-        </div>
-
-        <div className="card">
-          <h3>Advanced Case Search</h3>
-          <input placeholder="Case Number" />
-          <input placeholder="Client Name" />
-          <button>Search Case</button>
-        </div>
-
-        <div className="card">
-          <h3>Document Management</h3>
-          <p>Upload or browse case documents</p>
-          <button>Upload Document</button>
-        </div>
-
-        <div className="card">
-          <h3>Upcoming Reminders</h3>
-          <ul>
-            <li>Evidence submission deadline</li>
-            <li>Client meeting</li>
-            <li>Court hearing</li>
-          </ul>
         </div>
       </div>
-    </DashboardLayout>
-  );
+
+      <div className="dashboard-row">
+        <div className="card medium-card">
+          <h3>Advanced Case Search</h3>
+        </div>
+
+        <div className="card medium-card">
+          <h3>Client Management</h3>
+        </div>
+      </div>
+
+      <div className="dashboard-row">
+        <div className="card medium-card">
+          <h3>Document Management</h3>
+        </div>
+
+        <div className="card medium-card">
+          <h3>Upcoming Reminders</h3>
+        </div>
+      </div>
+
+  </DashboardLayout>
+);
+
 }
 
 export default AdvocateDashboard;
