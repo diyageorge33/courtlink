@@ -40,8 +40,6 @@ router.get("/dashboard/:id", async (req, res) => {
   }
 });
 
-module.exports = router;
-
 // GET All Cases for Advocate
 router.get("/cases/:id", async (req, res) => {
   const advocateId = req.params.id;
@@ -58,3 +56,5 @@ router.get("/cases/:id", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+module.exports = router;
