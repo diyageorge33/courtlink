@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
+// ===============================
+// AI ASSISTANT CHATBOT
+// ===============================
 router.post("/ask", async (req, res) => {
   try {
     const { question } = req.body;
@@ -10,7 +13,6 @@ router.post("/ask", async (req, res) => {
       return res.status(400).json({ message: "Question is required" });
     }
 
-    // Allow only CourtLink + Indian legal related questions
     const allowedKeywords = [
       "case",
       "court",
@@ -105,7 +107,6 @@ Consult an advocate for final legal advice.
 
     answer = answer.trim();
 
-    
     if (!answer.includes("•")) {
       const lines = answer
         .split(".")
@@ -118,7 +119,6 @@ Consult an advocate for final legal advice.
         .join("\n");
     }
 
-    
     const bannedAdviceWords = [
       "you should",
       "you must",
@@ -139,7 +139,6 @@ Consult an advocate for final legal advice.
         "Consult an advocate for final legal advice.";
     }
 
-
     if (!answer.toLowerCase().includes("consult an advocate")) {
       answer += "\nConsult an advocate for final legal advice.";
     }
@@ -151,6 +150,84 @@ Consult an advocate for final legal advice.
     return res.status(500).json({
       answer:
         "• AI service failed right now.\n• Please try again later.\nConsult an advocate for final legal advice.",
+    });
+  }
+});
+
+// ===============================
+// AI CASE DESCRIPTION GENERATOR
+// ===============================
+router.post("/generate-case-description", async (req, res) => {
+  try {
+    const { case_title, case_type, user_input } = req.body;
+
+    if (!case_title || !user_input) {
+      return res.status(400).json({
+        message: "case_title and user_input are required",
+      });
+    }
+
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(400).json({
+        message: "Groq API key missing in backend .env",
+      });
+    }
+
+    const systemPrompt = `
+You are CourtLink AI Case Filing Assistant.
+
+RULES:
+- Generate a professional case description for a client filing a case request.
+- Do NOT give legal advice.
+- Do NOT mention fake IPC sections.
+- Use simple formal language.
+- Output must be in paragraph format only.
+- Keep it between 6 to 10 lines.
+`;
+
+    const userPrompt = `
+Case Title: ${case_title}
+Case Type: ${case_type || "Not specified"}
+Client Explanation: ${user_input}
+
+Write a proper case description including:
+1) Background
+2) Incident summary
+3) Opposite party mention
+4) Relief requested
+`;
+
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.1-8b-instant",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.4,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const description =
+      response.data.choices?.[0]?.message?.content?.trim() ||
+      "No response from AI.";
+
+    return res.json({ description });
+  } catch (error) {
+    console.error(
+      "AI case description error:",
+      error.response?.data || error.message
+    );
+
+    return res.status(500).json({
+      message: "AI generation failed",
     });
   }
 });

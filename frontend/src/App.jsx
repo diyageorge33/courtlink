@@ -37,6 +37,11 @@ import Document from "./pages/Document";
 import Mycase from "./pages/Mycase";
 import PaymentTest from "./pages/PaymentTest";
 
+import FileCase from "./pages/FileCase";
+import UploadDocuments from "./pages/UploadDocuments";
+
+
+
 
 function App() {
   return (
@@ -82,9 +87,13 @@ function App() {
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/clientsetting" element={<Clientsetting />} />
             <Route path="/paymentshistory" element={<Paymentshistory />} />
-            <Route path="/document" element={<Document />} />
+            <Route path="/dashboard/client/document" element={<Document />} />
             <Route path="/mycase" element={<Mycase />} />
+
             <Route path="/payment-test" element={<PaymentTest />} />
+
+            <Route path="/dashboard/client/filecase" element={<FileCase />} />
+            <Route path="/dashboard/client/uploaddocuments" element={<UploadDocuments />} />
 
 
           </Routes>

@@ -1,6 +1,7 @@
 body {
   margin: 0;
   font-family: "Inter", Arial, sans-serif;
+
   padding-top: 80px; /* to prevent content being hidden behind fixed navbar */
   overflow-x: hidden;
 
@@ -10,7 +11,6 @@ body {
     #babbbe
   );
 }
-
 
 /*NAVBAR*/
 
@@ -63,7 +63,6 @@ body {
 }
 
 /* BUTTONS (GLOBAL)*/
-
 .btn-primary {
   background-color: #0f317c;
   color: white;
@@ -82,7 +81,7 @@ body {
   cursor: pointer;
 }
 
-/* HERO SECTION*/
+/* LANDING PAGE*/
 
 .hero {
   background-color: #ffffff;
@@ -90,7 +89,6 @@ body {
   border-radius: 12px;
   position: relative;
 }
-
 
 .hero-container {
   max-width: 1200px;
@@ -149,7 +147,6 @@ body {
   border-radius: 12px;
 }
 
-
 .services h2 {
   text-align: center;
   font-size: 28px;
@@ -198,7 +195,6 @@ body {
   padding: 50px 40px 20px;
 }
 
-
 .footer-content {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -210,7 +206,6 @@ body {
 .footer-section {
   text-align: center;
 }
-
 
 .footer-section h4 {
   margin-bottom: 12px;
@@ -244,7 +239,6 @@ body {
 
 /*ABOUTUS, PRIVACY POLICY, TERMS&CONDITIONS*/
 
-/*.about-page → styles the full About page background and positions the main content.*/
 .about-page {
   min-height: 100vh;
   padding: 50px 20px;
@@ -253,7 +247,6 @@ body {
   align-items: flex-start;
 }
 
-/*.about-container → the main white card/box that holds all About page content*/
 .about-container {
   width: 100%;
   max-width: 1100px;
@@ -263,7 +256,6 @@ body {
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
 }
 
-/*.about-container h1 → styles the main heading “About CourtLink”.*/
 .about-container h1 {
   font-size: 40px;
   margin-bottom: 20px;
@@ -271,7 +263,6 @@ body {
   text-align: center;
 }
 
-/*.about-intro → styles the introduction paragraph below the heading.*/
 .about-intro {
   font-size: 17px;
   color: #262d37;
@@ -279,26 +270,22 @@ body {
   line-height: 1.7;
 }
 
-/*.about-section → creates spacing between each section like Mission, Vision, etc.*/
 .about-section {
   margin-bottom: 10px;
 }
 
-/*.about-section h2 → styles the section headings like “Our Mission”.*/
 .about-section h2 {
   font-size: 18px;
   margin-bottom: 3px;
   color: #111827;
 }
 
-/*.about-section p → styles the paragraph text inside each section.*/
 .about-section p {
   font-size: 16px;
   color: #383e46;
   line-height: 1.7;
 }
 
-/*.about-section ul → styles the bullet list under “Why Choose CourtLink”.*/
 .about-section ul {
   padding-left: 20px;
   line-height: 1.8;
@@ -306,7 +293,6 @@ body {
   font-size: 16px;
 }
 
-/*.about-cards → arranges the feature cards in a row with spacing and responsiveness.*/
 .about-cards {
   display: flex;
   gap: 20px;
@@ -314,7 +300,6 @@ body {
   flex-wrap: wrap;
 }
 
-/*.about-card → styles each individual feature card box.*/
 .about-card {
   flex: 1;
   min-width: 250px;
@@ -324,19 +309,16 @@ body {
   border: 1px solid #e5e7eb;
 }
 
-/*.about-card h3 → styles the title inside each card*/
 .about-card h3 {
   margin-bottom: 8px;
   font-size: 18px;
 }
 
-/*.about-card p → styles the description text inside each card.*/
 .about-card p {
   color: #4b5563;
   font-size: 15px;
   line-height: 1.6;
 }
-
 
 /* LOGIN PAGE */
 
@@ -384,7 +366,6 @@ body {
   color: #6b7280;
 }
 
-
 .login-form {
   display: flex;
   flex-direction: column;
@@ -417,7 +398,6 @@ body {
   font-size: 13px;
 }
 
-
 .captcha {
   display: flex;
   align-items: center;
@@ -449,9 +429,7 @@ body {
   cursor: pointer;
 }
 
-/* =====================
-   REGISTER PAGE
-===================== */
+/* REGISTER PAGE*/
 
 .register-page {
   min-height: 100vh;
@@ -505,7 +483,6 @@ body {
   color: #9ca3af;
 }
 
-
 .active-step {
   color: #2563eb;
   font-weight: 600;
@@ -517,7 +494,6 @@ body {
   font-size: 13px;
   margin-bottom: 4px;
 }
-
 
 .register-form input,
 .register-form select {
@@ -537,7 +513,6 @@ body {
   font-size: 13px;
   margin-bottom: 12px;
 }
-
 
 .two-column {
   display: flex;
@@ -560,7 +535,6 @@ body {
   margin-top: 8px;
 }
 
-
 .login-redirect {
   text-align: center;
   font-size: 14px;
@@ -572,8 +546,8 @@ body {
   cursor: pointer;
 }
 
-
 /*INFO PAGES - for help page*/
+
 .info-page {
   min-height: calc(100vh - 80px);
   padding: 24px 32px;   
@@ -614,8 +588,6 @@ body {
 
 /* Advocate specific */
 
-/* === FINAL CHECKBOX ALIGNMENT FIX === */
-
 .checkbox-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -632,7 +604,6 @@ body {
   cursor: pointer;
 }
 
-/* normalize checkbox */
 .checkbox-item input {
   margin: 0;
   padding: 0;
@@ -641,7 +612,6 @@ body {
   flex-shrink: 0;
 }
 
-/* normalize text */
 .checkbox-item span {
   display: inline-block;
 }
@@ -662,6 +632,7 @@ body {
 }
 
 /* Cards */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -686,7 +657,6 @@ body {
   font-weight: bold;
   margin-top: 8px;
 }
-
 
 /* Auth Links in Navbar */
 .auth-links {
@@ -1017,4 +987,144 @@ body {
   line-height: 1.6;
 }
 
+/*mycase tables*/
+.cases-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
 
+.cases-table th,
+.cases-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.cases-table th {
+  background-color: #f3f3f3;
+}
+
+/*filecase*/
+.case-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  max-width: 600px;
+}
+
+.case-form input,
+.case-form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/*upload box*/
+.upload-box {
+  max-width: 700px;
+  padding: 25px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #ffffff;
+  margin: 20px auto;   /* ✅ THIS CENTERS IT */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0px 6px 14px rgba(0,0,0,0.12);
+}
+
+.upload-box select,
+.upload-box input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.settings-card {
+  max-width: 500px;
+   margin-top: 0px !important;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-card input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 35px;
+  margin-top: 30px;
+  align-items: start;
+}
+
+.profile-summary-card {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.profile-summary-card h2 {
+  margin-bottom: 10px;
+}
+
+.profile-summary-subtitle {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.profile-summary-details {
+  line-height: 1.9;
+}
+
+.profile-summary-details hr {
+  margin: 18px 0;
+}
+
+.profile-summary-tip {
+  margin-top: 18px;
+  color: #555;
+  font-size: 14px;
+}
+
+.settings-card h2 {
+  margin-bottom: 10px;
+}
+
+.settings-subtitle {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.settings-card input,
+.settings-card textarea,
+.settings-card select {
+  display: block;
+  width: 100%;
+  margin-left: 0 !important;
+  padding-left: 12px;
+  box-sizing: border-box;
+}
+
+.settings-card input:disabled {
+  background-color: #f2f2f2;
+  cursor: not-allowed;
+}
+
+.settings-card label {
+  display: block;
+  margin-left: 0;
+  padding-left: 0;
+}
