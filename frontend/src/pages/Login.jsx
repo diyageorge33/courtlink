@@ -46,6 +46,7 @@ const handleLogin = async (e) => {
     const data = await response.json();
 
     localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userId", data.user_id);
     localStorage.setItem("userName", data.full_name);
     localStorage.setItem("role", data.role);
 

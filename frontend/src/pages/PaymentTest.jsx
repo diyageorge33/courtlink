@@ -1,4 +1,4 @@
-import PayConsultation from "../pages/PayConsultation";
+import PayConsultation from "../components/PayConsultation";
 
 function PaymentTest() {
   return (

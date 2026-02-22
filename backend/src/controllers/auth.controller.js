@@ -56,9 +56,11 @@ exports.login = async (req, res) => {
 
     // Login success
     res.json({
-      user_id: user.user_id,
-      full_name: user.full_name,
-      role: user.role,
+      
+        user_id: user.user_id,
+        full_name: user.full_name,
+        role: user.role,
+      
     });
 
   } catch (err) {

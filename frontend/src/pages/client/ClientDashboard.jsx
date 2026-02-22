@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/ClientSidebar";
 import { fetchClientDashboardStats } from "../../api/clientApi";
+import PayConsultation from "../../components/PayConsultation";
 import { useEffect, useState } from "react";
 
 function ClientDashboard() {
   const navigate = useNavigate();
-
 
   const userName = localStorage.getItem("userName") || "Client";
 
@@ -16,38 +16,56 @@ function ClientDashboard() {
     pendingPayments: 0,
   });
 
+  const [consultationPaid, setConsultationPaid] = useState(false);
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
-  const loadStats = async () => {
-    try {
-      const clientId = localStorage.getItem("userId");
+    const loadData = async () => {
+      try {
+        const clientId = localStorage.getItem("userId");
 
-      if (!clientId) {
-        console.log("Client not logged in");
-        return;
+        if (!clientId) {
+          console.log("Client not logged in");
+          return;
+        }
+
+        // Load dashboard stats
+        const statsData = await fetchClientDashboardStats(clientId);
+        setStats(statsData);
+
+        // Check consultation payment status
+        const res = await fetch(
+          `http://localhost:5000/api/payment/consultation-status/${clientId}`
+        );
+        const paymentData = await res.json();
+        setConsultationPaid(paymentData.paid);
+
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await fetchClientDashboardStats(clientId);
-      setStats(data);
-    } catch (err) {
-      console.error("Error fetching dashboard stats:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  loadStats();
-}, []);
-
+    loadData();
+  }, []);
 
   return (
     <div className="client-layout">
       <Sidebar />
 
       <main className="client-content">
-        <h1>Welcome, {userName}!</h1>
-       
+        <div className="welcome-header">
+          <h1>Welcome, {userName}!</h1>
+
+          {consultationPaid && (
+            <span className="premium-badge">
+              💎 Premium Member
+            </span>
+          )}
+      </div>
+
         <p className="dashboard-subtitle">
           Here you can manage your cases, documents, and payments.
         </p>
@@ -78,6 +96,15 @@ function ClientDashboard() {
           </div>
         )}
 
+        {/*  Consultation Payment Section */}
+        {!consultationPaid && (
+          <div className="action-card" style={{ marginBottom: "20px" }}>
+            <h3>Consultation Fee Required</h3>
+            <p>Please pay ₹500 to unlock advanced features.</p>
+            <PayConsultation clientId={localStorage.getItem("userId")} />
+          </div>
+        )}
+
         <div className="dashboard-section">
           <h2>Quick Actions</h2>
 
@@ -97,11 +124,12 @@ function ClientDashboard() {
               <h3>Track Case Status</h3>
               <p>Check updates and current progress of your cases.</p>
               <button
-                className="action-btn"
-                onClick={() => navigate("/dashboard/client/mycases")}
-              >
-                Track
-              </button>
+                  className={`action-btn ${!consultationPaid ? "unlocked" : ""}`}
+                  disabled={!consultationPaid}
+                  onClick={() => navigate("/dashboard/client/mycases")}
+                >
+                  {consultationPaid ? "Track" : "🔒 Track (Premium)"}
+                </button>
             </div>
 
             <div className="action-card">
@@ -119,11 +147,12 @@ function ClientDashboard() {
               <h3>Download Orders</h3>
               <p>Download court orders and judgement documents.</p>
               <button
-                className="action-btn"
+                className={`action-btn ${!consultationPaid ? "unlocked" : ""}`}
+                disabled={!consultationPaid}
                 onClick={() => navigate("/dashboard/client/downloadorders")}
               >
-                Download
-              </button>
+                {consultationPaid ? "Download" : "🔒 Download (Premium)"}
+            </button>
             </div>
           </div>
         </div>

@@ -31,7 +31,7 @@ import ResetPassword from "./pages/ResetPassword";
 
 import VerifyOtp from "./pages/VerifyOtp";
 import Bookappointment from "./pages/Bookappointment";
-import Clientsetting from "./pages/Clientsetting";
+import Clientsetting from "./pages/client/Clientsetting";
 import Paymentshistory from "./pages/Paymentshistory";
 import Document from "./pages/Document";
 import Mycase from "./pages/Mycase";
@@ -39,6 +39,7 @@ import PaymentTest from "./pages/PaymentTest";
 
 import FileCase from "./pages/FileCase";
 import UploadDocuments from "./pages/UploadDocuments";
+import PaymentHistory from "./pages/client/PaymentHistory"; 
 
 
 
@@ -93,6 +94,7 @@ function App() {
             <Route path="/payment-test" element={<PaymentTest />} />
 
             <Route path="/dashboard/client/filecase" element={<FileCase />} />
+            <Route path="/dashboard/client/paymenthistory" element={<PaymentHistory />} />
             <Route path="/dashboard/client/uploaddocuments" element={<UploadDocuments />} />
 
 
