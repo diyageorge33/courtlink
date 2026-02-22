@@ -4,14 +4,16 @@ import Sidebar from "../../components/ClientSidebar";
 function ClientDashboard() {
   const navigate = useNavigate();
 
+  const userName = localStorage.getItem("userName") || "Client";
   return (
     <div className="client-layout">
       <Sidebar />
 
       <main className="client-content">
-        <h1>Client Dashboard</h1>
+        <h1>Welcome, {userName}!</h1>
+       
         <p className="dashboard-subtitle">
-          Welcome back! Here you can manage your cases, documents, and payments.
+          Here you can manage your cases, documents, and payments.
         </p>
 
         <div className="stats-grid">

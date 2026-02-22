@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
 
     // Fetch user by email
     const result = await pool.query(
-      "SELECT user_id, role, password_hash, is_verified FROM users WHERE email = $1",
+      "SELECT user_id, full_name, role, password_hash, is_verified FROM users WHERE email = $1",
       [email]
     );
 
@@ -57,6 +57,7 @@ exports.login = async (req, res) => {
     // Login success
     res.json({
       user_id: user.user_id,
+      full_name: user.full_name,
       role: user.role,
     });
 
