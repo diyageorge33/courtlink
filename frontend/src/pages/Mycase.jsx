@@ -9,17 +9,8 @@ function Mycase() {
   useEffect(() => {
     const loadCases = async () => {
       try {
-        const clientId = localStorage.getItem("userId");
-
-        console.log("🔥 userId from localStorage:", clientId);
-
-        if (!clientId) {
-          alert("Client not logged in. Please login again.");
-          setLoading(false);
-          return;
-        }
-
-        const data = await fetchClientCases(clientId);
+        
+        const data = await fetchClientCases();
         console.log("🔥 cases fetched:", data);
 
         setCases(data);

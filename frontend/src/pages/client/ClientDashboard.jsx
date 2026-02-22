@@ -16,27 +16,19 @@ function ClientDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const loadStats = async () => {
-    try {
-      const clientId = localStorage.getItem("userId");
-
-      if (!clientId) {
-        console.log("Client not logged in");
-        return;
+    const loadStats = async () => {
+      try {
+        const data = await fetchClientDashboardStats();
+        setStats(data);
+      } catch (err) {
+        console.error("Error fetching dashboard stats:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await fetchClientDashboardStats(clientId);
-      setStats(data);
-    } catch (err) {
-      console.error("Error fetching dashboard stats:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  loadStats();
-}, []);
-
+    loadStats();
+  }, []);
 
   return (
     <div className="client-layout">

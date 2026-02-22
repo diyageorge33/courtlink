@@ -119,7 +119,7 @@ function Register() {
               </div>
             </div>
 
-            {/* 🔐 PASSWORD FIELDS */}
+            {/*PASSWORD FIELDS */}
             <div className="two-column">
               <div>
                 <label>Password *</label>

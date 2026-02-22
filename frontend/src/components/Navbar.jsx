@@ -7,17 +7,15 @@ function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    setIsLoggedIn(loggedIn);
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
   }, [location.pathname]);
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("role");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
-  // check if current page is dashboard
   const isDashboardPage = location.pathname.startsWith("/dashboard");
 
   return (
@@ -26,7 +24,6 @@ function Navbar() {
         ⚖️ CourtLink
       </div>
 
-      {/* ALWAYS show these 4 options */}
       <ul className="nav-links">
         <li><Link to="/">Home</Link></li>
         <li><Link to="/services">Services</Link></li>
@@ -34,7 +31,6 @@ function Navbar() {
         <li><Link to="/help">Help</Link></li>
       </ul>
 
-      {/* Right side */}
       {!isLoggedIn && !isDashboardPage ? (
         <div className="auth-links">
           <span onClick={() => navigate("/login")}>Login</span>

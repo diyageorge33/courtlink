@@ -4,10 +4,11 @@ const pool = require("../db");
 
 const multer = require("multer");
 const path = require("path");
+const { verifyToken } = require("../middleware/authMiddleware");
 
-// ===============================
+
 // MULTER CONFIG (LOCAL STORAGE)
-// ===============================
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "src/uploads/");
@@ -19,12 +20,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ===============================
 // GET CLIENT DASHBOARD STATS
-// ===============================
-router.get("/dashboard/stats/:clientId", async (req, res) => {
+
+router.get("/dashboard/stats", verifyToken, async (req, res) => {
   try {
-    const { clientId } = req.params;
+    const clientId = req.user.user_id; // from JWT
 
     const ongoingResult = await pool.query(
       `SELECT COUNT(*) 
@@ -57,18 +57,19 @@ router.get("/dashboard/stats/:clientId", async (req, res) => {
       closedCases: parseInt(closedResult.rows[0].count),
       pendingPayments: 0,
     });
+
   } catch (err) {
     console.error("Dashboard stats error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ===============================
+
 // GET ALL CASES OF CLIENT
-// ===============================
-router.get("/cases/:clientId", async (req, res) => {
+
+router.get("/cases", verifyToken, async (req, res) => {
   try {
-    const { clientId } = req.params;
+    const clientId = req.user.user_id;
 
     const result = await pool.query(
       `SELECT case_id, case_title, case_type, status, next_hearing_date, created_at
@@ -85,16 +86,15 @@ router.get("/cases/:clientId", async (req, res) => {
   }
 });
 
-// ===============================
 // FILE NEW CASE REQUEST
-// ===============================
-router.post("/filecase", async (req, res) => {
+router.post("/filecase", verifyToken, async (req, res) => {
   try {
-    const { client_id, case_title, case_type, case_description } = req.body;
+    const clientId = req.user.user_id;
+    const { case_title, case_type, case_description } = req.body;
 
-    if (!client_id || !case_title) {
+    if (!case_title || case_title.trim() === "") {
       return res.status(400).json({
-        message: "client_id and case_title are required",
+        message: "Case title is required",
       });
     }
 
@@ -102,63 +102,98 @@ router.post("/filecase", async (req, res) => {
       `INSERT INTO cases (client_id, case_title, case_type, case_description)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [client_id, case_title, case_type, case_description]
+      [clientId, case_title, case_type, case_description]
     );
 
     res.status(201).json({
       message: "Case filed successfully",
       case: result.rows[0],
     });
+
   } catch (err) {
     console.error("Error filing case:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ===============================
 // UPLOAD DOCUMENT (CLIENT)
-// ===============================
-router.post("/upload-document", upload.single("file"), async (req, res) => {
+
+router.post(
+  "/upload-document",
+  verifyToken,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const clientId = req.user.user_id;
+      const { case_id } = req.body;
+
+      if (!case_id) {
+        return res.status(400).json({
+          message: "case_id is required",
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          message: "No file uploaded",
+        });
+      }
+
+      // Verify that this case actually belongs to this client
+      const caseCheck = await pool.query(
+        `SELECT case_id FROM cases WHERE case_id = $1 AND client_id = $2`,
+        [case_id, clientId]
+      );
+
+      if (caseCheck.rows.length === 0) {
+        return res.status(403).json({
+          message: "You are not allowed to upload documents for this case",
+        });
+      }
+
+      const fileUrl = `/uploads/${req.file.filename}`;
+
+      const result = await pool.query(
+        `INSERT INTO documents (case_id, uploaded_by, file_name, file_url)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *`,
+        [case_id, clientId, req.file.originalname, fileUrl]
+      );
+
+      res.status(201).json({
+        message: "Document uploaded successfully",
+        document: result.rows[0],
+      });
+
+    } catch (err) {
+      console.error("Upload document error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+
+// GET DOCUMENTS FOR A CASE
+
+router.get("/documents/case/:caseId", verifyToken, async (req, res) => {
   try {
-    const { case_id, uploaded_by } = req.body;
+    const caseId = parseInt(req.params.caseId);
 
-    if (!case_id || !uploaded_by) {
-      return res.status(400).json({
-        message: "case_id and uploaded_by are required",
-      });
+    if (!caseId || isNaN(caseId)) {
+      return res.status(400).json({ message: "Invalid case ID" });
     }
 
-    if (!req.file) {
-      return res.status(400).json({
-        message: "No file uploaded",
-      });
-    }
+    const clientId = req.user.user_id;
 
-    const fileUrl = `/uploads/${req.file.filename}`;
-
-    const result = await pool.query(
-      `INSERT INTO documents (case_id, uploaded_by, file_name, file_url)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [case_id, uploaded_by, req.file.originalname, fileUrl]
+    // Ensure case belongs to this client
+    const caseCheck = await pool.query(
+      `SELECT case_id FROM cases WHERE case_id = $1 AND client_id = $2`,
+      [caseId, clientId]
     );
 
-    res.status(201).json({
-      message: "Document uploaded successfully",
-      document: result.rows[0],
-    });
-  } catch (err) {
-    console.error("Upload document error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// ===============================
-// GET DOCUMENTS FOR A CASE
-// ===============================
-router.get("/documents/case/:caseId", async (req, res) => {
-  try {
-    const { caseId } = req.params;
+    if (caseCheck.rows.length === 0) {
+      return res.status(403).json({ message: "Access denied" });
+    }
 
     const result = await pool.query(
       `SELECT *
@@ -169,18 +204,19 @@ router.get("/documents/case/:caseId", async (req, res) => {
     );
 
     res.json(result.rows);
+
   } catch (err) {
     console.error("Fetch documents error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ===============================
+
 // GET ALL DOCUMENTS OF A CLIENT
-// ===============================
-router.get("/documents/client/:clientId", async (req, res) => {
+
+router.get("/documents/client", verifyToken, async (req, res) => {
   try {
-    const { clientId } = req.params;
+    const clientId = req.user.user_id;
 
     const result = await pool.query(
       `SELECT d.document_id, d.case_id, d.file_name, d.file_url, d.uploaded_at
@@ -199,45 +235,44 @@ router.get("/documents/client/:clientId", async (req, res) => {
 });
 
 // GET CLIENT PROFILE
-router.get("/settings/:clientId", async (req, res) => {
+router.get("/settings", verifyToken, async (req, res) => {
   try {
-    const { clientId } = req.params;
+    const clientId = req.user.user_id;
 
     const result = await pool.query(
-    `
-    SELECT 
-      u.user_id,
-      u.full_name,
-      u.email,
-      u.role,
-      cp.address,
-      cp.dob,
-      cp.gender,
-      cp.phone
-    FROM users u
-    LEFT JOIN client_profiles cp ON u.user_id = cp.client_id
-    WHERE u.user_id = $1
-    `,
-    [clientId]
-  );
-
+      `
+      SELECT 
+        u.user_id,
+        u.full_name,
+        u.email,
+        u.role,
+        cp.address,
+        cp.dob,
+        cp.gender,
+        cp.phone
+      FROM users u
+      LEFT JOIN client_profiles cp ON u.user_id = cp.client_id
+      WHERE u.user_id = $1
+      `,
+      [clientId]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Client not found" });
     }
 
     res.json(result.rows[0]);
+
   } catch (err) {
     console.error("Settings fetch error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-
 // UPDATE CLIENT PROFILE
-router.put("/settings/:clientId", async (req, res) => {
+router.put("/settings", verifyToken, async (req, res) => {
   try {
-    const { clientId } = req.params;
+    const clientId = req.user.user_id;
     let { full_name, address, dob, gender, phone } = req.body;
 
     if (!full_name || full_name.trim() === "") {
@@ -273,14 +308,11 @@ router.put("/settings/:clientId", async (req, res) => {
       message: "Settings updated successfully",
       profile: profileResult.rows[0],
     });
+
   } catch (err) {
     console.error("Settings update error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
-
-
-
 
 module.exports = router;

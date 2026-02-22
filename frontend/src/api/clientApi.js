@@ -1,12 +1,12 @@
 import api from "./api";
 
-export const fetchClientDashboardStats = async (clientId) => {
-  const res = await api.get(`/client/dashboard/stats/${clientId}`);
+export const fetchClientDashboardStats = async () => {
+  const res = await api.get(`/client/dashboard/stats`);
   return res.data;
 };
 
-export const fetchClientCases = async (clientId) => {
-  const res = await api.get(`/client/cases/${clientId}`);
+export const fetchClientCases = async () => {
+  const res = await api.get(`/client/cases`);
   return res.data;
 };
 
@@ -24,18 +24,18 @@ export const uploadClientDocument = async (formData) => {
   return res.data;
 };
 
-export const fetchClientDocuments = async (clientId) => {
-  const res = await api.get(`/client/documents/client/${clientId}`);
+export const fetchClientDocuments = async () => {
+  const res = await api.get(`/client/documents/client`);
   return res.data;
 };
 
-export const fetchClientSettings = async (clientId) => {
-  const res = await api.get(`/client/settings/${clientId}`);
+export const fetchClientSettings = async () => {
+  const res = await api.get(`/client/settings`);
   return res.data;
 };
 
-export const updateClientSettings = async (clientId, data) => {
-  const res = await api.put(`/client/settings/${clientId}`, data);
+export const updateClientSettings = async (data) => {
+  const res = await api.put(`/client/settings`, data);
   return res.data;
 };
 

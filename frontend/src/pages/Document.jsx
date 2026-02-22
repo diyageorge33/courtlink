@@ -9,14 +9,7 @@ function Document() {
   useEffect(() => {
     const loadDocuments = async () => {
       try {
-        const clientId = localStorage.getItem("userId");
-
-        if (!clientId) {
-          alert("Client not logged in");
-          return;
-        }
-
-        const data = await fetchClientDocuments(clientId);
+        const data = await fetchClientDocuments();
         setDocuments(data);
       } catch (err) {
         console.error("Error fetching documents:", err);
@@ -57,7 +50,9 @@ function Document() {
                   <td>{doc.document_id}</td>
                   <td>{doc.case_id}</td>
                   <td>{doc.file_name}</td>
-                  <td>{new Date(doc.uploaded_at).toLocaleDateString()}</td>
+                  <td>
+                    {new Date(doc.uploaded_at).toLocaleDateString()}
+                  </td>
                   <td>
                     <a
                       href={`http://localhost:5000${doc.file_url}`}

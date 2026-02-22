@@ -43,7 +43,7 @@ const handleLogin = async (e) => {
 
     const data = await response.json();
 
-    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("token", data.token);
     localStorage.setItem("role", data.role);
 
     if (data.role === "CLIENT") {
@@ -95,12 +95,6 @@ const handleLogin = async (e) => {
           >
             Forgot Password?
           </span>
-
-
-          {/* <div className="captcha">
-            <input type="checkbox" />
-            <span>I&apos;m not a robot</span>
-          </div> */}
 
           
           {/* reCAPTCHA */}

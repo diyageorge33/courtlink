@@ -3,6 +3,7 @@ const axios = require("axios");
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const transporter = require("../utils/mailer");
+const jwt = require("jsonwebtoken");
 
 /* LOGIN */
 exports.login = async (req, res) => {
@@ -54,10 +55,19 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Login success
+    // Login success-generate jwt
+      const token = jwt.sign(
+      {
+        user_id: user.user_id,   // using your original naming
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
     res.json({
-      user_id: user.user_id,
-      role: user.role,
+      token,
+      role: user.role
     });
 
   } catch (err) {

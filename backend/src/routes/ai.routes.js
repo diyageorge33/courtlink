@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
-// ===============================
+
 // AI ASSISTANT CHATBOT
-// ===============================
+
 router.post("/ask", async (req, res) => {
   try {
     const { question } = req.body;
@@ -154,9 +154,9 @@ Consult an advocate for final legal advice.
   }
 });
 
-// ===============================
+
 // AI CASE DESCRIPTION GENERATOR
-// ===============================
+
 router.post("/generate-case-description", async (req, res) => {
   try {
     const { case_title, case_type, user_input } = req.body;

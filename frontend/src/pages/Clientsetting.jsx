@@ -19,14 +19,7 @@ function Clientsetting() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const clientId = localStorage.getItem("userId");
-
-        if (!clientId) {
-          alert("Client not logged in");
-          return;
-        }
-
-        const data = await fetchClientSettings(clientId);
+        const data = await fetchClientSettings();
 
         setFormData({
           full_name: data.full_name || "",
@@ -53,16 +46,9 @@ function Clientsetting() {
 
   const handleSave = async () => {
     try {
-      const clientId = localStorage.getItem("userId");
-
-      if (!clientId) {
-        alert("Client not logged in");
-        return;
-      }
-
       setSaving(true);
 
-      await updateClientSettings(clientId, {
+      await updateClientSettings({
         full_name: formData.full_name,
         phone: formData.phone,
         address: formData.address,
@@ -101,35 +87,16 @@ function Clientsetting() {
               </p>
 
               <div className="profile-summary-details">
-                <p>
-                  <b>Name:</b> {formData.full_name || "Not Provided"}
-                </p>
-
-                <p>
-                  <b>Email:</b> {formData.email || "Not Provided"}
-                </p>
-
-                <p>
-                  <b>Phone:</b> {formData.phone || "Not Provided"}
-                </p>
-
-                <p>
-                  <b>DOB:</b> {formData.dob || "Not Provided"}
-                </p>
-
-                <p>
-                  <b>Gender:</b> {formData.gender || "Not Provided"}
-                </p>
-
-                <p>
-                  <b>Address:</b> {formData.address || "Not Provided"}
-                </p>
+                <p><b>Name:</b> {formData.full_name || "Not Provided"}</p>
+                <p><b>Email:</b> {formData.email || "Not Provided"}</p>
+                <p><b>Phone:</b> {formData.phone || "Not Provided"}</p>
+                <p><b>DOB:</b> {formData.dob || "Not Provided"}</p>
+                <p><b>Gender:</b> {formData.gender || "Not Provided"}</p>
+                <p><b>Address:</b> {formData.address || "Not Provided"}</p>
 
                 <hr />
 
-                <p>
-                  <b>Account Type:</b> {formData.role}
-                </p>
+                <p><b>Account Type:</b> {formData.role}</p>
               </div>
 
               <p className="profile-summary-tip">
@@ -193,7 +160,11 @@ function Clientsetting() {
                 onChange={handleChange}
               />
 
-              <button className="action-btn" onClick={handleSave} disabled={saving}>
+              <button
+                className="action-btn"
+                onClick={handleSave}
+                disabled={saving}
+              >
                 {saving ? "Saving..." : "Update Profile"}
               </button>
             </div>
