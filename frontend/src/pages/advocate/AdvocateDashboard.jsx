@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 function AdvocateDashboard() {
   const navigate = useNavigate();
 
-  // ✅ FIXED STATE TO MATCH BACKEND RESPONSE
   const [stats, setStats] = useState({
     totalCases: 0,
     openCases: 0,
