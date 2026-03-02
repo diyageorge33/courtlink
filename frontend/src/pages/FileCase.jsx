@@ -97,7 +97,36 @@ function FileCase() {
                 required
               />
 
-              <label>Case Type</label>
+              {/* CASE TYPE WITH GUIDE LINK */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginTop: "10px",
+                }}
+              >
+                <label style={{ margin: 0 }}>Case Type</label>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate("/dashboard/client/case-type-guide")
+                  }
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#1e40af",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    padding: 0,
+                  }}
+                >
+                  Not sure? Identify case type
+                </button>
+              </div>
+
               <input
                 type="text"
                 name="case_type"

@@ -180,3 +180,34 @@ AFTER INSERT ON case_assignments
 FOR EACH ROW
 EXECUTE FUNCTION handle_case_assignment();
 
+15.CREATE TABLE client_subscriptions (
+  client_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+  consultation_paid BOOLEAN DEFAULT FALSE,
+  transaction_id VARCHAR(100),
+  paid_at TIMESTAMP
+);
+
+16.ALTER TABLE payments
+ALTER COLUMN case_id DROP NOT NULL;
+
+17.ALTER TABLE advocate_profiles
+ADD COLUMN employee_id VARCHAR(20);
+
+UPDATE advocate_profiles
+SET employee_id = 'ADV' || LPAD(advocate_id::text, 3, '0');
+
+ALTER TABLE advocate_profiles
+ALTER COLUMN employee_id SET NOT NULL;
+
+ALTER TABLE advocate_profiles
+ADD CONSTRAINT unique_employee_id UNIQUE (employee_id);
+
+ALTER TABLE advocate_profiles
+ADD CONSTRAINT check_employee_id_format
+CHECK (employee_id ~ '^ADV[0-9]{3}$');
+
+ALTER TABLE advocate_profiles
+ADD COLUMN profile_image VARCHAR(255);
+
+ALTER TABLE advocate_profiles
+ADD COLUMN fee_per_hour INTEGER;

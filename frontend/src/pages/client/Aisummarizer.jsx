@@ -6,27 +6,35 @@ function Aisummarizer() {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSummarize = () => {
-    if (!file) {
-      alert("Please upload a court order file first!");
+  const handleSummarize = async () => {
+  if (!file) {
+    alert("Please upload a PDF or TXT file first!");
+    return;
+  }
+  try {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch(
+      "http://localhost:5000/api/ai/summarize-document",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      alert(data.message || "Summarization failed");
       return;
     }
-
-    setLoading(true);
-
-    setTimeout(() => {
-      setSummary(
-        `Summary of Court Order:\n\n` +
-          `• The court reviewed the submitted case documents.\n` +
-          `• The hearing has been scheduled for the next available date.\n` +
-          `• The respondent has been instructed to submit evidence.\n` +
-          `• Final decision is pending.\n\n` +
-          `Note: This is a dummy summary. AI integration will be added later.`
-      );
-
-      setLoading(false);
-    }, 2000);
-  };
+    setSummary(data.summary);
+  } catch (error) {
+    console.error("Summarizer error:", error);
+    alert("AI service failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="client-layout">

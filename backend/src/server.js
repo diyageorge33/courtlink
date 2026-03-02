@@ -23,7 +23,7 @@ app.use("/api/client", clientRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/payment", require("./routes/payment.routes"));
-app.use("/ai", aiRoutes);
+app.use("/api/ai", aiRoutes);
 app.use("/uploads", express.static("src/uploads"));
 
 

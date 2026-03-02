@@ -47,6 +47,7 @@ const handleLogin = async (e) => {
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("role", data.role);
+    localStorage.setItem("userName", data.full_name);
 
     if (data.role === "CLIENT") {
       navigate("/dashboard/client");
