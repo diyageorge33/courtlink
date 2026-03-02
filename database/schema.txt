@@ -28,7 +28,8 @@ CREATE TABLE client_profiles (
 ALTER TABLE client_profiles
 ADD COLUMN phone VARCHAR(15);
 
-3.advocate client_profilesCREATE TABLE advocate_profiles (
+3.advocate client_profiles
+CREATE TABLE advocate_profiles (
     advocate_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     bar_enrollment_no VARCHAR(50) UNIQUE NOT NULL,
     specialization TEXT,
@@ -115,7 +116,8 @@ CREATE TABLE case_updates (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-10.notificationsCREATE TABLE notifications (
+10.notifications
+CREATE TABLE notifications (
     notification_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 
@@ -177,3 +179,4 @@ $$ LANGUAGE plpgsql;
 AFTER INSERT ON case_assignments
 FOR EACH ROW
 EXECUTE FUNCTION handle_case_assignment();
+

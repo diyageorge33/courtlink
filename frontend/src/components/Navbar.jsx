@@ -18,24 +18,32 @@ function Navbar() {
 
   const isDashboardPage = location.pathname.startsWith("/dashboard");
 
+  const linkStyle = {
+    textDecoration: "none",
+    color: "white",
+    cursor: "pointer",
+  };
+
   return (
     <nav className="navbar">
-      <div className="logo" onClick={() => navigate("/")}>
+
+      {/* LOGO */}
+      <Link to="/" className="logo" style={linkStyle}>
         ⚖️ CourtLink
-      </div>
+      </Link>
 
       <ul className="nav-links">
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/services">Services</Link></li>
-        <li><Link to="/Legalexperts">Legal Experts</Link></li>
-        <li><Link to="/help">Help</Link></li>
+        <li><Link to="/" style={linkStyle}>Home</Link></li>
+        <li><Link to="/services" style={linkStyle}>Services</Link></li>
+        <li><Link to="/Legalexperts" style={linkStyle}>Legal Experts</Link></li>
+        <li><Link to="/help" style={linkStyle}>Help</Link></li>
       </ul>
 
       {!isLoggedIn && !isDashboardPage ? (
         <div className="auth-links">
-          <span onClick={() => navigate("/login")}>Login</span>
-          <span className="separator">/</span>
-          <span onClick={() => navigate("/register")}>Sign Up</span>
+          <Link to="/login" style={linkStyle}>Login</Link>
+          <span className="separator" style={{ color: "white" }}> / </span>
+          <Link to="/register" style={linkStyle}>Sign Up</Link>
         </div>
       ) : isLoggedIn ? (
         <button className="btn-primary" onClick={handleLogout}>

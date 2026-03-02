@@ -110,7 +110,7 @@ function Register() {
 
             <div>
               <label>Phone Number *</label>
-              <input type="tel" placeholder="+1 (555) 123-4567" />
+              <input type="tel" placeholder="+91" />
             </div>
 
             <div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../components/ClientSidebar";
-import { fetchClientSettings, updateClientSettings } from "../api/clientApi";
+import Sidebar from "../../components/ClientSidebar";
+import { fetchClientSettings, updateClientSettings } from "../../api/clientApi";
 
 function Clientsetting() {
   const [loading, setLoading] = useState(true);

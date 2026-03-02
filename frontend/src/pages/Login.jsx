@@ -35,10 +35,12 @@ const handleLogin = async (e) => {
     });
 
     if (!response.ok) {
-      toast.error("Invalid email or password");
+      const errorData = await response.json();
+      toast.error(errorData.message || "Login failed");
       captchaRef.current.reset();
       setCaptchaToken(null);
       return;
+      
     }
 
     const data = await response.json();

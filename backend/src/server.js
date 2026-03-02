@@ -22,8 +22,10 @@ app.use(express.json());
 app.use("/api/client", clientRoutes);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/payment", require("./routes/payment.routes"));
 app.use("/ai", aiRoutes);
 app.use("/uploads", express.static("src/uploads"));
+
 
 
 app.get("/", (req, res) => {

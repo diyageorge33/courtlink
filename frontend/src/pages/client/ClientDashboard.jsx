@@ -1,10 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/ClientSidebar";
 import { fetchClientDashboardStats } from "../../api/clientApi";
+import PayConsultation from "../../components/PayConsultation";
 import { useEffect, useState } from "react";
 
 function ClientDashboard() {
   const navigate = useNavigate();
+
+  const userName = localStorage.getItem("userName") || "Client";
 
   const [stats, setStats] = useState({
     ongoingCases: 0,
@@ -13,7 +16,9 @@ function ClientDashboard() {
     pendingPayments: 0,
   });
 
+  const [consultationPaid, setConsultationPaid] = useState(false);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     const loadStats = async () => {
@@ -35,9 +40,18 @@ function ClientDashboard() {
       <Sidebar />
 
       <main className="client-content">
-        <h1>Client Dashboard</h1>
+        <div className="welcome-header">
+          <h1>Welcome, {userName}!</h1>
+
+          {consultationPaid && (
+            <span className="premium-badge">
+              💎 Premium Member
+            </span>
+          )}
+      </div>
+
         <p className="dashboard-subtitle">
-          Welcome back! Here you can manage your cases, documents, and payments.
+          Here you can manage your cases, documents, and payments.
         </p>
 
         {loading ? (
@@ -66,6 +80,15 @@ function ClientDashboard() {
           </div>
         )}
 
+        {/*  Consultation Payment Section */}
+        {!consultationPaid && (
+          <div className="action-card" style={{ marginBottom: "20px" }}>
+            <h3>Consultation Fee Required</h3>
+            <p>Please pay ₹500 to unlock advanced features.</p>
+            <PayConsultation />
+          </div>
+        )}
+
         <div className="dashboard-section">
           <h2>Quick Actions</h2>
 
@@ -85,11 +108,12 @@ function ClientDashboard() {
               <h3>Track Case Status</h3>
               <p>Check updates and current progress of your cases.</p>
               <button
-                className="action-btn"
-                onClick={() => navigate("/dashboard/client/mycases")}
-              >
-                Track
-              </button>
+                  className={`action-btn ${!consultationPaid ? "unlocked" : ""}`}
+                  disabled={!consultationPaid}
+                  onClick={() => navigate("/dashboard/client/mycases")}
+                >
+                  {consultationPaid ? "Track" : "🔒 Track (Premium)"}
+                </button>
             </div>
 
             <div className="action-card">
@@ -107,11 +131,12 @@ function ClientDashboard() {
               <h3>Download Orders</h3>
               <p>Download court orders and judgement documents.</p>
               <button
-                className="action-btn"
+                className={`action-btn ${!consultationPaid ? "unlocked" : ""}`}
+                disabled={!consultationPaid}
                 onClick={() => navigate("/dashboard/client/downloadorders")}
               >
-                Download
-              </button>
+                {consultationPaid ? "Download" : "🔒 Download (Premium)"}
+            </button>
             </div>
           </div>
         </div>
