@@ -17,7 +17,6 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AdvocateRegister from "./pages/AdvocateRegister";
 import ClientDashboard from "./pages/client/ClientDashboard";
-import Clientprofile from "./pages/client/Clientprofile";
 import Aiassistant from "./pages/client/Aiassistant";
 import Aisummarizer from "./pages/client/Aisummarizer";
 import AdvocateDashboard from "./pages/advocate/AdvocateDashboard";
@@ -31,12 +30,16 @@ import ResetPassword from "./pages/ResetPassword";
 
 import VerifyOtp from "./pages/VerifyOtp";
 import Bookappointment from "./pages/Bookappointment";
-import Clientsetting from "./pages/Clientsetting";
+import Clientsetting from "./pages/client/Clientsetting";
 import Paymentshistory from "./pages/Paymentshistory";
 import Document from "./pages/Document";
 import Mycase from "./pages/Mycase";
+import PaymentTest from "./pages/PaymentTest";
+import ProtectedRoute from "./components/ProtectedRoute";
 import FileCase from "./pages/FileCase";
 import UploadDocuments from "./pages/UploadDocuments";
+import PaymentHistory from "./pages/client/PaymentHistory"; 
+import CaseTypeGuide from "./pages/client/CaseTypeGuide";
 
 
 
@@ -77,14 +80,15 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/register/advocate" element={<AdvocateRegister />} />
-            <Route path="/dashboard/client" element={<ClientDashboard />} />
-            <Route path="/dashboard/client/aiassistant" element={<Aiassistant />} />
-            <Route path="/dashboard/client/aisummarizer" element={<Aisummarizer />} />
-            <Route path="/dashboard/client/clientprofile" element={<Clientprofile/>} />
+            {/* <Route path="/dashboard/client" element={<ClientDashboard />} /> */}
+            <Route path="/dashboard/client" element={<ProtectedRoute>  <ClientDashboard /> </ProtectedRoute>} />
+            <Route path="/dashboard/client/aiassistant" element={<ProtectedRoute><Aiassistant /></ProtectedRoute>} />
+            <Route path="/dashboard/client/aisummarizer" element={<ProtectedRoute><Aisummarizer /></ProtectedRoute>} />
             <Route path="/dashboard/advocate" element={<AdvocateDashboard />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
+
             <Route path="/clientsetting" element={<Clientsetting />} />
             <Route path="/paymentshistory" element={<Paymentshistory />} />
             <Route path="/dashboard/client/document" element={<Document />} />
@@ -92,6 +96,18 @@ function App() {
             <Route path="/dashboard/advocate/cases" element={<AdvocateCases />} />
             <Route path="/dashboard/client/filecase" element={<FileCase />} />
             <Route path="/dashboard/client/uploaddocuments" element={<UploadDocuments />} />
+
+            {/* <Route path="/clientsetting" element={<Clientsetting />} /> */}
+            {/* <Route path="/paymentshistory" element={<Paymentshistory />} /> */}
+            <Route path="/dashboard/client/document" element={<ProtectedRoute><Document /></ProtectedRoute>} />
+            <Route path="/mycase" element={<ProtectedRoute><Mycase /></ProtectedRoute>} />
+            <Route path="/dashboard/client/case-type-guide" element={<CaseTypeGuide />} />
+            <Route path="/payment-test" element={<ProtectedRoute><PaymentTest /></ProtectedRoute>} />
+            <Route path="/dashboard/client/filecase" element={<ProtectedRoute><FileCase /></ProtectedRoute>} />
+            <Route path="/dashboard/client/paymenthistory" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
+            <Route path="/dashboard/client/uploaddocuments" element={<ProtectedRoute><UploadDocuments /></ProtectedRoute>} />
+            <Route path="/dashboard/client/clientsetting" element={<ProtectedRoute><Clientsetting /></ProtectedRoute>} />
+
 
           </Routes>
         </div>

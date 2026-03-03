@@ -28,7 +28,8 @@ CREATE TABLE client_profiles (
 ALTER TABLE client_profiles
 ADD COLUMN phone VARCHAR(15);
 
-3.advocate client_profilesCREATE TABLE advocate_profiles (
+3.advocate client_profiles
+CREATE TABLE advocate_profiles (
     advocate_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     bar_enrollment_no VARCHAR(50) UNIQUE NOT NULL,
     specialization TEXT,
@@ -115,7 +116,8 @@ CREATE TABLE case_updates (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-10.notificationsCREATE TABLE notifications (
+10.notifications
+CREATE TABLE notifications (
     notification_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 
@@ -177,3 +179,35 @@ $$ LANGUAGE plpgsql;
 AFTER INSERT ON case_assignments
 FOR EACH ROW
 EXECUTE FUNCTION handle_case_assignment();
+
+15.CREATE TABLE client_subscriptions (
+  client_id INT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+  consultation_paid BOOLEAN DEFAULT FALSE,
+  transaction_id VARCHAR(100),
+  paid_at TIMESTAMP
+);
+
+16.ALTER TABLE payments
+ALTER COLUMN case_id DROP NOT NULL;
+
+17.ALTER TABLE advocate_profiles
+ADD COLUMN employee_id VARCHAR(20);
+
+UPDATE advocate_profiles
+SET employee_id = 'ADV' || LPAD(advocate_id::text, 3, '0');
+
+ALTER TABLE advocate_profiles
+ALTER COLUMN employee_id SET NOT NULL;
+
+ALTER TABLE advocate_profiles
+ADD CONSTRAINT unique_employee_id UNIQUE (employee_id);
+
+ALTER TABLE advocate_profiles
+ADD CONSTRAINT check_employee_id_format
+CHECK (employee_id ~ '^ADV[0-9]{3}$');
+
+ALTER TABLE advocate_profiles
+ADD COLUMN profile_image VARCHAR(255);
+
+ALTER TABLE advocate_profiles
+ADD COLUMN fee_per_hour INTEGER;

@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/ClientSidebar";
-import { fetchClientCases } from "../api/clientApi";
-import { uploadClientDocument, fetchClientDocuments } from "../api/clientApi";
+import {
+  fetchClientCases,
+  uploadClientDocument,
+  fetchClientDocuments,
+} from "../api/clientApi";
 
 function UploadDocuments() {
   const [cases, setCases] = useState([]);
@@ -15,17 +18,10 @@ function UploadDocuments() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const clientId = localStorage.getItem("userId");
-
-        if (!clientId) {
-          alert("Client not logged in");
-          return;
-        }
-
-        const caseData = await fetchClientCases(clientId);
+        const caseData = await fetchClientCases();
         setCases(caseData);
 
-        const docData = await fetchClientDocuments(clientId);
+        const docData = await fetchClientDocuments();
         setDocuments(docData);
       } catch (err) {
         console.error("Error loading documents page:", err);
@@ -39,8 +35,6 @@ function UploadDocuments() {
 
   const handleUpload = async () => {
     try {
-      const clientId = localStorage.getItem("userId");
-
       if (!selectedCase) {
         alert("Please select a case first.");
         return;
@@ -55,17 +49,17 @@ function UploadDocuments() {
 
       const formData = new FormData();
       formData.append("case_id", selectedCase);
-      formData.append("uploaded_by", clientId);
       formData.append("file", file);
 
       await uploadClientDocument(formData);
 
       alert("Document uploaded successfully!");
 
-      const updatedDocs = await fetchClientDocuments(clientId);
+      const updatedDocs = await fetchClientDocuments();
       setDocuments(updatedDocs);
 
       setFile(null);
+      setSelectedCase("");
     } catch (err) {
       console.error("Upload error:", err);
       alert("Upload failed");

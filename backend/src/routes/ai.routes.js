@@ -2,9 +2,12 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
-// ===============================
+const multer = require("multer");
+const pdfParse = require("pdf-parse");
+const upload = multer(); // memory storage
+
 // AI ASSISTANT CHATBOT
-// ===============================
+
 router.post("/ask", async (req, res) => {
   try {
     const { question } = req.body;
@@ -13,74 +16,66 @@ router.post("/ask", async (req, res) => {
       return res.status(400).json({ message: "Question is required" });
     }
 
-    const allowedKeywords = [
-      "case",
-      "court",
-      "advocate",
-      "law",
-      "legal",
-      "petition",
-      "bail",
-      "fir",
-      "divorce",
-      "property",
-      "consumer",
-      "complaint",
-      "contract",
-      "crime",
-      "civil",
-      "criminal",
-      "document",
-      "hearing",
-      "evidence",
-      "courtlink",
-      "payment",
-      "fees",
-      "notice",
-      "section",
-      "ipc",
-      "crpc",
-      "maintenance",
-      "alimony",
-      "cheque",
-      "fraud",
-      "agreement",
-      "lease",
-      "rent",
-    ];
-
-    const lowerQ = question.toLowerCase();
-    const isLegal = allowedKeywords.some((word) => lowerQ.includes(word));
-
-    if (!isLegal) {
-      return res.json({
-        answer:
-          "Sorry, I can only answer questions related to CourtLink and Indian legal procedures.\n• Please ask a legal question.\nConsult an advocate for final legal advice.",
-      });
-    }
-
     if (!process.env.GROQ_API_KEY) {
-      return res.json({
-        answer:
-          "Groq API key is missing. Please add GROQ_API_KEY in backend .env file.\nConsult an advocate for final legal advice.",
+      return res.status(400).json({
+        answer: "AI service not configured properly.",
       });
     }
 
+    // STEP 1: AI CLASSIFIER
+    const classificationResponse = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "system",
+            content: `
+You are a strict classifier.
+
+Reply ONLY with:
+YES → if the question is related to Indian law, courts, legal procedure, or CourtLink platform.
+NO → if unrelated (technology, sports, movies, general chat, etc).
+`,
+          },
+          {
+            role: "user",
+            content: question,
+          },
+        ],
+        temperature: 0,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const classification =
+      classificationResponse.data.choices?.[0]?.message?.content?.trim().toUpperCase();
+
+    if (classification !== "YES") {
+      return res.json({
+        answer:
+          "• I can only assist with Indian legal queries.\n• Please ask a legal question.\nConsult an advocate for final legal advice.",
+      });
+    }
+
+    // STEP 2: REAL LEGAL ASSISTANT RESPONSE
     const systemPrompt = `
 You are CourtLink AI Legal Assistant.
 
 STRICT RULES:
 - Provide only GENERAL legal information and procedure.
-- DO NOT give legal advice or final recommendations.
-- DO NOT say "you should file a case" or "you must do this".
-- Use words like: "You may", "Usually", "Generally", "Typically".
-- Do not mention fake laws or fake case references.
-- Respond in maximum 6 bullet points only.
+- DO NOT give legal advice.
+- Use words like: "Generally", "Typically", "You may".
+- Respond in maximum 6 bullet points.
 - Each bullet must start with "• ".
-- Do not write paragraphs.
-- If question is not about Indian law or CourtLink, refuse politely.
-
-End with exactly:
+- Do NOT write paragraphs.
+- Do NOT invent laws or sections.
+- End with:
 Consult an advocate for final legal advice.
 `;
 
@@ -103,47 +98,15 @@ Consult an advocate for final legal advice.
     );
 
     let answer =
-      response.data.choices?.[0]?.message?.content || "No response from AI.";
-
-    answer = answer.trim();
-
-    if (!answer.includes("•")) {
-      const lines = answer
-        .split(".")
-        .map((line) => line.trim())
-        .filter((line) => line.length > 10);
-
-      answer = lines
-        .slice(0, 6)
-        .map((l) => `• ${l}.`)
-        .join("\n");
-    }
-
-    const bannedAdviceWords = [
-      "you should",
-      "you must",
-      "definitely",
-      "guaranteed",
-      "sue",
-      "file a case",
-      "take legal action",
-      "go to court immediately",
-    ];
-
-    const lowerAns = answer.toLowerCase();
-
-    if (bannedAdviceWords.some((w) => lowerAns.includes(w))) {
-      answer =
-        "• I can provide only general legal information and procedure.\n" +
-        "• Please consult an advocate for personalized legal advice.\n" +
-        "Consult an advocate for final legal advice.";
-    }
+      response.data.choices?.[0]?.message?.content?.trim() ||
+      "No response from AI.";
 
     if (!answer.toLowerCase().includes("consult an advocate")) {
       answer += "\nConsult an advocate for final legal advice.";
     }
 
     return res.json({ answer });
+
   } catch (error) {
     console.error("Groq Error:", error.response?.data || error.message);
 
@@ -154,9 +117,9 @@ Consult an advocate for final legal advice.
   }
 });
 
-// ===============================
+
 // AI CASE DESCRIPTION GENERATOR
-// ===============================
+
 router.post("/generate-case-description", async (req, res) => {
   try {
     const { case_title, case_type, user_input } = req.body;
@@ -228,6 +191,93 @@ Write a proper case description including:
 
     return res.status(500).json({
       message: "AI generation failed",
+    });
+  }
+});
+
+// AI DOCUMENT SUMMARIZER (PDF / TXT)
+
+router.post("/summarize-document", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(400).json({
+        message: "Groq API key missing in backend .env",
+      });
+    }
+
+    let extractedText = "";
+
+    if (req.file.mimetype === "application/pdf") {
+      const data = await pdfParse(req.file.buffer);
+      extractedText = data.text;
+    }
+
+    else if (req.file.mimetype === "text/plain") {
+      extractedText = req.file.buffer.toString("utf-8");
+    }
+
+    else {
+      return res.status(400).json({
+        message: "Only PDF and TXT files are supported",
+      });
+    }
+
+    if (!extractedText.trim()) {
+      return res.status(400).json({
+        message: "File contains no readable text",
+      });
+    }
+
+    const systemPrompt = `
+You are CourtLink AI Legal Summarizer.
+
+RULES:
+- Summarize the court order in simple language.
+- Use bullet points only.
+- Maximum 8 bullet points.
+- Each point must start with "• ".
+- Do NOT give legal advice.
+- Do NOT invent laws or sections.
+- End with: "Consult an advocate for final legal advice."
+`;
+
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.1-8b-instant",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: extractedText.slice(0, 12000) },
+        ],
+        temperature: 0.3,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    let summary =
+      response.data.choices?.[0]?.message?.content?.trim() ||
+      "No summary generated.";
+
+    if (!summary.toLowerCase().includes("consult an advocate")) {
+      summary += "\nConsult an advocate for final legal advice.";
+    }
+
+    return res.json({ summary });
+
+  } catch (error) {
+    console.error("AI Summarizer Error:", error.response?.data || error.message);
+
+    return res.status(500).json({
+      message: "AI summarization failed",
     });
   }
 });

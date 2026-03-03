@@ -3,6 +3,7 @@ const axios = require("axios");
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const transporter = require("../utils/mailer");
+const jwt = require("jsonwebtoken");
 
 /* LOGIN */
 exports.login = async (req, res) => {
@@ -70,11 +71,21 @@ exports.login = async (req, res) => {
 }
 
 
-    // Login success
+    // Login success-generate jwt
+      const token = jwt.sign(
+      {
+        user_id: user.user_id,   // using your original naming
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
     res.json({
-      user_id: user.user_id,
-      role: user.role,
-    });
+  token,
+  role: user.role,
+  full_name: user.full_name
+});
 
   } catch (err) {
   console.error("FULL ERROR DETAILS:", err);
@@ -83,53 +94,6 @@ exports.login = async (req, res) => {
 
 };
 
-/* =========================
-   REGISTER
-========================= */
-// exports.register = async (req, res) => {
-//   const { fullName, email, password, role } = req.body;
-
-//   try {
-//     // 🔐 Hash password
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     // 🔢 Generate OTP
-//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-//     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-//     await pool.query(
-//       `INSERT INTO users 
-//        (full_name, email, password_hash, role, otp, otp_expiry, is_verified)
-//        VALUES ($1,$2,$3,$4,$5,$6,false)`,
-//       [fullName, email, hashedPassword, role, otp, otpExpiry]
-//     );
-
-//     // 📧 Send OTP email
-//     await transporter.sendMail({
-//       from: `"CourtLink Support" <${process.env.EMAIL_USER}>`,
-//       to: email,
-//       subject: "Verify your CourtLink account",
-//       html: `
-//         <h3>Email Verification</h3>
-//         <p>Your OTP is:</p>
-//         <h2>${otp}</h2>
-//         <p>This OTP expires in 10 minutes.</p>
-//       `,
-//     });
-
-//     res.status(201).json({
-//       message: "Registration successful. OTP sent to email.",
-//     });
-
-//   } catch (err) {
-//     if (err.code === "23505") {
-//       res.status(400).json({ message: "Email already exists" });
-//     } else {
-//       console.error(err);
-//       res.status(500).json({ message: "Server error" });
-//     }
-//   }
-// };
 
 exports.register = async (req, res) => {
   const {
@@ -145,7 +109,8 @@ exports.register = async (req, res) => {
   try {
     const normalizedEmail = email.toLowerCase();
 
-    //Check if email already exists
+
+    // Check if email already exists
     const existingUser = await pool.query(
       "SELECT is_verified FROM users WHERE email = $1",
       [normalizedEmail]
@@ -167,7 +132,7 @@ exports.register = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
-    //Insert user
+    // Insert user
     const userResult = await pool.query(
       `INSERT INTO users 
        (full_name, email, password_hash, role, otp, otp_expiry, is_verified)
@@ -179,6 +144,7 @@ exports.register = async (req, res) => {
     const userId = userResult.rows[0].user_id;
 
     //Insert advocate profile BEFORE OTP (if advocate)
+
     if (role === "ADVOCATE") {
       await pool.query(
         `INSERT INTO advocate_profiles
@@ -219,6 +185,7 @@ exports.register = async (req, res) => {
     }
   }
 };
+
 
 
 /* FORGOT PASSWORD*/

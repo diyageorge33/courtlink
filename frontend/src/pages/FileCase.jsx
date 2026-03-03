@@ -24,24 +24,14 @@ function FileCase() {
     e.preventDefault();
 
     try {
-      const clientId = localStorage.getItem("userId");
-
-      if (!clientId) {
-        alert("Client not logged in. Please login again.");
-        return;
-      }
-
-      const payload = {
-        client_id: clientId,
+      await fileNewCase({
         case_title: formData.case_title,
         case_type: formData.case_type,
         case_description: formData.case_description,
-      };
-
-      await fileNewCase(payload);
+      });
 
       alert("Case filed successfully!");
-      navigate("/Mycase");
+      navigate("/dashboard/client/mycases");
     } catch (err) {
       console.error("Error filing case:", err);
       alert("Failed to file case");
@@ -96,7 +86,6 @@ function FileCase() {
             marginRight: "auto",
           }}
         >
-          {/* LEFT FORM SECTION */}
           <div>
             <form onSubmit={handleSubmit} className="case-form">
               <label>Case Title</label>
@@ -108,7 +97,36 @@ function FileCase() {
                 required
               />
 
-              <label>Case Type</label>
+              {/* CASE TYPE WITH GUIDE LINK */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginTop: "10px",
+                }}
+              >
+                <label style={{ margin: 0 }}>Case Type</label>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate("/dashboard/client/case-type-guide")
+                  }
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#1e40af",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    padding: 0,
+                  }}
+                >
+                  Not sure? Identify case type
+                </button>
+              </div>
+
               <input
                 type="text"
                 name="case_type"
@@ -132,7 +150,6 @@ function FileCase() {
             </form>
           </div>
 
-          {/* RIGHT AI PANEL */}
           <div
             style={{
               width: "100%",
@@ -178,7 +195,6 @@ function FileCase() {
                 boxSizing: "border-box",
                 fontFamily: "inherit",
               }}
-
             />
 
             <button

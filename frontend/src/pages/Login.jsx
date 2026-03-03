@@ -35,17 +35,19 @@ const handleLogin = async (e) => {
     });
 
     if (!response.ok) {
-      toast.error("Invalid email or password");
+      const errorData = await response.json();
+      toast.error(errorData.message || "Login failed");
       captchaRef.current.reset();
       setCaptchaToken(null);
       return;
+      
     }
 
     const data = await response.json();
 
-    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("token", data.token);
     localStorage.setItem("role", data.role);
-    localStorage.setItem("user_id", data.user_id); 
+    localStorage.setItem("userName", data.full_name);
 
     if (data.role === "CLIENT") {
       navigate("/dashboard/client");
@@ -97,12 +99,7 @@ const handleLogin = async (e) => {
             Forgot Password?
           </span>
 
-
-          {/* <div className="captcha">
-            <input type="checkbox" />
-            <span>I&apos;m not a robot</span>
-          </div> */}
-
+          
           {/* reCAPTCHA */}
           <div className="mb-3 d-flex justify-content-center">
             <ReCAPTCHA
