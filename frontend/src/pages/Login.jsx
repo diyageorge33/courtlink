@@ -103,12 +103,11 @@ const handleLogin = async (e) => {
             <span>I&apos;m not a robot</span>
           </div> */}
 
-          
           {/* reCAPTCHA */}
           <div className="mb-3 d-flex justify-content-center">
             <ReCAPTCHA
               ref={captchaRef}
-              sitekey="6LckgG4sAAAAACF359UsLAbM7mzq5l8BLKNOhatm"
+              sitekey="6LfUiEksAAAAADag55ZIgvka96w1QzPvdJjscUb2"
               onChange={(token) => setCaptchaToken(token)}
             />
           </div>
