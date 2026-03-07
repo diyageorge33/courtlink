@@ -1,10 +1,21 @@
-function Practice() {
-  return (
-    <div style={{ padding: "40px" }}>
-      <h2>Practice areas</h2>
-      <p>You will know what kind of case you are into</p>
+import { useNavigate } from "react-router-dom";
 
-      {/* BACKEND: GET /api/advocate/dashboard */}
+function Practice() {
+  const navigate = useNavigate();
+
+  return (
+    <div
+      style={{
+        padding: "40px",
+        cursor: "pointer"
+      }}
+      onClick={() => {
+        console.log("Navigating...");
+        navigate("/case-type-guide");
+      }}
+    >
+      <h2>Case Types</h2>
+      <p>You will know what kind of case you are into</p>
     </div>
   );
 }

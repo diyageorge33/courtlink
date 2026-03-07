@@ -7,8 +7,8 @@ body {
 
   background: linear-gradient(
     135deg,
-    #172b79,
-    #babbbe
+    #202d68,
+    #474a58
   );
 }
 
@@ -412,7 +412,7 @@ body {
   padding: 12px;
   border: none;
   border-radius: 6px;
-  background: #2563eb;
+  background: #1a48ac;
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -1333,6 +1333,4 @@ body {
     padding: 0 20px;
   }
 }
-
-
 

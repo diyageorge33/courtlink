@@ -1,10 +1,12 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/ClientSidebar";
 import { fileNewCase } from "../api/clientApi";
 import { generateCaseDescription } from "../api/aiApi";
+import "../newstyles.css";
 
 function FileCase() {
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -24,6 +26,7 @@ function FileCase() {
     e.preventDefault();
 
     try {
+
       await fileNewCase({
         case_title: formData.case_title,
         case_type: formData.case_type,
@@ -31,15 +34,21 @@ function FileCase() {
       });
 
       alert("Case filed successfully!");
+
       navigate("/dashboard/client/mycases");
+
     } catch (err) {
+
       console.error("Error filing case:", err);
       alert("Failed to file case");
+
     }
   };
 
   const handleGenerateAI = async () => {
+
     try {
+
       if (!formData.case_title.trim()) {
         alert("Please enter Case Title first.");
         return;
@@ -59,175 +68,145 @@ function FileCase() {
       });
 
       setFormData({ ...formData, case_description: result.description });
+
     } catch (err) {
+
       console.error("AI error:", err);
       alert("AI failed to generate description");
+
     } finally {
+
       setAiLoading(false);
+
     }
   };
 
   return (
-    <div className="client-layout">
-      <Sidebar />
 
-      <main className="client-content">
-        <h1>File a New Case</h1>
+    <div className="client-dashboard-new">
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr",
-            gap: "25px",
-            marginTop: "20px",
-            alignItems: "start",
-            maxWidth: "1000px",
-            marginLeft: "auto",
-            marginRight: "auto",
-          }}
-        >
-          <div>
-            <form onSubmit={handleSubmit} className="case-form">
-              <label>Case Title</label>
-              <input
-                type="text"
-                name="case_title"
-                value={formData.case_title}
-                onChange={handleChange}
-                required
-              />
+      {/* HEADER */}
 
-              {/* CASE TYPE WITH GUIDE LINK */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginTop: "10px",
-                }}
-              >
-                <label style={{ margin: 0 }}>Case Type</label>
+      <div className="documents-header-new">
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate("/dashboard/client/case-type-guide")
-                  }
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#1e40af",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    padding: 0,
-                  }}
-                >
-                  Not sure? Identify case type
-                </button>
-              </div>
+        <h1 className="page-title-new">File a New Case</h1>
 
-              <input
-                type="text"
-                name="case_type"
-                value={formData.case_type}
-                onChange={handleChange}
-                placeholder="Civil / Criminal / Family..."
-              />
+        <div className="documents-header-buttons">
 
-              <label>Case Description</label>
-              <textarea
-                name="case_description"
-                value={formData.case_description}
-                onChange={handleChange}
-                rows="7"
-                placeholder="Explain your issue briefly..."
-              />
-
-              <button type="submit" className="action-btn">
-                Submit Case Request
-              </button>
-            </form>
-          </div>
-
-          <div
-            style={{
-              width: "100%",
-              maxWidth: "270px",
-              backgroundColor: "#ffffff",
-              borderRadius: "14px",
-              padding: "18px",
-              boxShadow: "0px 8px 18px rgba(0,0,0,0.12)",
-              border: "1px solid #e5e7eb",
-              justifySelf: "end",
-            }}
+          <button
+            className="dashboard-btn-new"
+            onClick={() => navigate("/Mycase")}
           >
-            <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>
-              🤖 AI Assistant
-            </h3>
+           + My Cases
+          </button>
 
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#555",
-                marginBottom: "12px",
-                lineHeight: "1.4",
-              }}
-            >
-              Type your issue briefly and AI will draft a professional case
-              description.
-            </p>
+          <button
+            className="dashboard-btn-new"
+            onClick={() => navigate("/dashboard/client")}
+          >
+            ← Dashboard
+          </button>
 
-            <textarea
-              rows="4"
-              value={aiInput}
-              onChange={(e) => setAiInput(e.target.value)}
-              placeholder="Explain your issue..."
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "10px",
-                border: "1px solid #cbd5e1",
-                fontSize: "13px",
-                outline: "none",
-                resize: "none",
-                backgroundColor: "#ffffff",
-                boxSizing: "border-box",
-                fontFamily: "inherit",
-              }}
+        </div>
+
+      </div>
+
+
+      <div className="filecase-grid-new">
+
+        {/* FORM */}
+
+        <div className="form-card-new">
+
+          <form onSubmit={handleSubmit}>
+
+            <label>Case Title</label>
+
+            <input
+              type="text"
+              name="case_title"
+              value={formData.case_title}
+              onChange={handleChange}
+              required
             />
 
-            <button
-              type="button"
-              className="action-btn"
-              style={{
-                width: "100%",
-                backgroundColor: "#1e40af",
-                marginTop: "12px",
-                padding: "10px",
-                borderRadius: "10px",
-                fontSize: "14px",
-              }}
-              disabled={aiLoading}
-              onClick={handleGenerateAI}
-            >
-              {aiLoading ? "Generating..." : "Generate"}
+            <div className="case-type-row-new">
+
+              <label>Case Type</label>
+
+              <button
+                type="button"
+                className="link-btn-new"
+                onClick={() => navigate("/dashboard/client/case-type-guide")}
+              >
+                Identify case type
+              </button>
+
+            </div>
+
+            <input
+              type="text"
+              name="case_type"
+              value={formData.case_type}
+              onChange={handleChange}
+              placeholder="Civil / Criminal / Family..."
+            />
+
+            <label>Case Description</label>
+
+            <textarea
+              name="case_description"
+              value={formData.case_description}
+              onChange={handleChange}
+              rows="7"
+              placeholder="Explain your issue briefly..."
+            />
+
+            <button type="submit" className="primary-btn-new">
+              Submit Case Request
             </button>
 
-            <p
-              style={{
-                fontSize: "12px",
-                marginTop: "12px",
-                color: "#666",
-                lineHeight: "1.4",
-              }}
-            >
-              <b>Tip:</b> Enter case title + type for best output.
-            </p>
-          </div>
+          </form>
+
         </div>
-      </main>
+
+
+        {/* AI ASSISTANT */}
+
+        <div className="ai-card-new">
+
+          <h3>AI Assistant</h3>
+
+          <p className="ai-description-new">
+            Type your issue briefly and AI will draft a professional case description.
+          </p>
+
+          <textarea
+            rows="4"
+            value={aiInput}
+            onChange={(e) => setAiInput(e.target.value)}
+            placeholder="Explain your issue..."
+          />
+
+          <button
+            type="button"
+            className="primary-btn-new"
+            onClick={handleGenerateAI}
+            disabled={aiLoading}
+          >
+            {aiLoading ? "Generating..." : "Generate"}
+          </button>
+
+          <p className="ai-tip-new">
+            Tip: Enter case title + type for best output.
+          </p>
+
+        </div>
+
+      </div>
+
     </div>
+
   );
 }
 

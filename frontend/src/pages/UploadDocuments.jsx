@@ -1,14 +1,17 @@
+
 import { useEffect, useState } from "react";
-import Sidebar from "../components/ClientSidebar";
+import { useNavigate } from "react-router-dom";
 import {
   fetchClientCases,
-  uploadClientDocument,
-  fetchClientDocuments,
+  uploadClientDocument
 } from "../api/clientApi";
+import "../newstyles.css";
 
 function UploadDocuments() {
+
+  const navigate = useNavigate();
+
   const [cases, setCases] = useState([]);
-  const [documents, setDocuments] = useState([]);
   const [selectedCase, setSelectedCase] = useState("");
   const [file, setFile] = useState(null);
 
@@ -16,25 +19,28 @@ function UploadDocuments() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    const loadData = async () => {
+
+    const loadCases = async () => {
       try {
+
         const caseData = await fetchClientCases();
         setCases(caseData);
 
-        const docData = await fetchClientDocuments();
-        setDocuments(docData);
       } catch (err) {
-        console.error("Error loading documents page:", err);
+        console.error("Error loading cases:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
+    loadCases();
+
   }, []);
 
   const handleUpload = async () => {
+
     try {
+
       if (!selectedCase) {
         alert("Please select a case first.");
         return;
@@ -55,109 +61,98 @@ function UploadDocuments() {
 
       alert("Document uploaded successfully!");
 
-      const updatedDocs = await fetchClientDocuments();
-      setDocuments(updatedDocs);
+      // Redirect to My Documents page
+      navigate("/dashboard/client/document");
 
-      setFile(null);
-      setSelectedCase("");
     } catch (err) {
+
       console.error("Upload error:", err);
       alert("Upload failed");
+
     } finally {
       setUploading(false);
     }
+
   };
 
   return (
-    <div className="client-layout">
-      <Sidebar />
 
-      <main className="client-content">
-        <h1>Upload Documents</h1>
+    <div className="client-dashboard-new">
 
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <>
-            {/* Upload Box */}
-            <div className="upload-box">
-              <h3>Upload New Document</h3>
+      {/* PAGE HEADER */}
 
-              <label>Select Case</label>
-              <select
-                value={selectedCase}
-                onChange={(e) => setSelectedCase(e.target.value)}
-              >
-                <option value="">-- Select Case --</option>
-                {cases.map((c) => (
-                  <option key={c.case_id} value={c.case_id}>
-                    {c.case_title} (#{c.case_id})
-                  </option>
-                ))}
-              </select>
+      <div className="documents-header-new">
 
-              <label>Choose File</label>
-              <input
-                type="file"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
+        <h1 className="page-title-new">Upload Documents</h1>
 
-              <button
-                className="action-btn"
-                onClick={handleUpload}
-                disabled={uploading}
-              >
-                {uploading ? "Uploading..." : "Upload Document"}
-              </button>
-            </div>
+        <div className="documents-header-buttons">
 
-            {/* Documents List */}
-            <div style={{ marginTop: "30px" }}>
-              <h2>Uploaded Documents</h2>
+          <button
+            className="dashboard-btn-new"
+            onClick={() => navigate("/dashboard/client/document")}
+          >
+           + My Documents
+          </button>
 
-              {documents.length === 0 ? (
-                <p>No documents uploaded yet.</p>
-              ) : (
-                <table className="cases-table">
-                  <thead>
-                    <tr>
-                      <th>Document ID</th>
-                      <th>Case ID</th>
-                      <th>File Name</th>
-                      <th>Uploaded At</th>
-                      <th>View</th>
-                    </tr>
-                  </thead>
+          <button
+            className="dashboard-btn-new"
+            onClick={() => navigate("/dashboard/client")}
+          >
+            ← Dashboard
+          </button>
 
-                  <tbody>
-                    {documents.map((doc) => (
-                      <tr key={doc.document_id}>
-                        <td>{doc.document_id}</td>
-                        <td>{doc.case_id}</td>
-                        <td>{doc.file_name}</td>
-                        <td>
-                          {new Date(doc.uploaded_at).toLocaleDateString()}
-                        </td>
-                        <td>
-                          <a
-                            href={`http://localhost:5000${doc.file_url}`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Open
-                          </a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </>
-        )}
-      </main>
+        </div>
+
+      </div>
+
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+
+        <div className="upload-box-new">
+
+          <h3>Upload New Document</h3>
+
+          <label>Select Case</label>
+
+          <select
+            value={selectedCase}
+            onChange={(e) => setSelectedCase(e.target.value)}
+          >
+            <option value="">-- Select Case --</option>
+
+            {cases.map((c) => (
+              <option key={c.case_id} value={c.case_id}>
+                {c.case_title} (#{c.case_id})
+              </option>
+            ))}
+
+          </select>
+
+          <label>Choose File</label>
+
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+
+          <button
+            className="primary-btn-new"
+            onClick={handleUpload}
+            disabled={uploading}
+          >
+            {uploading ? "Uploading..." : "Upload Document"}
+          </button>
+
+        </div>
+
+      )}
+
     </div>
+
   );
+
 }
 
 export default UploadDocuments;

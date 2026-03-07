@@ -27,7 +27,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-
+import Casetypepage from "./pages/Casetypepage";
 import VerifyOtp from "./pages/VerifyOtp";
 import Bookappointment from "./pages/Bookappointment";
 import Clientsetting from "./pages/client/Clientsetting";
@@ -95,6 +95,8 @@ function App() {
             <Route path="/dashboard/client/paymenthistory" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
             <Route path="/dashboard/client/uploaddocuments" element={<ProtectedRoute><UploadDocuments /></ProtectedRoute>} />
             <Route path="/dashboard/client/clientsetting" element={<ProtectedRoute><Clientsetting /></ProtectedRoute>} />
+            <Route path="/case-type-page" element={<Casetypepage />} />
+
 
           </Routes>
         </div>
