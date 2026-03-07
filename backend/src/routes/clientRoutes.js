@@ -350,4 +350,40 @@ router.delete("/documents/:documentId", verifyToken, async (req, res) => {
   }
 });
 
+// GET CLIENT ADVOCATES
+
+router.get("/advocates", verifyToken, async (req, res) => {
+
+  try {
+
+    const clientId = req.user.user_id;
+
+    const result = await pool.query(
+      `
+      SELECT DISTINCT
+        u.user_id AS advocate_id,
+        u.full_name,
+        ap.specialization,
+        ap.experience_years,
+        cp.phone
+      FROM case_assignments ca
+      JOIN cases c ON ca.case_id = c.case_id
+      JOIN users u ON ca.advocate_id = u.user_id
+      LEFT JOIN advocate_profiles ap ON u.user_id = ap.advocate_id
+      LEFT JOIN client_profiles cp ON u.user_id = cp.client_id
+      WHERE c.client_id = $1
+      `,
+      [clientId]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+
+    console.error("Error fetching advocates:", err);
+    res.status(500).json({ message: "Server error" });
+
+  }
+
+});
 module.exports = router;

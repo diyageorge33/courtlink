@@ -40,7 +40,7 @@ import FileCase from "./pages/FileCase";
 import UploadDocuments from "./pages/UploadDocuments";
 import PaymentHistory from "./pages/client/PaymentHistory"; 
 import CaseTypeGuide from "./pages/client/CaseTypeGuide";
-
+import MyAdvocates from "./pages/MyAdvocates";
 
 
 function App() {
@@ -96,8 +96,7 @@ function App() {
             <Route path="/dashboard/client/uploaddocuments" element={<ProtectedRoute><UploadDocuments /></ProtectedRoute>} />
             <Route path="/dashboard/client/clientsetting" element={<ProtectedRoute><Clientsetting /></ProtectedRoute>} />
             <Route path="/case-type-page" element={<Casetypepage />} />
-
-
+            <Route path="/dashboard/client/advocates" element={<MyAdvocates />} />
           </Routes>
         </div>
       </BrowserRouter>

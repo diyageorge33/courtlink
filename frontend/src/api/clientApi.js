@@ -55,3 +55,20 @@ export const deleteClientDocument = async (documentId) => {
 
   return res.json();
 };
+
+export const fetchClientAdvocates = async () => {
+
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(
+    "http://localhost:5000/api/client/advocates",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  return res.json();
+
+};
