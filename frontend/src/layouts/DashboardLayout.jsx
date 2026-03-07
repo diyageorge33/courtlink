@@ -1,10 +1,14 @@
-import Sidebar from "../components/ClientSidebar";
+import ClientSidebar from "../components/ClientSidebar";
+import AdvocateSidebar from "../components/AdvocateSidebar";
 import Topbar from "../components/Topbar";
 
 function DashboardLayout({ children, role }) {
+
+  const Sidebar = role === "advocate" ? AdvocateSidebar : ClientSidebar;
+
   return (
     <div className="dashboard-wrapper">
-      <Sidebar role={role} />
+      <Sidebar />
 
       <div className="dashboard-main">
         <Topbar />

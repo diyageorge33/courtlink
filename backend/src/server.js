@@ -9,6 +9,7 @@ const authRoutes = require("./routes/auth.routes");
 const aiRoutes = require("./routes/ai.routes");
 const clientRoutes = require("./routes/clientRoutes");
 
+const advocateRoutes = require("./routes/advocate.routes");
 
 
 app.use(
@@ -26,6 +27,7 @@ app.use("/api/payment", require("./routes/payment.routes"));
 app.use("/api/ai", aiRoutes);
 app.use("/uploads", express.static("src/uploads"));
 
+app.use("/api/advocate", advocateRoutes);
 
 
 app.get("/", (req, res) => {

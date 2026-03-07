@@ -42,8 +42,9 @@ import PaymentHistory from "./pages/client/PaymentHistory";
 import CaseTypeGuide from "./pages/client/CaseTypeGuide";
 
 
-
+import AddCase from "./pages/advocate/AddCase";
 import AdvocateCases from "./pages/advocate/AdvocateCases";
+import ScheduleHearing from "./pages/advocate/ScheduleHearing";
 
 
 function App() {
@@ -84,16 +85,17 @@ function App() {
             <Route path="/dashboard/client" element={<ProtectedRoute>  <ClientDashboard /> </ProtectedRoute>} />
             <Route path="/dashboard/client/aiassistant" element={<ProtectedRoute><Aiassistant /></ProtectedRoute>} />
             <Route path="/dashboard/client/aisummarizer" element={<ProtectedRoute><Aisummarizer /></ProtectedRoute>} />
-            <Route path="/dashboard/advocate" element={<AdvocateDashboard />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
+            
+
+            
 
             <Route path="/clientsetting" element={<Clientsetting />} />
             <Route path="/paymentshistory" element={<Paymentshistory />} />
             <Route path="/dashboard/client/document" element={<Document />} />
             <Route path="/mycase" element={<Mycase />} />
-            <Route path="/dashboard/advocate/cases" element={<AdvocateCases />} />
             <Route path="/dashboard/client/filecase" element={<FileCase />} />
             <Route path="/dashboard/client/uploaddocuments" element={<UploadDocuments />} />
 
@@ -107,6 +109,11 @@ function App() {
             <Route path="/dashboard/client/paymenthistory" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
             <Route path="/dashboard/client/uploaddocuments" element={<ProtectedRoute><UploadDocuments /></ProtectedRoute>} />
             <Route path="/dashboard/client/clientsetting" element={<ProtectedRoute><Clientsetting /></ProtectedRoute>} />
+
+            <Route  path="/dashboard/advocate"  element={<ProtectedRoute><AdvocateDashboard /></ProtectedRoute>}>
+            <Route path="cases" element={<AdvocateCases />} /></Route>
+            <Route path="/dashboard/advocate/addcase" element={<AddCase />} />
+            <Route path="/dashboard/advocate/hearings" element={<ScheduleHearing />}/>
 
 
           </Routes>

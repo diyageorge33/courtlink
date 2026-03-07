@@ -20,16 +20,16 @@ function AdvocateSidebar() {
           Add Case
         </li>
 
-        <li onClick={() => navigate("/dashboard/advocate/schedule")}>
-          Schedule Hearing
-        </li>
-
         <li onClick={() => navigate("/dashboard/advocate/uploadorder")}>
           Upload Orders
         </li>
 
         <li onClick={() => navigate("/dashboard/advocate/clients")}>
           Clients
+        </li>
+
+        <li onClick={() => navigate("/dashboard/advocate/hearings")}>
+          Schedule Hearing
         </li>
 
         <li
