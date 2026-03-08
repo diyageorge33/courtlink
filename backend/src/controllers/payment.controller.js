@@ -16,7 +16,7 @@ exports.createOrder = async (req, res) => {
       [clientId]
     );
 
-    if (existing.rows.length > 0 && existing.rows[0].consultation_paid) {
+    if (existing.rows[0]?.consultation_paid === true) {
       return res.status(400).json({ message: "Consultation already paid" });
     }
 

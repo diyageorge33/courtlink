@@ -66,10 +66,10 @@ exports.login = async (req, res) => {
     );
 
     res.json({
-  token,
-  role: user.role,
-  full_name: user.full_name
-});
+      token,
+      role: user.role,
+      full_name: user.full_name
+    });
 
   } catch (err) {
     console.error(err);

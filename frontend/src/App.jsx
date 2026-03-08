@@ -31,16 +31,14 @@ import Casetypepage from "./pages/Casetypepage";
 import VerifyOtp from "./pages/VerifyOtp";
 import Bookappointment from "./pages/Bookappointment";
 import Clientsetting from "./pages/client/Clientsetting";
-import Paymentshistory from "./pages/Paymentshistory";
 import Document from "./pages/Document";
 import Mycase from "./pages/Mycase";
-import PaymentTest from "./pages/PaymentTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FileCase from "./pages/FileCase";
 import UploadDocuments from "./pages/UploadDocuments";
 import PaymentHistory from "./pages/client/PaymentHistory"; 
 import CaseTypeGuide from "./pages/client/CaseTypeGuide";
-
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 
 function App() {
@@ -90,13 +88,12 @@ function App() {
             <Route path="/dashboard/client/document" element={<ProtectedRoute><Document /></ProtectedRoute>} />
             <Route path="/mycase" element={<ProtectedRoute><Mycase /></ProtectedRoute>} />
             <Route path="/dashboard/client/case-type-guide" element={<CaseTypeGuide />} />
-            <Route path="/payment-test" element={<ProtectedRoute><PaymentTest /></ProtectedRoute>} />
             <Route path="/dashboard/client/filecase" element={<ProtectedRoute><FileCase /></ProtectedRoute>} />
             <Route path="/dashboard/client/paymenthistory" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
             <Route path="/dashboard/client/uploaddocuments" element={<ProtectedRoute><UploadDocuments /></ProtectedRoute>} />
             <Route path="/dashboard/client/clientsetting" element={<ProtectedRoute><Clientsetting /></ProtectedRoute>} />
             <Route path="/case-type-page" element={<Casetypepage />} />
-
+            <Route path="/dashboard/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
           </Routes>
         </div>

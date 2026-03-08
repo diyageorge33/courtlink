@@ -665,3 +665,97 @@ nav.navbar{
 .separator{
   color:white;
 }
+
+/* PAYMENT HISTORY CARD */
+
+.payment-card-new{
+  background:#052664;   /* light grey like previous UI */
+  padding:22px;
+  border-radius:18px;
+  width:420px;
+  margin-top:25px;
+  margin-left:0;
+}
+
+.payment-header-new{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:12px;
+}
+
+.payment-status-new{
+  background:#10b981;
+  color:white;
+  padding:4px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.payment-id-new{
+  color:#64748b;
+  word-break:break-all;
+  margin-bottom:10px;
+}
+
+/* PREMIUM BADGE */
+
+.welcome-header-new{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* PREMIUM BADGE */
+
+.premium-badge-new{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background:linear-gradient(135deg,#a5f3fc,#38bdf8);
+  color:#0f172a;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+}
+
+/* DIAMOND ICON */
+
+.diamond-icon{
+  animation: diamondShine 2s infinite;
+}
+
+/* SHINE ANIMATION */
+
+@keyframes diamondShine{
+
+  0%{
+    transform:scale(1);
+    filter:brightness(1);
+  }
+
+  50%{
+    transform:scale(1.15);
+    filter:brightness(1.6);
+  }
+
+  100%{
+    transform:scale(1);
+    filter:brightness(1);
+  }
+
+}
+
+.case-description-card{
+  margin-top:20px;
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  border:1px solid #334155;
+}
+
+.case-description-card p{
+  color:#cbd5e1;
+  line-height:1.6;
+}
