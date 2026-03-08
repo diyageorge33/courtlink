@@ -32,7 +32,7 @@ exports.login = async (req, res) => {
 
     // Fetch user by email
     const result = await pool.query(
-      "SELECT user_id, full_name, role, password_hash, is_verified FROM users WHERE email = $1",
+      "SELECT user_id, full_name, role, password_hash, is_verified FROM users WHERE email = $1 AND is_active = true",
       [email]
     );
 

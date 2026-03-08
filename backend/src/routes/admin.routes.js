@@ -10,7 +10,13 @@ const {
   assignAdvocate,
   reassignAdvocate,
     getClientCases,
-    suggestAdvocates
+    suggestAdvocates,
+    getClosedCases,
+    closeCase,
+    getAdminStats,
+    reopenCase,
+    deleteAdvocate,
+    restoreAdvocate
 } = require("../controllers/admin.controller");
 
 router.get("/clients", verifyToken, getClients);
@@ -18,8 +24,16 @@ router.get("/advocates", verifyToken, getAdvocates);
 router.get("/cases", verifyToken, getCases);
 router.get("/client-cases/:clientId", verifyToken, getClientCases);
 router.get("/suggest-advocates/:caseId", verifyToken, suggestAdvocates);
+router.get("/closed-cases", verifyToken, getClosedCases);
+router.get("/stats", verifyToken, getAdminStats);
 
 router.post("/assign", verifyToken, assignAdvocate);
 router.post("/reassign", verifyToken, reassignAdvocate);
+
+router.put("/close-case/:caseId", verifyToken, closeCase);
+router.put("/reopen-case/:caseId", verifyToken, reopenCase);
+router.put("/restore-advocate/:advocateId", verifyToken, restoreAdvocate);
+
+router.delete("/delete-advocate/:advocateId", verifyToken, deleteAdvocate);
 
 module.exports = router;
