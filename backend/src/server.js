@@ -10,6 +10,7 @@ const aiRoutes = require("./routes/ai.routes");
 const clientRoutes = require("./routes/clientRoutes");
 
 const advocateRoutes = require("./routes/advocate.routes");
+const orderRoutes = require("./routes/order.routes");
 
 
 app.use(
@@ -28,6 +29,7 @@ app.use("/api/ai", aiRoutes);
 app.use("/uploads", express.static("src/uploads"));
 
 app.use("/api/advocate", advocateRoutes);
+app.use("/api/orders", orderRoutes);
 
 
 app.get("/", (req, res) => {

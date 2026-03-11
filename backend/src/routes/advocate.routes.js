@@ -1,10 +1,12 @@
+const { verifyToken } = require("../middleware/authMiddleware");
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
 // GET Advocate Dashboard Stats
-router.get("/dashboard/:id", async (req, res) => {
-  const advocateId = req.params.id;
+router.get("/dashboard/:id", verifyToken, async (req,res)=>{
+
+  const advocateId = req.user.user_id;
 
   try {
     const totalCases = await pool.query(
@@ -41,8 +43,8 @@ router.get("/dashboard/:id", async (req, res) => {
 });
 
 // GET All Cases for Advocate
-router.get("/cases/:id", async (req, res) => {
-  const advocateId = req.params.id;
+router.get("/cases/:id", verifyToken, async (req,res)=>{
+  const advocateId = req.user.user_id;
 
   try {
     const result = await pool.query(
@@ -57,51 +59,35 @@ router.get("/cases/:id", async (req, res) => {
   }
 });
 
-router.get("/dashboard/:id", async (req, res) => {
-
-  const advocateId = req.params.id;
-
+router.get("/clients", verifyToken, async (req, res) => {
   try {
+    const advocateId = req.user.user_id;
 
-    const totalCases = await pool.query(
-      "SELECT COUNT(*) FROM cases WHERE advocate_id = $1",
+    console.log("CLIENT ROUTE HIT. Advocate ID:", advocateId);
+
+    const result = await pool.query(
+      `
+      SELECT DISTINCT u.user_id, u.full_name, u.email
+      FROM users u
+      JOIN cases c ON u.user_id = c.client_id
+      WHERE c.advocate_id = $1
+      `,
       [advocateId]
     );
 
-    const ongoingCases = await pool.query(
-      "SELECT COUNT(*) FROM cases WHERE advocate_id = $1 AND status = 'ONGOING'",
-      [advocateId]
-    );
+    console.log("CLIENT QUERY RESULT:", result.rows);
 
-    const weeklyCases = await pool.query(
-      `SELECT COUNT(*) FROM cases
-       WHERE advocate_id = $1
-       AND created_at >= NOW() - INTERVAL '7 days'`,
-      [advocateId]
-    );
-
-    const clients = await pool.query(
-      "SELECT COUNT(DISTINCT client_id) FROM cases WHERE advocate_id = $1",
-      [advocateId]
-    );
-
-    res.json({
-      totalCases: totalCases.rows[0].count,
-      ongoingCases: ongoingCases.rows[0].count,
-      weeklyCases: weeklyCases.rows[0].count,
-      clients: clients.rows[0].count
-    });
+    res.json(result.rows);
 
   } catch (err) {
 
-    console.error(err);
+    console.error("CLIENT FETCH ERROR:", err);
+
     res.status(500).json({ error: "Server error" });
-
   }
-
 });
 
-router.post("/add-case", async (req, res) => {
+router.post("/add-case", verifyToken, async (req,res)=>{
   const {
     client_id,
     advocate_id,
@@ -126,7 +112,7 @@ router.post("/add-case", async (req, res) => {
   }
 });
 
-router.delete("/delete-case/:id", async (req, res) => {
+router.delete("/delete-case/:id", verifyToken, async (req,res)=>{
   const caseId = req.params.id;
 
   try {
@@ -143,7 +129,7 @@ router.delete("/delete-case/:id", async (req, res) => {
   }
 });
 
-router.put("/schedule-hearing/:id", async (req, res) => {
+router.put("/schedule-hearing/:id", verifyToken, async (req,res)=>{
   const caseId = req.params.id;
   const { hearing_date } = req.body;
 
@@ -161,3 +147,11 @@ router.put("/schedule-hearing/:id", async (req, res) => {
 });
 
 module.exports = router;
+
+
+
+
+
+
+
+

@@ -45,7 +45,8 @@ import CaseTypeGuide from "./pages/client/CaseTypeGuide";
 import AddCase from "./pages/advocate/AddCase";
 import AdvocateCases from "./pages/advocate/AdvocateCases";
 import ScheduleHearing from "./pages/advocate/ScheduleHearing";
-
+import UploadOrder from "./pages/advocate/UploadOrder";
+import Clients from "./pages/advocate/Clients";
 
 function App() {
   return (
@@ -114,6 +115,8 @@ function App() {
             <Route path="cases" element={<AdvocateCases />} /></Route>
             <Route path="/dashboard/advocate/addcase" element={<AddCase />} />
             <Route path="/dashboard/advocate/hearings" element={<ScheduleHearing />}/>
+            <Route path="/dashboard/advocate/uploadorder" element={<UploadOrder />} />
+            <Route path="/dashboard/advocate/clients" element={<Clients />} />
 
 
           </Routes>
