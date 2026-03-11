@@ -7,6 +7,7 @@ const {
   getClients,
   getAdvocates,
   getCases,
+  rejectCase,
   assignAdvocate,
   reassignAdvocate,
     getClientCases,
@@ -31,6 +32,7 @@ router.post("/assign", verifyToken, assignAdvocate);
 router.post("/reassign", verifyToken, reassignAdvocate);
 
 router.put("/close-case/:caseId", verifyToken, closeCase);
+router.put("/reject-case/:caseId", verifyToken, rejectCase);
 router.put("/reopen-case/:caseId", verifyToken, reopenCase);
 router.put("/restore-advocate/:advocateId", verifyToken, restoreAdvocate);
 

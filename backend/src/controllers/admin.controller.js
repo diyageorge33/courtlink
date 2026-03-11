@@ -255,6 +255,30 @@ exports.closeCase = async (req, res) => {
 
 };
 
+exports.rejectCase = async (req, res) => {
+
+  const { caseId } = req.params;
+
+  try {
+
+    await pool.query(
+      `UPDATE cases
+       SET status='REJECTED'
+       WHERE case_id=$1`,
+      [caseId]
+    );
+
+    res.json({ message: "Case rejected successfully" });
+
+  } catch (err) {
+
+    console.error(err);
+    res.status(500).json({ message: "Error rejecting case" });
+
+  }
+
+};
+
 exports.getAdminStats = async (req, res) => {
   try {
 

@@ -15,24 +15,28 @@ exports.login = async (req, res) => {
 
   try {
     //  Verify reCAPTCHA
-    const captchaResponse = await axios.post(
-      "https://www.google.com/recaptcha/api/siteverify",
-      null,
-      {
-        params: {
-          secret: process.env.RECAPTCHA_SECRET,
-          response: captchaToken,
-        },
-      }
-    );
-
-    if (!captchaResponse.data.success) {
-      return res.status(403).json({ message: "Captcha verification failed" });
+    const captchaVerify = await axios.post(
+  "https://www.google.com/recaptcha/api/siteverify",
+  new URLSearchParams({
+    secret: process.env.RECAPTCHA_SECRET,
+    response: captchaToken
+  }),
+  {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
     }
+  }
+);
+
+console.log("Captcha response:", captchaVerify.data);
+
+if (!captchaVerify.data.success) {
+  return res.status(403).json({ message: "Captcha verification failed" });
+}
 
     // Fetch user by email
     const result = await pool.query(
-      "SELECT user_id, full_name, role, password_hash, is_verified FROM users WHERE email = $1 AND is_active = true",
+      "SELECT user_id, full_name, role, password_hash, is_verified FROM users WHERE email = $1",
       [email]
     );
 

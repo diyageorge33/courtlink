@@ -4,254 +4,211 @@ import { toast } from "react-toastify";
 
 function AdminDashboard() {
 
-  const [view,setView] = useState("dashboard");
+const [view,setView] = useState("dashboard");
 
-  const [clients,setClients] = useState([]);
-  const [advocates,setAdvocates] = useState([]);
-  const [cases,setCases] = useState([]);
+const [clients,setClients] = useState([]);
+const [advocates,setAdvocates] = useState([]);
+const [cases,setCases] = useState([]);
 
-  const [clientCases,setClientCases] = useState([]);
-  const [selectedClient,setSelectedClient] = useState(null);
-  const [selectedCase,setSelectedCase] = useState(null);
-  const [suggestedAdvocates,setSuggestedAdvocates] = useState([]);
-  const [closedCases,setClosedCases] = useState([]);
-  const [stats,setStats] = useState({
-    totalCases:0,
-    activeCases:0,
-    closedCases:0,
-    totalAdvocates:0
+const [statusFilter,setStatusFilter] = useState("ALL");
+const [caseSearch,setCaseSearch] = useState("");
+
+const [clientCases,setClientCases] = useState([]);
+const [selectedCase,setSelectedCase] = useState(null);
+const [suggestedAdvocates,setSuggestedAdvocates] = useState([]);
+
+const [closedCases,setClosedCases] = useState([]);
+
+const [stats,setStats] = useState({
+totalCases:0,
+activeCases:0,
+closedCases:0,
+totalAdvocates:0
 });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalClients, setTotalClients] = useState(0);
 
-  const token = localStorage.getItem("token");
+const [currentPage,setCurrentPage] = useState(1);
+const [totalClients,setTotalClients] = useState(0);
 
-  const fetchClients = async(page = 1) => {
+const token = localStorage.getItem("token");
 
-    const res = await fetch(
-        `http://localhost:5000/api/admin/clients?page=${page}`,
-        {
-        headers: { Authorization: `Bearer ${token}` }
-        }
-    );
+/* FETCH CLIENTS */
 
-    const data = await res.json();
+const fetchClients = async(page=1)=>{
 
-    setClients(data.clients);
-    setTotalClients(data.total);
-    setCurrentPage(page);
+const res = await fetch(
+`http://localhost:5000/api/admin/clients?page=${page}`,
+{headers:{Authorization:`Bearer ${token}`}}
+);
+
+const data = await res.json();
+
+setClients(data.clients);
+setTotalClients(data.total);
+setCurrentPage(page);
 
 };
 
-  /* FETCH DATA */
+/* INITIAL DATA */
 
-  useEffect(()=>{
+useEffect(()=>{
 
-    fetchClients();
+fetchClients();
 
-    fetch("http://localhost:5000/api/admin/advocates",{
-      headers:{ Authorization:`Bearer ${token}` }
-    })
-    .then(res=>res.json())
-    .then(data=>setAdvocates(data));
+fetch("http://localhost:5000/api/admin/advocates",{headers:{Authorization:`Bearer ${token}`}})
+.then(res=>res.json())
+.then(data=>setAdvocates(data));
 
-    fetch("http://localhost:5000/api/admin/cases",{
-      headers:{ Authorization:`Bearer ${token}` }
-    })
-    .then(res=>res.json())
-    .then(data=>setCases(data));
+fetch("http://localhost:5000/api/admin/cases",{headers:{Authorization:`Bearer ${token}`}})
+.then(res=>res.json())
+.then(data=>setCases(data));
 
-    fetch("http://localhost:5000/api/admin/closed-cases",{
-      headers:{ Authorization:`Bearer ${token}` }
-    })
-    .then(res=>res.json())
-    .then(data=>setClosedCases(data));
+fetch("http://localhost:5000/api/admin/closed-cases",{headers:{Authorization:`Bearer ${token}`}})
+.then(res=>res.json())
+.then(data=>setClosedCases(data));
 
-    fetch("http://localhost:5000/api/admin/stats",{
-      headers:{ Authorization:`Bearer ${token}` }
-    })
-    .then(res=>res.json())
-    .then(data=>setStats(data));
+fetch("http://localhost:5000/api/admin/stats",{headers:{Authorization:`Bearer ${token}`}})
+.then(res=>res.json())
+.then(data=>setStats(data));
 
-  },[]);
+},[]);
 
 
-  /* FETCH CLIENT CASES */
+/* CLIENT CASES */
 
-  const fetchClientCases = async(clientId)=>{
+const fetchClientCases = async(clientId)=>{
 
-    const res = await fetch(
-      `http://localhost:5000/api/admin/client-cases/${clientId}`,
-      {
-        headers:{ Authorization:`Bearer ${token}` }
-      }
-    );
+const res = await fetch(
+`http://localhost:5000/api/admin/client-cases/${clientId}`,
+{headers:{Authorization:`Bearer ${token}`}}
+);
 
-    const data = await res.json();
+const data = await res.json();
 
-    setClientCases(data);
-    setSelectedClient(clientId);
-    setView("clientCases");
+setClientCases(data);
+setView("clientCases");
 
-  };
+};
 
 
-  /* ASSIGN ADVOCATE */
+/* ASSIGN ADVOCATE */
 
-  const assignAdvocate = async(caseId,advocateId)=>{
+const assignAdvocate = async(caseId,advocateId)=>{
 
-    await fetch("http://localhost:5000/api/admin/assign",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        Authorization:`Bearer ${token}`
-      },
-      body:JSON.stringify({caseId,advocateId})
-    });
+if(!advocateId) return;
 
-    toast.success("Advocate Assigned");
+await fetch("http://localhost:5000/api/admin/assign",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+},
+body:JSON.stringify({caseId,advocateId})
+});
 
-  };
+toast.success("Advocate Assigned");
 
-    const openCaseDetails = async(caseData)=>{
-
-        setSelectedCase(caseData);
-        const res = await fetch(
-            `http://localhost:5000/api/admin/suggest-advocates/${caseData.case_id}`,
-            {
-            headers:{ Authorization:`Bearer ${token}` }
-            }
-        );
-        const data = await res.json();
-
-        setSuggestedAdvocates(data);
-        setView("caseDetails");
-    };
-
-    const closeCase = async (caseId) => {
-
-        await fetch(
-                `http://localhost:5000/api/admin/close-case/${caseId}`,
-                {
-                method:"PUT",
-                headers:{
-                    Authorization:`Bearer ${token}`
-                }
-                }
-        );
-
-        toast.success("Case closed successfully");
-
-        window.location.reload();
-
-    };
-
-    const reopenCase = async (caseId) => {
-
-        await fetch(
-            `http://localhost:5000/api/admin/reopen-case/${caseId}`,
-            {
-            method:"PUT",
-            headers:{
-                Authorization:`Bearer ${token}`
-            }
-            }
-        );
-
-        toast.success("Case reopened successfully");
-
-        window.location.reload();
-
-    };
-
-    const deleteAdvocate = async (advocateId) => {
-
-        const res = await fetch(
-            `http://localhost:5000/api/admin/delete-advocate/${advocateId}`,
-            {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-            }
-        );
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            toast.error(data.message);
-            return;
-        }
-
-        toast.success("Advocate deactivated successfully");
-
-        /* REFRESH ADVOCATE LIST */
-
-        const updated = await fetch(
-            "http://localhost:5000/api/admin/advocates",
-            {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-            }
-        );
-
-        const advocatesData = await updated.json();
-
-        setAdvocates(advocatesData);
-
-    };
-
-   const restoreAdvocate = async (advocateId) => {
-
-        const res = await fetch(
-            `http://localhost:5000/api/admin/restore-advocate/${advocateId}`,
-            {
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-            }
-        );
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            toast.error(data.message);
-            return;
-        }
-
-        toast.success("Advocate restored successfully");
-
-        const updated = await fetch(
-            "http://localhost:5000/api/admin/advocates",
-            {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-            }
-        );
-
-        const advocatesData = await updated.json();
-
-        setAdvocates(advocatesData);
-
-    };
-
-  return(
-
-  <div className="client-dashboard-new">
-
-  <h1>Admin Dashboard</h1>
+};
 
 
-  {/* DASHBOARD CARDS */}
+/* CLOSE CASE */
 
-  {view === "dashboard" && (
+const closeCase = async(caseId)=>{
+
+await fetch(
+`http://localhost:5000/api/admin/close-case/${caseId}`,
+{method:"PUT",headers:{Authorization:`Bearer ${token}`}}
+);
+
+toast.success("Case closed successfully");
+window.location.reload();
+
+};
+
+/* REOPEN CASE */
+
+const reopenCase = async(caseId)=>{
+
+await fetch(
+`http://localhost:5000/api/admin/reopen-case/${caseId}`,
+{method:"PUT",headers:{Authorization:`Bearer ${token}`}}
+);
+
+toast.success("Case reopened successfully");
+window.location.reload();
+
+};
+
+
+/* DELETE ADVOCATE */
+
+const deleteAdvocate = async(advocateId)=>{
+
+const res = await fetch(
+`http://localhost:5000/api/admin/delete-advocate/${advocateId}`,
+{method:"DELETE",headers:{Authorization:`Bearer ${token}`}}
+);
+
+const data = await res.json();
+
+if(!res.ok){
+toast.error(data.message);
+return;
+}
+
+toast.success("Advocate deactivated successfully");
+
+const updated = await fetch(
+"http://localhost:5000/api/admin/advocates",
+{headers:{Authorization:`Bearer ${token}`}}
+);
+
+const advocatesData = await updated.json();
+setAdvocates(advocatesData);
+
+};
+
+
+/* RESTORE ADVOCATE */
+
+const restoreAdvocate = async(advocateId)=>{
+
+const res = await fetch(
+`http://localhost:5000/api/admin/restore-advocate/${advocateId}`,
+{method:"PUT",headers:{Authorization:`Bearer ${token}`}}
+);
+
+const data = await res.json();
+
+if(!res.ok){
+toast.error(data.message);
+return;
+}
+
+toast.success("Advocate restored successfully");
+
+const updated = await fetch(
+"http://localhost:5000/api/admin/advocates",
+{headers:{Authorization:`Bearer ${token}`}}
+);
+
+const advocatesData = await updated.json();
+setAdvocates(advocatesData);
+
+};
+
+
+return(
+
+<div className="client-dashboard-new">
+
+<h1>Admin Dashboard</h1>
+
+
+{/* DASHBOARD */}
+
+{view==="dashboard" &&(
 
 <div>
-
-{/* ADMIN ANALYTICS STATS */}
 
 <div className="stats-grid-new">
 
@@ -277,39 +234,24 @@ function AdminDashboard() {
 
 </div>
 
-
-{/* DASHBOARD ACTION CARDS */}
-
 <div className="actions-grid-new">
 
-<div
-className="action-tile-new"
-onClick={()=>setView("clients")}
->
+<div className="action-tile-new" onClick={()=>setView("clients")}>
 <h3>Clients</h3>
 <p>View registered clients</p>
 </div>
 
-<div
-className="action-tile-new"
-onClick={()=>setView("advocates")}
->
+<div className="action-tile-new" onClick={()=>setView("advocates")}>
 <h3>Advocates</h3>
-<p>View advocates in firm</p>
+<p>View advocates</p>
 </div>
 
-<div
-className="action-tile-new"
-onClick={()=>setView("cases")}
->
+<div className="action-tile-new" onClick={()=>setView("cases")}>
 <h3>Case Assignment</h3>
-<p>Assign advocate to cases</p>
+<p>Assign advocates</p>
 </div>
 
-<div
-className="action-tile-new"
-onClick={()=>setView("closedCases")}
->
+<div className="action-tile-new" onClick={()=>setView("closedCases")}>
 <h3>Closed Cases</h3>
 <p>View completed cases</p>
 </div>
@@ -321,513 +263,286 @@ onClick={()=>setView("closedCases")}
 )}
 
 
-  {/* CLIENT LIST */}
+{/* CLIENT LIST */}
 
-  {view === "clients" && (
-
-  <div>
-
-  <button
-  className="dashboard-btn-new"
-  onClick={()=>setView("dashboard")}
-  >
-  ← Back
-  </button>
-
-  <h2>Clients</h2>
-
-  <table className="cases-table-new">
-
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-    </tr>
-  </thead>
-
-  <tbody>
-
-  {clients.map(c=>(
-
-    <tr key={c.user_id}>
-
-      <td
-        style={{cursor:"pointer",color:"#3b82f6"}}
-        onClick={()=>fetchClientCases(c.user_id)}
-      >
-        {c.full_name}
-      </td>
-
-      <td>{c.email}</td>
-
-    </tr>
-
-  ))}
-
-  </tbody>
-
-  </table>
-
-  <div style={{marginTop:"20px"}}>
-
-<button
-className="dashboard-btn-new"
-disabled={currentPage === 1}
-onClick={()=>fetchClients(currentPage - 1)}
->
-Previous
-</button>
-
-<span style={{margin:"0 15px"}}>
-Page {currentPage}
-</span>
-
-<button
-className="dashboard-btn-new"
-disabled={currentPage * 10 >= totalClients}
-onClick={()=>fetchClients(currentPage + 1)}
->
-Next
-</button>
-
-</div>
-
-  </div>
-
-  )}
-
-
-  {/* CLIENT CASES */}
-
-  {view === "clientCases" && (
-
-  <div>
-
-  <button
-  className="dashboard-btn-new"
-  onClick={()=>setView("clients")}
-  >
-  ← Back
-  </button>
-
-  <h2>Client Cases</h2>
-
-  <table className="cases-table-new">
-
-  <thead>
-
-  <tr>
-    <th>Case Title</th>
-    <th>Type</th>
-    <th>Status</th>
-    <th>Advocate</th>
-  </tr>
-
-  </thead>
-
-  <tbody>
-
-  {clientCases.map(c=>(
-    <tr key={c.case_id}>
-
-      <td
-      style={{cursor:"pointer",color:"#3b82f6"}}
-      onClick={()=>openCaseDetails(c)}
-      >
-        {c.case_title}
-      </td>
-      <td>{c.case_type}</td>
-      <td>{c.status}</td>
-
-      <td>
-        {c.advocate_name
-          ? c.advocate_name
-          : "Advocate not assigned"}
-      </td>
-
-    </tr>
-  ))}
-
-  </tbody>
-
-  </table>
-
-  </div>
-
-  )}
-
-
-  {/* ADVOCATES */}
-
-  {view === "advocates" && (
-
-  <div>
-
-  <button
-  className="dashboard-btn-new"
-  onClick={()=>setView("dashboard")}
-  >
-  ← Back
-  </button>
-
-  <h2>Advocates</h2>
-
-  <table className="cases-table-new">
-
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Specialization</th>
-      <th>Experience</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-
-  <tbody>
-
-  {advocates.map(a => (
-
-        <tr key={a.user_id}>
-
-        <td>{a.full_name}</td>
-
-        <td>{a.specialization}</td>
-
-        <td>{a.experience_years} years</td>
-
-        <td>
-        <span
-        style={{
-        background: a.is_active ? "#16a34a" : "#ef4444",
-        padding: "4px 10px",
-        borderRadius: "6px",
-        color: "white",
-        fontSize: "12px"
-        }}
-        >
-        {a.is_active ? "Active" : "Inactive"}
-        </span>
-        </td>
-
-        <td>
-
-        {a.is_active ? (
-
-        <button
-        className="delete-btn-new"
-        onClick={() => deleteAdvocate(a.user_id)}
-        >
-        Deactivate
-        </button>
-
-        ) : (
-
-        <button
-        className="dashboard-btn-new"
-        onClick={() => restoreAdvocate(a.user_id)}
-        >
-        Restore
-        </button>
-
-        )}
-
-        </td>
-
-        </tr>
-
-    ))}
-  </tbody>
-
-  </table>
-
-  </div>
-
-  )}
-
-
-  {/* CASE ASSIGNMENT */}
-
-  {view === "cases" && (
-
-  <div>
-
-  <button
-  className="dashboard-btn-new"
-  onClick={()=>setView("dashboard")}
-  >
-  ← Back
-  </button>
-
-  <h2>Case Assignment</h2>
-
-  <table className="cases-table-new">
-
-  <thead>
-
-  <tr>
-    <th>Case</th>
-    <th>Client</th>
-    <th>Status</th>
-    <th>Assign Advocate</th>
-    <th>Close Case</th>
-  </tr>
-
-  </thead>
-
-  <tbody>
-
-  {cases.map(c=>(
-
-    <tr key={c.case_id}>
-
-      <td>{c.case_title}</td>
-      <td>{c.client_name}</td>
-      <td>{c.status}</td>
-
-      <td>
-
-        <select
-        onChange={(e)=>assignAdvocate(c.case_id,e.target.value)}
-        >
-
-        <option>Select Advocate</option>
-
-        {advocates.map(a=>(
-
-          <option
-          key={a.user_id}
-          value={a.user_id}
-          >
-          {a.full_name} ({a.specialization})
-          </option>
-
-        ))}
-
-        </select>
-
-      </td>
-
-     <td>
-
-        {c.status === "CLOSED" ? (
-
-            <button
-            className="dashboard-btn-new"
-            onClick={()=>reopenCase(c.case_id)}
-            >
-
-            Reopen Case
-
-            </button>
-
-            ) : (
-
-            <button
-            className="dashboard-btn-new"
-            onClick={()=>closeCase(c.case_id)}
-            >
-
-            Close Case
-
-            </button>
-
-        )}
-
-    </td>
-
-    </tr>
-
-  ))}
-
-  </tbody>
-
-  </table>
-
-  </div>
-
-  )}
-
-
-
-{/* CASE DETAILS */}
-
-{view === "caseDetails" && selectedCase && (
+{view==="clients" &&(
 
 <div>
 
-<button
-className="dashboard-btn-new"
-onClick={()=>setView("clientCases")}
+<button className="dashboard-btn-new" onClick={()=>setView("dashboard")}>← Back</button>
+
+<h2>Clients</h2>
+
+<table className="cases-table-new">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Email</th>
+</tr>
+</thead>
+
+<tbody>
+
+{clients.map(c=>(
+
+<tr key={c.user_id}>
+
+<td
+style={{cursor:"pointer",color:"#3b82f6"}}
+onClick={()=>fetchClientCases(c.user_id)}
 >
-← Back
-</button>
+{c.full_name}
+</td>
 
-<h2>Case Details</h2>
+<td>{c.email}</td>
 
-<div className="case-description-card">
+</tr>
 
-<h3>{selectedCase.case_title}</h3>
+))}
 
-<p><strong>Type:</strong> {selectedCase.case_type}</p>
+</tbody>
 
-<p><strong>Status:</strong> {selectedCase.status}</p>
+</table>
 
-<p>
-<strong>Previous Advocate:</strong>{" "}
-{selectedCase.previous_advocate
-  ? selectedCase.previous_advocate
-  : "None"}
-</p>
+</div>
 
-<p>
-<strong>Assigned Advocate:</strong>{" "}
-{selectedCase.advocate_name
-  ? selectedCase.advocate_name
-  : "Advocate not assigned"}
-</p>
+)}
 
-<hr/>
 
-<p><strong>Description:</strong></p>
+{/* ADVOCATES */}
 
-<p>{selectedCase.case_description}</p>
+{view==="advocates" &&(
 
-<hr/>
+<div>
 
-<h3>Assign / Reassign Advocate</h3>
+<button className="dashboard-btn-new" onClick={()=>setView("dashboard")}>← Back</button>
 
-<select
-onChange={(e)=>assignAdvocate(selectedCase.case_id,e.target.value)}
->
+<h2>Advocates</h2>
 
-<option>Select Advocate</option>
+<table className="cases-table-new">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Specialization</th>
+<th>Experience</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
 
 {advocates.map(a=>(
 
+<tr key={a.user_id}>
+
+<td>{a.full_name}</td>
+<td>{a.specialization}</td>
+<td>{a.experience_years} years</td>
+
+<td>{a.is_active ? "Active" : "Inactive"}</td>
+
+<td>
+
+{a.is_active ?
+
+<button className="delete-btn-new" onClick={()=>deleteAdvocate(a.user_id)}>
+Deactivate
+</button>
+
+:
+
+<button className="dashboard-btn-new" onClick={()=>restoreAdvocate(a.user_id)}>
+Restore
+</button>
+
+}
+
+</td>
+
+</tr>
+
+))}
+
+</tbody>
+
+</table>
+
+</div>
+
+)}
+
+
+{/* CASE ASSIGNMENT */}
+
+{view==="cases" &&(
+
+<div>
+
+<button className="dashboard-btn-new" onClick={()=>setView("dashboard")}>← Back</button>
+
+<h2>Case Assignment</h2>
+
+<input
+type="text"
+placeholder="Search cases..."
+value={caseSearch}
+onChange={(e)=>setCaseSearch(e.target.value)}
+style={{padding:"8px",width:"250px",marginBottom:"15px"}}
+/>
+
+<select
+value={statusFilter}
+onChange={(e)=>setStatusFilter(e.target.value)}
+>
+
+<option value="ALL">All Cases</option>
+<option value="PENDING">Pending</option>
+<option value="ONGOING">Ongoing</option>
+<option value="CLOSED">Closed</option>
+<option value="REJECTED">Rejected</option>
+
+</select>
+
+<table className="cases-table-new">
+
+<thead>
+
+<tr>
+<th>Case</th>
+<th>Client</th>
+<th>Status</th>
+<th>Assign Advocate</th>
+<th>Close Case</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{cases
+.filter(c =>
+(statusFilter==="ALL" || c.status===statusFilter) &&
+c.case_title.toLowerCase().includes(caseSearch.toLowerCase())
+)
+.map(c=>(
+
+<tr key={c.case_id}>
+
+<td>{c.case_title}</td>
+<td>{c.client_name}</td>
+<td>{c.status}</td>
+
+<td>
+
+{c.status==="REJECTED" || c.status==="CLOSED" ?
+
+<span>Not Allowed</span>
+
+:
+
+<select onChange={(e)=>assignAdvocate(c.case_id,e.target.value)}>
+
+<option>Select Advocate</option>
+
+{advocates
+.filter(a=>a.is_active)
+.map(a=>(
+
 <option key={a.user_id} value={a.user_id}>
-
 {a.full_name} ({a.specialization})
-
 </option>
 
 ))}
 
 </select>
 
-<hr/>
+}
 
-<h3>AI Suggested Advocates</h3>
+</td>
 
-{suggestedAdvocates.length === 0 && (
-<p>No recommended advocates for this case.</p>
-)}
+<td>
 
-{suggestedAdvocates.map(a=>(
+{c.status==="CLOSED" ?
 
-<div
-key={a.advocate_id}
-style={{
-marginBottom:"12px",
-padding:"10px",
-border:"1px solid #334155",
-borderRadius:"8px"
-}}
->
-
-<p>
-
-<strong>{a.full_name}</strong>
-
-<br/>
-
-Specialization: {a.specialization}
-
-<br/>
-
-Experience: {a.experience_years} years
-
-</p>
-
-<button
-className="dashboard-btn-new"
-onClick={()=>assignAdvocate(selectedCase.case_id,a.advocate_id)}
->
-Assign Advocate
+<button onClick={()=>reopenCase(c.case_id)}>
+Reopen
 </button>
 
-</div>
+:
+
+<button onClick={()=>closeCase(c.case_id)}>
+Close
+</button>
+
+}
+
+</td>
+
+</tr>
 
 ))}
 
-</div>
+</tbody>
+
+</table>
 
 </div>
 
 )}
 
-    {/* CLOSED CASES */}
 
-{view === "closedCases" && (
+{/* CLOSED CASES */}
 
-    <div>
+{view==="closedCases" &&(
 
-    <button
-    className="dashboard-btn-new"
-    onClick={()=>setView("dashboard")}
-    >
-    ← Back
-    </button>
+<div>
 
-    <h2>Closed Cases</h2>
+<button className="dashboard-btn-new" onClick={()=>setView("dashboard")}>← Back</button>
 
-    <table className="cases-table-new">
+<h2>Closed Cases</h2>
 
-    <thead>
-    <tr>
-    <th>Case ID</th>
-    <th>Case Title</th>
-    <th>Type</th>
-    <th>Client</th>
-    <th>Advocate</th>
-    </tr>
-    </thead>
+<table className="cases-table-new">
 
-    <tbody>
+<thead>
+<tr>
+<th>ID</th>
+<th>Title</th>
+<th>Type</th>
+<th>Client</th>
+<th>Advocate</th>
+</tr>
+</thead>
 
-    {closedCases.map(c=>(
+<tbody>
 
-    <tr key={c.case_id}>
+{closedCases.map(c=>(
 
-    <td>{c.case_id}</td>
+<tr key={c.case_id}>
 
-    <td>{c.case_title}</td>
+<td>{c.case_id}</td>
+<td>{c.case_title}</td>
+<td>{c.case_type}</td>
+<td>{c.client_name}</td>
+<td>{c.advocate_name || "Not Assigned"}</td>
 
-    <td>{c.case_type}</td>
+</tr>
 
-    <td>{c.client_name}</td>
+))}
 
-    <td>
-    {c.advocate_name
-    ? c.advocate_name
-    : "Not Assigned"}
-    </td>
+</tbody>
 
-    </tr>
+</table>
 
-    ))}
-
-    </tbody>
-
-    </table>
-
-    </div>
+</div>
 
 )}
 
-  </div>
+</div>
 
-  );
+);
 
 }
 
