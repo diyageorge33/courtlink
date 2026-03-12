@@ -47,6 +47,7 @@ import AdvocateCases from "./pages/advocate/AdvocateCases";
 import ScheduleHearing from "./pages/advocate/ScheduleHearing";
 import UploadOrder from "./pages/advocate/UploadOrder";
 import Clients from "./pages/advocate/Clients";
+import CaseDetails from "./pages/advocate/CaseDetails";
 
 function App() {
   return (
@@ -117,6 +118,7 @@ function App() {
             <Route path="/dashboard/advocate/hearings" element={<ScheduleHearing />}/>
             <Route path="/dashboard/advocate/uploadorder" element={<UploadOrder />} />
             <Route path="/dashboard/advocate/clients" element={<Clients />} />
+            <Route path="/dashboard/advocate/case/:id" element={<CaseDetails />} />
 
 
           </Routes>

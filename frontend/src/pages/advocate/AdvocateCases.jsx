@@ -108,7 +108,10 @@ const deleteCase = async (caseId) => {
                 {new Date(c.created_at).toLocaleDateString()}
               </td>
               <td>
-                <button className="view-btn">
+                <button
+                  className="view-btn"
+                  onClick={() => navigate(`/dashboard/advocate/case/${c.case_id}`)}
+                >
                   View
                 </button>
                 <button

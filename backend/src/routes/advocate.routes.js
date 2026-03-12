@@ -87,6 +87,28 @@ router.get("/clients", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/case/:id", verifyToken, async (req, res) => {
+
+  const caseId = req.params.id;
+
+  try {
+
+    const result = await pool.query(
+      "SELECT * FROM cases WHERE case_id = $1",
+      [caseId]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+
+  }
+
+});
+
 router.post("/add-case", verifyToken, async (req,res)=>{
   const {
     client_id,
