@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../../newstyles.css";
 import { toast } from "react-toastify";
+import confetti from "canvas-confetti";
 
 function AdminDashboard() {
 
@@ -20,6 +21,8 @@ const [suggestedAdvocates,setSuggestedAdvocates] = useState([]);
 
 const [closedCases,setClosedCases] = useState([]);
 const [pendingCases,setPendingCases] = useState([]);
+const [analyticsData,setAnalyticsData] = useState(null);
+const [caseTimeline,setCaseTimeline] = useState([]);
 
 const [stats,setStats] = useState({
 totalCases:0,
@@ -76,6 +79,10 @@ fetch("http://localhost:5000/api/admin/stats",{headers:{Authorization:`Bearer ${
 fetch("http://localhost:5000/api/admin/pending-cases",{headers:{Authorization:`Bearer ${token}`}})
 .then(res=>res.json())
 .then(data=>setPendingCases(data));
+
+fetch("http://localhost:5000/api/admin/analytics",{headers:{Authorization:`Bearer ${token}`}})
+.then(res=>res.json())
+.then(data=>setAnalyticsData(data));
 
 },[]);
 
@@ -165,12 +172,19 @@ await fetch(`http://localhost:5000/api/admin/approve-case/${caseId}`,{
 method:"PUT",
 headers:{Authorization:`Bearer ${token}`}
 });
-toast.success("Case Approved");
-fetchPendingCases();
-// Update stats
-fetch("http://localhost:5000/api/admin/stats",{headers:{Authorization:`Bearer ${token}`}})
-.then(res=>res.json())
-.then(data=>setStats(data));
+  toast.success("Case Approved");
+  confetti({
+    particleCount: 150,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ['#3b82f6', '#16a34a', '#ca8a04']
+  });
+  fetchPendingCases();
+  fetchAnalytics(); // Refresh analytics
+  // Update stats
+  fetch("http://localhost:5000/api/admin/stats",{headers:{Authorization:`Bearer ${token}`}})
+  .then(res=>res.json())
+  .then(data=>setStats(data));
 };
 
 const rejectCaseReview = async(caseId)=>{
@@ -184,6 +198,22 @@ fetchPendingCases();
 fetch("http://localhost:5000/api/admin/stats",{headers:{Authorization:`Bearer ${token}`}})
 .then(res=>res.json())
 .then(data=>setStats(data));
+};
+
+
+/* ANALYTICS & TIMELINE */
+
+const fetchAnalytics = async()=>{
+const res = await fetch("http://localhost:5000/api/admin/analytics",{headers:{Authorization:`Bearer ${token}`}});
+const data = await res.json();
+setAnalyticsData(data);
+};
+
+const fetchCaseTimeline = async(caseId)=>{
+const res = await fetch(`http://localhost:5000/api/admin/case-timeline/${caseId}`,{headers:{Authorization:`Bearer ${token}`}});
+const data = await res.json();
+setCaseTimeline(data);
+setSelectedCase(caseId); // Using this to identify which case timeline is open
 };
 
 
@@ -309,6 +339,50 @@ return(
 <p>View completed cases</p>
 </div>
 
+<div className="action-tile-new" onClick={()=>setView("analytics")}>
+<h3>Analytics</h3>
+<p>Visual reports & trends</p>
+</div>
+
+</div>
+
+{/* RECENT ACTIVITY FEED */}
+
+<div style={{marginTop:"40px"}}>
+
+<h2 style={{marginBottom:"20px"}}>Recent Activity</h2>
+
+<div className="cases-table-wrapper-new" style={{marginTop:"0"}}>
+
+{analyticsData?.recentActivity?.length > 0 ? (
+
+<table className="cases-table-new">
+<thead>
+<tr>
+<th>Action</th>
+<th>Case</th>
+<th>By Admin</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+{analyticsData.recentActivity.map((act,idx)=>(
+<tr key={idx}>
+<td>{act.action}</td>
+<td>{act.case_title || "N/A"}</td>
+<td>{act.full_name}</td>
+<td>{new Date(act.created_at).toLocaleString()}</td>
+</tr>
+))}
+</tbody>
+</table>
+
+) : (
+<p style={{color:"#94a3b8"}}>No recent activity recorded.</p>
+)}
+
+</div>
+
 </div>
 
 </div>
@@ -390,6 +464,7 @@ onClick={()=>fetchClientCases(c)}
         <th>Type</th>
         <th>Status</th>
         <th>Assigned Advocate</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -399,10 +474,53 @@ onClick={()=>fetchClientCases(c)}
           <td>{c.case_type}</td>
           <td>{c.status}</td>
           <td>{c.advocate_name || "Not Assigned"}</td>
+          <td>
+            <button className="dashboard-btn-new" style={{padding:"5px 10px",fontSize:"12px"}} onClick={()=>fetchCaseTimeline(c.case_id)}>View History</button>
+          </td>
         </tr>
       ))}
     </tbody>
   </table>
+)}
+
+{/* CASE TIMELINE OVERLAY */}
+{selectedCase && caseTimeline.length > 0 && (
+  <div style={{
+    marginTop: "30px",
+    background: "rgba(255,255,255,0.03)",
+    padding: "20px",
+    borderRadius: "10px",
+    borderLeft: "4px solid #3b82f6",
+    animation: "fadeIn 0.3s ease-in"
+  }}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}}>
+      <h3 style={{margin:0}}>Case History Timeline</h3>
+      <button className="delete-btn-new" style={{padding:"5px 10px"}} onClick={()=>setSelectedCase(null)}>Close</button>
+    </div>
+    
+    <div style={{position:"relative",paddingLeft:"30px"}}>
+      <div style={{position:"absolute",left:"14px",top:0,bottom:0,width:"2px",background:"#334155"}}></div>
+      {caseTimeline.map((step,idx)=>(
+        <div key={idx} style={{position:"relative",marginBottom:"20px"}}>
+          <div style={{
+            position:"absolute",
+            left:"-21px",
+            top:"5px",
+            width:"12px",
+            height:"12px",
+            borderRadius:"50%",
+            background: idx === caseTimeline.length - 1 ? "#3b82f6" : "#64748b",
+            border: "3px solid #0f172a",
+            zIndex: 1
+          }}></div>
+          <div style={{fontSize:"14px",fontWeight:"600",color: idx === caseTimeline.length - 1 ? "#fff" : "#cbd5e1"}}>{step.action}</div>
+          <div style={{fontSize:"12px",color:"#94a3b8",marginTop:"2px"}}>
+            Done by {step.performed_by} • {new Date(step.created_at).toLocaleString()}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
 )}
 
 </div>
@@ -689,6 +807,68 @@ Close
     </tbody>
   </table>
 )}
+
+</div>
+
+)}
+
+{/* ANALYTICS VIEW */}
+
+{view==="analytics" && analyticsData && (
+
+<div>
+
+<button className="dashboard-btn-new" onClick={()=>setView("dashboard")}>← Back</button>
+
+<h2 style={{marginTop:"20px"}}>System Analytics</h2>
+
+<div className="stats-grid-new" style={{marginTop:"30px"}}>
+
+<div className="stat-card-new" style={{textAlign:"left"}}>
+  <h3>Case Status Distribution</h3>
+  <div style={{marginTop:"20px"}}>
+    {analyticsData.statusStats.map(s=>(
+      <div key={s.status} style={{marginBottom:"15px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:"14px",marginBottom:"5px"}}>
+          <span>{s.status}</span>
+          <span>{s.count} cases</span>
+        </div>
+        <div style={{height:"10px",background:"#1e293b",borderRadius:"5px",overflow:"hidden"}}>
+          <div style={{
+            height:"100%",
+            transition:"width 1s ease-in-out",
+            width:`${(parseInt(s.count)/stats.totalCases)*100}%`,
+            background: s.status==="ONGOING" ? "#3b82f6" : s.status==="PENDING" ? "#ca8a04" : s.status==="CLOSED" ? "#16a34a" : "#ef4444"
+          }}></div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<div className="stat-card-new" style={{textAlign:"left"}}>
+  <h3>Case Type Distribution</h3>
+  <div style={{marginTop:"20px"}}>
+    {analyticsData.typeStats.map(t=>(
+      <div key={t.case_type} style={{marginBottom:"15px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:"14px",marginBottom:"5px"}}>
+          <span>{t.case_type || "Other"}</span>
+          <span>{t.count} cases</span>
+        </div>
+        <div style={{height:"10px",background:"#1e293b",borderRadius:"5px",overflow:"hidden"}}>
+          <div style={{
+            height:"100%",
+            transition:"width 1s ease-in-out",
+            width:`${(parseInt(t.count)/stats.totalCases)*100}%`,
+            background: "#8b5cf6"
+          }}></div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+</div>
 
 </div>
 

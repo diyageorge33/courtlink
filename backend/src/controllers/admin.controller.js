@@ -85,11 +85,6 @@ exports.assignAdvocate = async (req, res) => {
   const { caseId, advocateId } = req.body;
   const adminId = req.user.user_id;
 
-  console.log('--- ASSIGN ADVOCATE DEBUG ---');
-  console.log('caseId:', caseId);
-  console.log('advocateId:', advocateId);
-  console.log('adminId:', adminId);
-
   try {
 
     /* STORE ASSIGNMENT HISTORY */
@@ -107,6 +102,13 @@ exports.assignAdvocate = async (req, res) => {
        SET advocate_id = $1
        WHERE case_id = $2`,
       [advocateId, caseId]
+    );
+
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (case_id, action, performed_by)
+       VALUES ($1, $2, $3)`,
+      [caseId, 'Advocate Assigned', adminId]
     );
 
     res.json({
@@ -252,6 +254,13 @@ exports.closeCase = async (req, res) => {
       [caseId]
     );
 
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (case_id, action, performed_by)
+       VALUES ($1, $2, $3)`,
+      [caseId, 'Case Closed', req.user.user_id]
+    );
+
     res.json({ message: "Case closed successfully" });
 
   } catch (err) {
@@ -274,6 +283,13 @@ exports.rejectCase = async (req, res) => {
        SET status='REJECTED'
        WHERE case_id=$1`,
       [caseId]
+    );
+
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (case_id, action, performed_by)
+       VALUES ($1, $2, $3)`,
+      [caseId, 'Case Rejected', req.user.user_id]
     );
 
     res.json({ message: "Case rejected successfully" });
@@ -316,6 +332,14 @@ exports.approveCase = async (req, res) => {
       `UPDATE cases SET status = 'ONGOING' WHERE case_id = $1`,
       [caseId]
     );
+
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (case_id, action, performed_by)
+       VALUES ($1, $2, $3)`,
+      [caseId, 'Case Approved', req.user.user_id]
+    );
+
     res.json({ message: "Case approved successfully" });
   } catch (err) {
     console.error(err);
@@ -464,4 +488,50 @@ exports.restoreAdvocate = async (req, res) => {
 
   }
 
+};
+
+exports.getCaseTimeline = async (req, res) => {
+  const { caseId } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT a.action, a.created_at, u.full_name AS performed_by
+       FROM audit_logs a
+       JOIN users u ON a.performed_by = u.user_id
+       WHERE a.case_id = $1
+       ORDER BY a.created_at ASC`,
+      [caseId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching timeline" });
+  }
+};
+
+exports.getAnalyticsData = async (req, res) => {
+  try {
+    const statusResult = await pool.query(
+      "SELECT status, COUNT(*) FROM cases GROUP BY status"
+    );
+    const typeResult = await pool.query(
+      "SELECT case_type, COUNT(*) FROM cases GROUP BY case_type"
+    );
+    const recentActivity = await pool.query(
+      `SELECT a.action, u.full_name, a.created_at, c.case_title
+       FROM audit_logs a
+       JOIN users u ON a.performed_by = u.user_id
+       LEFT JOIN cases c ON a.case_id = c.case_id
+       ORDER BY a.created_at DESC
+       LIMIT 5`
+    );
+
+    res.json({
+      statusStats: statusResult.rows,
+      typeStats: typeResult.rows,
+      recentActivity: recentActivity.rows
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching analytics" });
+  }
 };

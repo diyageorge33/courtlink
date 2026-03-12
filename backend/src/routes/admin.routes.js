@@ -19,7 +19,9 @@ const {
     deleteAdvocate,
     restoreAdvocate,
     approveCase,
-    getPendingCases
+    getPendingCases,
+    getAnalyticsData,
+    getCaseTimeline
 } = require("../controllers/admin.controller");
 
 router.get("/clients", verifyToken, getClients);
@@ -30,6 +32,8 @@ router.get("/suggest-advocates/:caseId", verifyToken, suggestAdvocates);
 router.get("/closed-cases", verifyToken, getClosedCases);
 router.get("/stats", verifyToken, getAdminStats);
 router.get("/pending-cases", verifyToken, getPendingCases);
+router.get("/analytics", verifyToken, getAnalyticsData);
+router.get("/case-timeline/:caseId", verifyToken, getCaseTimeline);
 
 router.post("/assign", verifyToken, assignAdvocate);
 router.post("/reassign", verifyToken, reassignAdvocate);
