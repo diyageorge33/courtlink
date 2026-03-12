@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../../components/ClientSidebar";
 
 function PaymentHistory() {
+
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const clientId = localStorage.getItem("userId");
 
-    if (!clientId) return;
+    const token = localStorage.getItem("token");
 
-    fetch(`http://localhost:5000/api/payment/history/${clientId}`)
+    fetch("http://localhost:5000/api/payment/history", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
       .then(res => res.json())
       .then(data => {
         setPayments(data);
@@ -20,50 +23,59 @@ function PaymentHistory() {
         console.error("Error fetching payments:", err);
         setLoading(false);
       });
+
   }, []);
 
   return (
-    <div className="client-layout">
-      <Sidebar />
 
-      <main className="client-content">
-        <h1>Payment History</h1>
-        <p className="dashboard-subtitle">
-          View your consultation payment details.
-        </p>
+    <div className="client-dashboard-new">
 
-        {loading ? (
-          <p>Loading payments...</p>
-        ) : payments.length === 0 ? (
-          <div className="action-card">
-            <p>No payments found.</p>
-          </div>
-        ) : (
-          <div className="payments-grid">
-            {payments.map((payment, index) => (
-              <div className="payment-card" key={index}>
-                <div className="payment-header">
-                  <span className="payment-status">
-                    {payment.consultation_paid ? "PAID" : "PENDING"}
-                  </span>
-                </div>
+      <h1 className="page-title-new">Payment History</h1>
 
-                <p><strong>Transaction ID:</strong></p>
-                <p className="payment-id">{payment.transaction_id}</p>
+      <p className="ai-tagline-new">
+        View your consultation payment details.
+      </p>
 
-                <p><strong>Amount:</strong> ₹500</p>
-                <p>
-                  <strong>Date:</strong>{" "}
-                  {payment.paid_at
-                    ? new Date(payment.paid_at).toLocaleString()
-                    : "—"}
-                </p>
+      {loading ? (
+        <p>Loading payments...</p>
+      ) : payments.length === 0 ? (
+        <p>No payments found.</p>
+      ) : (
+
+        <div style={{ marginTop: "30px" }}>
+
+          {payments.map((payment, index) => (
+
+            <div className="payment-card-new" key={index}>
+
+              <div className="payment-header-new">
+                <span className="payment-status-new">
+                  {payment.consultation_paid ? "PAID" : "PENDING"}
+                </span>
               </div>
-            ))}
-          </div>
-        )}
-      </main>
+
+              <p><strong>Transaction ID:</strong></p>
+              <p className="payment-id-new">{payment.transaction_id}</p>
+
+              <p><strong>Amount:</strong> ₹500</p>
+
+              <p>
+                <strong>Date:</strong>{" "}
+                {payment.paid_at
+                  ? new Date(payment.paid_at).toLocaleString()
+                  : "—"}
+              </p>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
+
     </div>
+
   );
 }
 

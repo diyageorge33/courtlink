@@ -12,7 +12,7 @@ const { verifyToken } = require("../middleware/authMiddleware");
 
 router.post("/create-order", verifyToken, createOrder);
 router.post("/verify-payment", verifyToken, verifyPayment);
-router.get("/consultation-status/:clientId", verifyToken, checkConsultationPayment);
-router.get("/history/:clientId", verifyToken, getPaymentHistory);
+router.get("/consultation-status", verifyToken, checkConsultationPayment);
+router.get("/history", verifyToken, getPaymentHistory);
 
 module.exports = router;

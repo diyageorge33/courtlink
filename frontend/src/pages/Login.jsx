@@ -54,7 +54,7 @@ const handleLogin = async (e) => {
     } else if (data.role === "ADVOCATE") {
       navigate("/dashboard/advocate");
     } else if (data.role === "ADMIN") {
-      navigate("/admin-dashboard");
+      navigate("/dashboard/admin");
     }
   } catch (err) {
     console.error(err);
@@ -104,7 +104,7 @@ const handleLogin = async (e) => {
           <div className="mb-3 d-flex justify-content-center">
             <ReCAPTCHA
               ref={captchaRef}
-              sitekey="6LfUiEksAAAAADag55ZIgvka96w1QzPvdJjscUb2"
+              sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
               onChange={(token) => setCaptchaToken(token)}
             />
           </div>

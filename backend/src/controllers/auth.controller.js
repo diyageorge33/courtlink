@@ -16,22 +16,20 @@ exports.login = async (req, res) => {
   }
 
   try {
-    //  Verify reCAPTCHA
-    const captchaResponse = await axios.post(
-      "https://www.google.com/recaptcha/api/siteverify",
-      null,
-      {
-        params: {
-          secret: process.env.RECAPTCHA_SECRET,
-          response: captchaToken,
-        },
-      }
-    );
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`;
+    const captchaRes = await fetch(verifyUrl, { method: "POST" });
+    const captchaVerify = {};
+    captchaVerify.data = await captchaRes.json();
 
     if (!captchaResponse.data.success) {
       console.log("Captcha failed");
       return res.status(403).json({ message: "Captcha verification failed" });
     }
+console.log("Captcha response:", captchaVerify.data);
+
+if (!captchaVerify.data.success) {
+  return res.status(403).json({ message: "Captcha verification failed" });
+}
 
     // Normalize email
     const normalizedEmail = email.trim().toLowerCase();
@@ -82,10 +80,10 @@ exports.login = async (req, res) => {
     );
 
     res.json({
-  token,
-  role: user.role,
-  full_name: user.full_name
-});
+      token,
+      role: user.role,
+      full_name: user.full_name
+    });
 
   } catch (err) {
   console.error("FULL ERROR DETAILS:", err);

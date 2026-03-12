@@ -33,16 +33,14 @@ function Services() {
         </div>
 
         <div
-            className="service-card"
-            onClick={() => navigate("/Practice")}
+  className="service-card"
+  onClick={() => navigate("/case-type-page")}
         >
-
-          <h3>Practice areas</h3>
-          <p>
-            You can see what kind of case you are into.
-          </p>
-          {/* BACKEND: GET /api/advocate/dashboard */}
-        </div>
+  <h3>Case Types</h3>
+  <p>
+    You can see what kind of case you are into.
+  </p>
+</div>
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 const pool = require("./db");
@@ -22,7 +23,7 @@ app.use(
 
 app.use(express.json());
 app.use("/api/client", clientRoutes);
-
+app.use("/api/admin", require("./routes/admin.routes"));
 app.use("/api/auth", authRoutes);
 app.use("/api/payment", require("./routes/payment.routes"));
 app.use("/api/ai", aiRoutes);

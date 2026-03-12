@@ -72,12 +72,12 @@ router.get("/cases", verifyToken, async (req, res) => {
     const clientId = req.user.user_id;
 
     const result = await pool.query(
-      `SELECT case_id, case_title, case_type, status, next_hearing_date, created_at
-       FROM cases
-       WHERE client_id = $1
-       ORDER BY created_at DESC`,
-      [clientId]
-    );
+  `SELECT case_id, case_title, case_type, case_description, status, next_hearing_date, created_at
+   FROM cases
+   WHERE client_id = $1
+   ORDER BY created_at DESC`,
+  [clientId]
+);
 
     res.json(result.rows);
   } catch (err) {
@@ -109,6 +109,13 @@ router.post("/filecase", verifyToken, async (req, res) => {
       message: "Case filed successfully",
       case: result.rows[0],
     });
+
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (case_id, action, performed_by)
+       VALUES ($1, $2, $3)`,
+      [result.rows[0].case_id, 'Case Filed', clientId]
+    );
 
   } catch (err) {
     console.error("Error filing case:", err);
@@ -164,6 +171,13 @@ router.post(
         message: "Document uploaded successfully",
         document: result.rows[0],
       });
+
+      /* LOG ACTIVITY */
+      await pool.query(
+        `INSERT INTO audit_logs (case_id, action, performed_by)
+         VALUES ($1, $2, $3)`,
+        [case_id, 'Document Uploaded: ' + req.file.originalname, clientId]
+      );
 
     } catch (err) {
       console.error("Upload document error:", err);
@@ -311,6 +325,41 @@ router.put("/settings", verifyToken, async (req, res) => {
 
   } catch (err) {
     console.error("Settings update error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+//delete documents
+router.delete("/documents/:documentId", verifyToken, async (req, res) => {
+  try {
+
+    const documentId = parseInt(req.params.documentId);
+    const clientId = req.user.user_id;
+
+    const check = await pool.query(
+      `
+      SELECT d.document_id
+      FROM documents d
+      INNER JOIN cases c ON d.case_id = c.case_id
+      WHERE d.document_id = $1 AND c.client_id = $2
+      `,
+      [documentId, clientId]
+    );
+
+    if (check.rows.length === 0) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    await pool.query(
+      `DELETE FROM documents WHERE document_id = $1`,
+      [documentId]
+    );
+
+    res.json({ message: "Document deleted successfully" });
+
+  } catch (err) {
+    console.error("Delete document error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });

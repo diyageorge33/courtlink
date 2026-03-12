@@ -16,7 +16,7 @@ exports.createOrder = async (req, res) => {
       [clientId]
     );
 
-    if (existing.rows.length > 0 && existing.rows[0].consultation_paid) {
+    if (existing.rows[0]?.consultation_paid === true) {
       return res.status(400).json({ message: "Consultation already paid" });
     }
 
@@ -86,9 +86,9 @@ const clientId = req.user.user_id; // 👈 from JWT
    CHECK CONSULTATION STATUS
 ========================= */
 exports.checkConsultationPayment = async (req, res) => {
-  const { clientId } = req.params;
-
   try {
+    const clientId = req.user.user_id;
+
     const result = await pool.query(
       `SELECT consultation_paid 
        FROM client_subscriptions 
@@ -96,14 +96,15 @@ exports.checkConsultationPayment = async (req, res) => {
       [clientId]
     );
 
-    res.json({
-      paid:
-        result.rows.length > 0 &&
-        result.rows[0].consultation_paid === true,
-    });
+    if (result.rows.length === 0) {
+      return res.json({ consultation_paid: false });
+    }
+
+    res.json({ consultation_paid: result.rows[0].consultation_paid });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error checking payment" });
+    console.error("Error checking consultation payment:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -111,24 +112,19 @@ exports.checkConsultationPayment = async (req, res) => {
    PAYMENT HISTORY
 ========================= */
 exports.getPaymentHistory = async (req, res) => {
-  const { clientId } = req.params;
-
   try {
+    const clientId = req.user.user_id;
+
     const result = await pool.query(
-      `SELECT 
-          transaction_id,
-          consultation_paid,
-          paid_at
+      `SELECT transaction_id, consultation_paid, paid_at
        FROM client_subscriptions
-       WHERE client_id = $1
-       ORDER BY paid_at DESC`,
+       WHERE client_id = $1`,
       [clientId]
     );
 
     res.json(result.rows);
-
   } catch (err) {
-    console.error("Payment history error:", err);
-    res.status(500).json({ message: "Error fetching payment history" });
+    console.error("Error fetching payment history:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
