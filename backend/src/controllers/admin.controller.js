@@ -137,6 +137,13 @@ exports.reassignAdvocate = async (req, res) => {
       [advocateId, caseId]
     );
 
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (case_id, action, performed_by)
+       VALUES ($1, $2, $3)`,
+      [caseId, 'Advocate Reassigned', req.user.user_id]
+    );
+
     res.json({ message: "Advocate reassigned successfully" });
 
   } catch (err) {
@@ -399,6 +406,13 @@ exports.reopenCase = async (req, res) => {
       [caseId]
     );
 
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (case_id, action, performed_by)
+       VALUES ($1, $2, $3)`,
+      [caseId, 'Case Reopened', req.user.user_id]
+    );
+
     res.json({ message: "Case reopened successfully" });
 
   } catch (err) {
@@ -445,6 +459,13 @@ exports.deleteAdvocate = async (req, res) => {
       [advocateId]
     );
 
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (action, performed_by)
+       VALUES ($1, $2)`,
+      ['Advocate Suspended: ' + advocateId, req.user.user_id]
+    );
+
     res.json({
       message: "Advocate deleted successfully"
     });
@@ -472,6 +493,13 @@ exports.restoreAdvocate = async (req, res) => {
        SET is_active = true
        WHERE user_id = $1`,
       [advocateId]
+    );
+
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (action, performed_by)
+       VALUES ($1, $2)`,
+      ['Advocate Restored: ' + advocateId, req.user.user_id]
     );
 
     res.json({

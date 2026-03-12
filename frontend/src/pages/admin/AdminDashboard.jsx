@@ -3,6 +3,8 @@ import "../../newstyles.css";
 import { toast } from "react-toastify";
 import confetti from "canvas-confetti";
 
+
+
 function AdminDashboard() {
 
 const [view,setView] = useState("dashboard");
@@ -632,8 +634,8 @@ onChange={(e)=>setStatusFilter(e.target.value)}
 <th>Case</th>
 <th>Client</th>
 <th>Status</th>
-<th>Assign Advocate</th>
-<th>Close Case</th>
+<th>Assigned Advocate</th>
+<th>Actions</th>
 </tr>
 
 </thead>
@@ -652,7 +654,6 @@ onChange={(e)=>setStatusFilter(e.target.value)}
 <td>{c.case_title}</td>
 <td>{c.client_name}</td>
 <td>{c.status}</td>
-
 <td>
 
 {c.status==="REJECTED" || c.status==="CLOSED" ?
@@ -678,7 +679,7 @@ onChange={(e)=>setStatusFilter(e.target.value)}
 .map(a=>(
 
 <option key={a.user_id} value={a.user_id}>
-{a.full_name} ({a.specialization})
+{a.full_name} ({a.specialization}) {a.specialization === c.case_type ? '✨ Suggested' : ''}
 </option>
 
 ))}
