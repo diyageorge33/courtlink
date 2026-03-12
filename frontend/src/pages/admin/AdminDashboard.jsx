@@ -14,16 +14,19 @@ const [statusFilter,setStatusFilter] = useState("ALL");
 const [caseSearch,setCaseSearch] = useState("");
 
 const [clientCases,setClientCases] = useState([]);
+const [selectedClient,setSelectedClient] = useState(null);
 const [selectedCase,setSelectedCase] = useState(null);
 const [suggestedAdvocates,setSuggestedAdvocates] = useState([]);
 
 const [closedCases,setClosedCases] = useState([]);
+const [pendingCases,setPendingCases] = useState([]);
 
 const [stats,setStats] = useState({
 totalCases:0,
 activeCases:0,
 closedCases:0,
-totalAdvocates:0
+totalAdvocates:0,
+pendingCases:0
 });
 
 const [currentPage,setCurrentPage] = useState(1);
@@ -70,20 +73,25 @@ fetch("http://localhost:5000/api/admin/stats",{headers:{Authorization:`Bearer ${
 .then(res=>res.json())
 .then(data=>setStats(data));
 
+fetch("http://localhost:5000/api/admin/pending-cases",{headers:{Authorization:`Bearer ${token}`}})
+.then(res=>res.json())
+.then(data=>setPendingCases(data));
+
 },[]);
 
 
 /* CLIENT CASES */
 
-const fetchClientCases = async(clientId)=>{
+const fetchClientCases = async(client)=>{
 
 const res = await fetch(
-`http://localhost:5000/api/admin/client-cases/${clientId}`,
+`http://localhost:5000/api/admin/client-cases/${client.user_id}`,
 {headers:{Authorization:`Bearer ${token}`}}
 );
 
 const data = await res.json();
 
+setSelectedClient(client);
 setClientCases(data);
 setView("clientCases");
 
@@ -94,7 +102,7 @@ setView("clientCases");
 
 const assignAdvocate = async(caseId,advocateId)=>{
 
-if(!advocateId) return;
+if(!advocateId || advocateId === "Select Advocate") return;
 
 await fetch("http://localhost:5000/api/admin/assign",{
 method:"POST",
@@ -106,6 +114,11 @@ body:JSON.stringify({caseId,advocateId})
 });
 
 toast.success("Advocate Assigned");
+
+// Refetch the cases to legally update the UI state
+const res = await fetch("http://localhost:5000/api/admin/cases",{headers:{Authorization:`Bearer ${token}`}});
+const data = await res.json();
+setCases(data);
 
 };
 
@@ -136,6 +149,41 @@ await fetch(
 toast.success("Case reopened successfully");
 window.location.reload();
 
+};
+
+
+/* CASE REVIEW */
+
+const fetchPendingCases = async()=>{
+const res = await fetch("http://localhost:5000/api/admin/pending-cases",{headers:{Authorization:`Bearer ${token}`}});
+const data = await res.json();
+setPendingCases(data);
+};
+
+const approveCaseReview = async(caseId)=>{
+await fetch(`http://localhost:5000/api/admin/approve-case/${caseId}`,{
+method:"PUT",
+headers:{Authorization:`Bearer ${token}`}
+});
+toast.success("Case Approved");
+fetchPendingCases();
+// Update stats
+fetch("http://localhost:5000/api/admin/stats",{headers:{Authorization:`Bearer ${token}`}})
+.then(res=>res.json())
+.then(data=>setStats(data));
+};
+
+const rejectCaseReview = async(caseId)=>{
+await fetch(`http://localhost:5000/api/admin/reject-case/${caseId}`,{
+method:"PUT",
+headers:{Authorization:`Bearer ${token}`}
+});
+toast.success("Case Rejected");
+fetchPendingCases();
+// Update stats
+fetch("http://localhost:5000/api/admin/stats",{headers:{Authorization:`Bearer ${token}`}})
+.then(res=>res.json())
+.then(data=>setStats(data));
 };
 
 
@@ -243,12 +291,17 @@ return(
 
 <div className="action-tile-new" onClick={()=>setView("advocates")}>
 <h3>Advocates</h3>
-<p>View advocates</p>
+<p>{stats.totalAdvocates} registered advocates</p>
+</div>
+
+<div className="action-tile-new" onClick={()=>setView("review")}>
+<h3>Case Review</h3>
+<p>{stats.pendingCases} cases pending</p>
 </div>
 
 <div className="action-tile-new" onClick={()=>setView("cases")}>
 <h3>Case Assignment</h3>
-<p>Assign advocates</p>
+<p>Assign advocates to cases</p>
 </div>
 
 <div className="action-tile-new" onClick={()=>setView("closedCases")}>
@@ -290,7 +343,7 @@ return(
 
 <td
 style={{cursor:"pointer",color:"#3b82f6"}}
-onClick={()=>fetchClientCases(c.user_id)}
+onClick={()=>fetchClientCases(c)}
 >
 {c.full_name}
 </td>
@@ -304,6 +357,53 @@ onClick={()=>fetchClientCases(c.user_id)}
 </tbody>
 
 </table>
+
+</div>
+
+)}
+
+
+{/* CLIENT CASES DETAILS */}
+
+{view==="clientCases" &&(
+
+<div>
+
+<button className="dashboard-btn-new" onClick={()=>setView("clients")}>← Back to Clients</button>
+
+{selectedClient && (
+  <div style={{ background: "rgba(255,255,255,0.05)", padding: "20px", borderRadius: "10px", marginBottom: "20px" }}>
+    <h2 style={{ marginBottom: "5px" }}>{selectedClient.full_name}</h2>
+    <p style={{ color: "#aaa" }}>{selectedClient.email}</p>
+  </div>
+)}
+
+<h3>Cases Filed</h3>
+
+{clientCases.length === 0 ? (
+  <p style={{ color: "#aaa", marginTop: "15px" }}>No cases found for this client.</p>
+) : (
+  <table className="cases-table-new">
+    <thead>
+      <tr>
+        <th>Case Title</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Assigned Advocate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {clientCases.map(c=>(
+        <tr key={c.case_id}>
+          <td>{c.case_title}</td>
+          <td>{c.case_type}</td>
+          <td>{c.status}</td>
+          <td>{c.advocate_name || "Not Assigned"}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}
 
 </div>
 
@@ -425,7 +525,7 @@ onChange={(e)=>setStatusFilter(e.target.value)}
 {cases
 .filter(c =>
 (statusFilter==="ALL" || c.status===statusFilter) &&
-c.case_title.toLowerCase().includes(caseSearch.toLowerCase())
+(c.case_title || "").toLowerCase().includes(caseSearch.toLowerCase())
 )
 .map(c=>(
 
@@ -440,6 +540,14 @@ c.case_title.toLowerCase().includes(caseSearch.toLowerCase())
 {c.status==="REJECTED" || c.status==="CLOSED" ?
 
 <span>Not Allowed</span>
+
+: c.status==="PENDING" ?
+
+<span style={{color:"#ca8a04",fontWeight:"500"}}>Needs Approval</span>
+
+: c.advocate_id ? 
+
+<span>Assigned: {c.advocate_name}</span>
 
 :
 
@@ -535,6 +643,52 @@ Close
 </tbody>
 
 </table>
+
+</div>
+
+)}
+
+{/* CASE REVIEW VIEW */}
+
+{view==="review" &&(
+
+<div>
+
+<button className="dashboard-btn-new" onClick={()=>setView("dashboard")}>← Back</button>
+
+<h2>Cases for Review</h2>
+
+<p style={{color:"#aaa",marginBottom:"20px"}}>These cases have been filed by clients and are awaiting your approval.</p>
+
+{pendingCases.length === 0 ? (
+  <p style={{color:"#aaa",marginTop:"20px"}}>No cases currently awaiting review.</p>
+) : (
+  <table className="cases-table-new">
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Case Title</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {pendingCases.map(c=>(
+        <tr key={c.case_id}>
+          <td>{c.client_name}</td>
+          <td>{c.case_title}</td>
+          <td>{c.case_type}</td>
+          <td>{c.case_description}</td>
+          <td>
+            <button className="dashboard-btn-new" style={{background:"#16a34a",marginRight:"5px"}} onClick={()=>approveCaseReview(c.case_id)}>Approve</button>
+            <button className="delete-btn-new" onClick={()=>rejectCaseReview(c.case_id)}>Reject</button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}
 
 </div>
 

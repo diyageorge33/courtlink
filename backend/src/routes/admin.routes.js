@@ -17,7 +17,9 @@ const {
     getAdminStats,
     reopenCase,
     deleteAdvocate,
-    restoreAdvocate
+    restoreAdvocate,
+    approveCase,
+    getPendingCases
 } = require("../controllers/admin.controller");
 
 router.get("/clients", verifyToken, getClients);
@@ -27,6 +29,7 @@ router.get("/client-cases/:clientId", verifyToken, getClientCases);
 router.get("/suggest-advocates/:caseId", verifyToken, suggestAdvocates);
 router.get("/closed-cases", verifyToken, getClosedCases);
 router.get("/stats", verifyToken, getAdminStats);
+router.get("/pending-cases", verifyToken, getPendingCases);
 
 router.post("/assign", verifyToken, assignAdvocate);
 router.post("/reassign", verifyToken, reassignAdvocate);
@@ -34,6 +37,7 @@ router.post("/reassign", verifyToken, reassignAdvocate);
 router.put("/close-case/:caseId", verifyToken, closeCase);
 router.put("/reject-case/:caseId", verifyToken, rejectCase);
 router.put("/reopen-case/:caseId", verifyToken, reopenCase);
+router.put("/approve-case/:caseId", verifyToken, approveCase);
 router.put("/restore-advocate/:advocateId", verifyToken, restoreAdvocate);
 
 router.delete("/delete-advocate/:advocateId", verifyToken, deleteAdvocate);

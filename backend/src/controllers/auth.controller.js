@@ -14,19 +14,10 @@ exports.login = async (req, res) => {
   }
 
   try {
-    //  Verify reCAPTCHA
-    const captchaVerify = await axios.post(
-  "https://www.google.com/recaptcha/api/siteverify",
-  new URLSearchParams({
-    secret: process.env.RECAPTCHA_SECRET,
-    response: captchaToken
-  }),
-  {
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
-  }
-);
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`;
+    const captchaRes = await fetch(verifyUrl, { method: "POST" });
+    const captchaVerify = {};
+    captchaVerify.data = await captchaRes.json();
 
 console.log("Captcha response:", captchaVerify.data);
 

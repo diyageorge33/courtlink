@@ -104,7 +104,7 @@ const handleLogin = async (e) => {
           <div className="mb-3 d-flex justify-content-center">
             <ReCAPTCHA
               ref={captchaRef}
-              sitekey="6LfVGIYsAAAAAAAxRrwAcFWKlyu0-rmgqODgq1GQ"
+              sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
               onChange={(token) => setCaptchaToken(token)}
             />
           </div>

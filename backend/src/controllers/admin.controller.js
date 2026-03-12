@@ -63,10 +63,12 @@ exports.getCases = async (req, res) => {
               c.case_title,
               c.case_type,
               c.status,
-              u.full_name AS client_name
+              c.advocate_id,
+              u.full_name AS client_name,
+              a.full_name AS advocate_name
        FROM cases c
-       JOIN users u
-       ON c.client_id = u.user_id`
+       JOIN users u ON c.client_id = u.user_id
+       LEFT JOIN users a ON c.advocate_id = a.user_id`
     );
 
     res.json(result.rows);
@@ -82,6 +84,11 @@ exports.assignAdvocate = async (req, res) => {
 
   const { caseId, advocateId } = req.body;
   const adminId = req.user.user_id;
+
+  console.log('--- ASSIGN ADVOCATE DEBUG ---');
+  console.log('caseId:', caseId);
+  console.log('advocateId:', advocateId);
+  console.log('adminId:', adminId);
 
   try {
 
@@ -148,7 +155,8 @@ exports.getClientCases = async (req, res) => {
         c.case_type,
         c.case_description,
         c.status,
-        u.full_name AS advocate_name,
+        c.advocate_id,
+        adv.full_name AS advocate_name,
         (
             SELECT u2.full_name
             FROM case_assignments ca
@@ -158,8 +166,8 @@ exports.getClientCases = async (req, res) => {
             OFFSET 1 LIMIT 1
         ) AS previous_advocate
        FROM cases c
-       LEFT JOIN users u
-       ON c.advocate_id = u.user_id
+       LEFT JOIN users adv
+       ON c.advocate_id = adv.user_id
        WHERE c.client_id = $1`,
       [clientId]
     );
@@ -279,11 +287,55 @@ exports.rejectCase = async (req, res) => {
 
 };
 
+exports.getPendingCases = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT c.case_id,
+              c.case_title,
+              c.case_type,
+              c.case_description,
+              c.status,
+              u.full_name AS client_name
+       FROM cases c
+       JOIN users u ON c.client_id = u.user_id
+       WHERE c.status = 'PENDING'
+       ORDER BY c.case_id DESC`
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching pending cases" });
+  }
+};
+
+exports.approveCase = async (req, res) => {
+  const { caseId } = req.params;
+  try {
+    await pool.query(
+      `UPDATE cases SET status = 'ONGOING' WHERE case_id = $1`,
+      [caseId]
+    );
+    res.json({ message: "Case approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error approving case" });
+  }
+};
+
 exports.getAdminStats = async (req, res) => {
   try {
 
     const totalCases = await pool.query(
       "SELECT COUNT(*) FROM cases"
+    );
+
+    const totalAdvocates = await pool.query(
+      "SELECT COUNT(*) FROM users WHERE role='ADVOCATE'"
+    );
+
+    const pendingCases = await pool.query(
+      "SELECT COUNT(*) FROM cases WHERE status='PENDING'"
     );
 
     const activeCases = await pool.query(
@@ -294,15 +346,12 @@ exports.getAdminStats = async (req, res) => {
       "SELECT COUNT(*) FROM cases WHERE status='CLOSED'"
     );
 
-    const totalAdvocates = await pool.query(
-      "SELECT COUNT(*) FROM users WHERE role='ADVOCATE'"
-    );
-
     res.json({
       totalCases: totalCases.rows[0].count,
       activeCases: activeCases.rows[0].count,
       closedCases: closedCases.rows[0].count,
-      totalAdvocates: totalAdvocates.rows[0].count
+      totalAdvocates: totalAdvocates.rows[0].count,
+      pendingCases: pendingCases.rows[0].count
     });
 
   } catch (err) {
