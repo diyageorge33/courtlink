@@ -18,18 +18,13 @@ exports.login = async (req, res) => {
   try {
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`;
     const captchaRes = await fetch(verifyUrl, { method: "POST" });
-    const captchaVerify = {};
-    captchaVerify.data = await captchaRes.json();
+    const captchaData = await captchaRes.json();
+    console.log("Captcha response:", captchaData);
 
-    if (!captchaResponse.data.success) {
+    if (!captchaData.success) {
       console.log("Captcha failed");
       return res.status(403).json({ message: "Captcha verification failed" });
     }
-console.log("Captcha response:", captchaVerify.data);
-
-if (!captchaVerify.data.success) {
-  return res.status(403).json({ message: "Captcha verification failed" });
-}
 
     // Normalize email
     const normalizedEmail = email.trim().toLowerCase();
