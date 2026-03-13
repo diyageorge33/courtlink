@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 const pool = require("./db");
@@ -9,6 +10,8 @@ const authRoutes = require("./routes/auth.routes");
 const aiRoutes = require("./routes/ai.routes");
 const clientRoutes = require("./routes/clientRoutes");
 
+const advocateRoutes = require("./routes/advocate.routes");
+const orderRoutes = require("./routes/order.routes");
 
 
 app.use(
@@ -20,12 +23,14 @@ app.use(
 
 app.use(express.json());
 app.use("/api/client", clientRoutes);
-
+app.use("/api/admin", require("./routes/admin.routes"));
 app.use("/api/auth", authRoutes);
 app.use("/api/payment", require("./routes/payment.routes"));
 app.use("/api/ai", aiRoutes);
 app.use("/uploads", express.static("src/uploads"));
 
+app.use("/api/advocate", advocateRoutes);
+app.use("/api/orders", orderRoutes);
 
 
 app.get("/", (req, res) => {

@@ -254,3 +254,14 @@ ADD PRIMARY KEY (employee_id);
 
 ALTER TABLE advocate_profiles
 ADD UNIQUE (advocate_id);
+
+INSERT INTO users
+(full_name,email,password_hash,role,is_verified)
+VALUES
+(
+'System Admin',
+'admin@courtlink.com',
+'$2b$10$7Oj4qfF.WqRYBdXWjrZZy.HDi8JOFPZpypoUoGdFefsz2x2AXkkDu',
+'ADMIN',
+true
+);

@@ -6,6 +6,7 @@ import PayConsultation from "../../components/PayConsultation";
 import { useEffect, useState } from "react";
 import { FaCog } from "react-icons/fa";
 import "../../newstyles.css";
+import {FaGem} from "react-icons/fa";
 
 function ClientDashboard() {
   const navigate = useNavigate();
@@ -38,6 +39,12 @@ function ClientDashboard() {
 
         const paymentData = await res.json();
         setConsultationPaid(paymentData.consultation_paid);
+
+        // Update pending payment dynamically
+        setStats(prev => ({
+          ...prev,
+          pendingPayments: paymentData.consultation_paid ? 0 : 500
+        }));
       } catch (err) {
         console.error(err);
       } finally {
@@ -55,7 +62,16 @@ function ClientDashboard() {
       <div className="dashboard-header-new">
 
         <div>
-          <h1>Welcome, {userName}</h1>
+          <div className="welcome-header-new">
+              <h1>Welcome, {userName}</h1>
+
+              {consultationPaid && (
+                <span className="premium-badge-new">
+                  <FaGem className="diamond-icon" />
+                  Premium Member
+                </span>
+              )}
+          </div>
           <p>Manage your cases and legal documents.</p>
         </div>
 

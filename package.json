@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.18.0",
+    "axios": "^1.13.6"
+
+  }
+}

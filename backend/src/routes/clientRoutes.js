@@ -110,6 +110,13 @@ router.post("/filecase", verifyToken, async (req, res) => {
       case: result.rows[0],
     });
 
+    /* LOG ACTIVITY */
+    await pool.query(
+      `INSERT INTO audit_logs (case_id, action, performed_by)
+       VALUES ($1, $2, $3)`,
+      [result.rows[0].case_id, 'Case Filed', clientId]
+    );
+
   } catch (err) {
     console.error("Error filing case:", err);
     res.status(500).json({ message: "Server error" });
@@ -164,6 +171,13 @@ router.post(
         message: "Document uploaded successfully",
         document: result.rows[0],
       });
+
+      /* LOG ACTIVITY */
+      await pool.query(
+        `INSERT INTO audit_logs (case_id, action, performed_by)
+         VALUES ($1, $2, $3)`,
+        [case_id, 'Document Uploaded: ' + req.file.originalname, clientId]
+      );
 
     } catch (err) {
       console.error("Upload document error:", err);

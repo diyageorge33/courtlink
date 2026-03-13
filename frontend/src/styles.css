@@ -1279,9 +1279,8 @@ body {
   word-break: break-all;
 }
 
-/* ============================= */
 /* CASE TYPE GUIDE PAGE STYLES  */
-/* ============================= */
+
 
 .case-guide-container {
   flex: 1; /* important for flex layout */
@@ -1334,3 +1333,129 @@ body {
   }
 }
 
+.status {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.ongoing {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status.closed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.view-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 6px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.hearing-btn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-left: 6px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+}
+
+.hearing-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Dashboard content area */
+.dashboard-content {
+  padding: 20px 40px;
+  width: 100%;
+  background: transparent;
+}
+
+.dashboard-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card container */
+.add-case-card {
+  max-width: 520px;
+  margin: 20px auto;   /* small top margin so it sits near top */
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* Form layout */
+.add-case-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Form groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+/* Inputs */
+.form-group input,
+.form-group textarea {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Button */
+.submit-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: #1d4ed8;
+}

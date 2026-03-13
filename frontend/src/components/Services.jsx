@@ -34,7 +34,7 @@ function Services() {
 
         <div
   className="service-card"
-  onClick={() => navigate("/case-type-page")}
+  onClick={() => navigate("/Casetypepage")}
         >
   <h3>Case Types</h3>
   <p>

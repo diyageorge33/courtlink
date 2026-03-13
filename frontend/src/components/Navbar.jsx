@@ -20,20 +20,51 @@ function Navbar() {
     navigate("/login");
   };
 
+  //Redirect home based on role
+  const handleHomeClick = () => {
+
+    const role = localStorage.getItem("role");
+
+    if (!isLoggedIn) {
+      navigate("/");
+      return;
+    }
+
+    if (role === "CLIENT") {
+      navigate("/dashboard/client");
+    } 
+    else if (role === "ADVOCATE") {
+      navigate("/dashboard/advocate");
+    } 
+    else if (role === "ADMIN") {
+      navigate("/dashboard/admin");
+    } 
+    else {
+      navigate("/");
+    }
+  };
+
   const isDashboardPage = location.pathname.startsWith("/dashboard");
 
   return (
     <nav className="navbar">
 
-      {/* LOGO (NOT CLICKABLE) */}
-      <div className="logo">
+      {/* LOGO */}
+      <div 
+        className="logo" 
+        onClick={handleHomeClick}
+        style={{ cursor: "pointer" }}
+      >
         ⚖️ CourtLink
       </div>
 
       {/* NAV LINKS */}
       <ul className="nav-links">
+
         <li>
-          <Link to="/">Home</Link>
+          <a onClick={handleHomeClick} style={{ cursor: "pointer" }}>
+            Home
+          </a>
         </li>
 
         <li>
@@ -47,6 +78,7 @@ function Navbar() {
         <li>
           <Link to="/help">Help</Link>
         </li>
+
       </ul>
 
       {/* AUTH SECTION */}
