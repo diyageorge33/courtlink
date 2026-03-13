@@ -37,4 +37,40 @@ router.post("/upload", verifyToken, upload.single("order"), async (req,res)=>{
 
 });
 
+router.get("/my-orders", verifyToken, async (req, res) => {
+  const advocateId = req.user.user_id;
+  try {
+    const result = await pool.query(
+      `SELECT o.*, c.case_title 
+       FROM orders o
+       JOIN cases c ON o.case_id = c.case_id
+       WHERE o.advocate_id = $1
+       ORDER BY o.uploaded_at DESC`,
+      [advocateId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.delete("/delete/:id", verifyToken, async (req, res) => {
+  const advocateId = req.user.user_id;
+  const orderId = req.params.id;
+  try {
+    const result = await pool.query(
+      "DELETE FROM orders WHERE order_id = $1 AND advocate_id = $2 RETURNING *",
+      [orderId, advocateId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Order not found or unauthorized" });
+    }
+    res.json({ message: "Order deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;

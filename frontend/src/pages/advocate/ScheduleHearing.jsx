@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import DashboardLayout from "../../layouts/DashboardLayout";
+import "../../newstyles.css";
 
 function ScheduleHearing() {
-
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -28,15 +27,12 @@ function ScheduleHearing() {
     }
 
     try {
-
       await axios.put(
         `http://localhost:5000/api/advocate/schedule-hearing/${caseId}`,
         { hearing_date: date }
       );
 
       alert("Hearing scheduled successfully");
-
-      // redirect back to My Cases
       navigate("/dashboard/advocate/cases");
 
     } catch (err) {
@@ -47,50 +43,48 @@ function ScheduleHearing() {
   };
 
   return (
-    <DashboardLayout role="advocate">
-
-      <div className="add-case-wrapper">
-
-        <div className="add-case-card">
-
-          <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-            Schedule Hearing
-          </h2>
-
-          <form onSubmit={handleSubmit} className="add-case-form">
-
-            <div className="form-group">
-              <label>Case ID</label>
-              <input
-                type="number"
-                value={caseId}
-                onChange={(e) => setCaseId(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Hearing Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-              />
-            </div>
-
-            <button type="submit" className="submit-btn">
-              Schedule Hearing
-            </button>
-
-          </form>
-
+    <div className="client-dashboard-new">
+      {/* HEADER */}
+      <div className="documents-header-new">
+        <h1 className="page-title-new">Schedule Hearing</h1>
+        <div className="documents-header-buttons">
+          <button
+            className="dashboard-btn-new"
+            onClick={() => navigate("/dashboard/advocate")}
+          >
+            ← Dashboard
+          </button>
         </div>
-
       </div>
 
-    </DashboardLayout>
+      <div className="upload-box-new">
+        <div className="form-card-new">
+          <form onSubmit={handleSubmit}>
+            <label>Case ID</label>
+            <input
+              type="number"
+              value={caseId}
+              onChange={(e) => setCaseId(e.target.value)}
+              placeholder="Enter Case ID"
+              required
+            />
+
+            <label>Hearing Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+            />
+
+            <button type="submit" className="primary-btn-new">
+              Schedule Hearing
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
 
-export default ScheduleHearing;  
+export default ScheduleHearing;

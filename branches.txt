@@ -1,0 +1,12 @@
+﻿  feature/advocate-dashboard
+  main
+* new-advbranch
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/admin-features
+  remotes/origin/feature-admin-final
+  remotes/origin/feature/advocate-dashboard
+  remotes/origin/krishna-admin-dashboard
+  remotes/origin/main
+  remotes/origin/minor
+  remotes/origin/new-advbranch
+  remotes/origin/payment

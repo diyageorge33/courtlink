@@ -11,14 +11,21 @@ exports.login = async (req, res) => {
   console.log("Request body:", req.body);
   const { email, password, captchaToken } = req.body;
 
-  if (!captchaToken) {
-    return res.status(400).json({ message: "Captcha is required" });
+  if (!email || !password || !captchaToken) {
+    console.log("Missing fields:", { email: !!email, password: !!password, captcha: !!captchaToken });
+    return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`;
-    const captchaRes = await fetch(verifyUrl, { method: "POST" });
-    const captchaData = await captchaRes.json();
+    const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
+    const captchaRes = await axios.post(
+      verifyUrl,
+      new URLSearchParams({
+        secret: process.env.RECAPTCHA_SECRET,
+        response: captchaToken,
+      })
+    );
+    const captchaData = captchaRes.data;
     console.log("Captcha response:", captchaData);
 
     if (!captchaData.success) {
@@ -31,7 +38,7 @@ exports.login = async (req, res) => {
 
     // Fetch user by email
     const result = await pool.query(
-      "SELECT user_id, role, password_hash, is_verified FROM users WHERE email = $1",
+      "SELECT user_id, role, full_name, password_hash, is_verified FROM users WHERE email = $1",
       [normalizedEmail]
     );
 
@@ -81,9 +88,12 @@ exports.login = async (req, res) => {
     });
 
   } catch (err) {
-  console.error("FULL ERROR DETAILS:", err);
-  res.status(500).json({ message: err.message });
-}
+    console.error("LOGIN CRITICAL ERROR:", err);
+    res.status(500).json({ 
+      message: "An internal server error occurred during login. Please contact support.",
+      error: err.message 
+    });
+  }
 
 };
 

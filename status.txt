@@ -1,0 +1,433 @@
+﻿On branch new-advbranch
+Your branch is up to date with 'origin/new-advbranch'.
+
+All conflicts fixed but you are still merging.
+  (use "git commit" to conclude merge)
+
+Changes to be committed:
+	new file:   backend/.npm_run_dev.log
+	new file:   backend/env.txt
+	modified:   backend/package-lock.json
+	modified:   backend/package.json
+	new file:   backend/src/controllers/admin.controller.js
+	modified:   backend/src/controllers/auth.controller.js
+	modified:   backend/src/controllers/payment.controller.js
+	modified:   backend/src/middleware/authMiddleware.js
+	new file:   backend/src/routes/admin.routes.js
+	modified:   backend/src/routes/clientRoutes.js
+	modified:   backend/src/routes/payment.routes.js
+	modified:   backend/src/server.js
+	modified:   database/schema.txt
+	new file:   frontend/env.txt
+	modified:   frontend/package-lock.json
+	modified:   frontend/package.json
+	modified:   frontend/src/App.jsx
+	modified:   frontend/src/api/clientApi.js
+	modified:   frontend/src/components/Navbar.jsx
+	modified:   frontend/src/components/ProtectedRoute.jsx
+	modified:   frontend/src/components/Services.jsx
+	new file:   frontend/src/newstyles.css
+	new file:   frontend/src/pages/Casetypepage.jsx
+	modified:   frontend/src/pages/Document.jsx
+	modified:   frontend/src/pages/FileCase.jsx
+	modified:   frontend/src/pages/Login.jsx
+	modified:   frontend/src/pages/Mycase.jsx
+	deleted:    frontend/src/pages/PaymentTest.jsx
+	deleted:    frontend/src/pages/Paymentshistory.jsx
+	modified:   frontend/src/pages/Practice.jsx
+	modified:   frontend/src/pages/UploadDocuments.jsx
+	new file:   frontend/src/pages/admin/AdminDashboard.jsx
+	modified:   frontend/src/pages/client/Aiassistant.jsx
+	modified:   frontend/src/pages/client/Aisummarizer.jsx
+	modified:   frontend/src/pages/client/ClientDashboard.jsx
+	modified:   frontend/src/pages/client/Clientsetting.jsx
+	modified:   frontend/src/pages/client/PaymentHistory.jsx
+	modified:   frontend/src/styles.css
+	new file:   node_modules/.package-lock.json
+	new file:   node_modules/asynckit/LICENSE
+	new file:   node_modules/asynckit/README.md
+	new file:   node_modules/asynckit/bench.js
+	new file:   node_modules/asynckit/index.js
+	new file:   node_modules/asynckit/lib/abort.js
+	new file:   node_modules/asynckit/lib/async.js
+	new file:   node_modules/asynckit/lib/defer.js
+	new file:   node_modules/asynckit/lib/iterate.js
+	new file:   node_modules/asynckit/lib/readable_asynckit.js
+	new file:   node_modules/asynckit/lib/readable_parallel.js
+	new file:   node_modules/asynckit/lib/readable_serial.js
+	new file:   node_modules/asynckit/lib/readable_serial_ordered.js
+	new file:   node_modules/asynckit/lib/state.js
+	new file:   node_modules/asynckit/lib/streamify.js
+	new file:   node_modules/asynckit/lib/terminator.js
+	new file:   node_modules/asynckit/package.json
+	new file:   node_modules/asynckit/parallel.js
+	new file:   node_modules/asynckit/serial.js
+	new file:   node_modules/asynckit/serialOrdered.js
+	new file:   node_modules/asynckit/stream.js
+	new file:   node_modules/axios/CHANGELOG.md
+	new file:   node_modules/axios/LICENSE
+	new file:   node_modules/axios/MIGRATION_GUIDE.md
+	new file:   node_modules/axios/README.md
+	new file:   node_modules/axios/dist/axios.js
+	new file:   node_modules/axios/dist/axios.js.map
+	new file:   node_modules/axios/dist/axios.min.js
+	new file:   node_modules/axios/dist/axios.min.js.map
+	new file:   node_modules/axios/dist/browser/axios.cjs
+	new file:   node_modules/axios/dist/browser/axios.cjs.map
+	new file:   node_modules/axios/dist/esm/axios.js
+	new file:   node_modules/axios/dist/esm/axios.js.map
+	new file:   node_modules/axios/dist/esm/axios.min.js
+	new file:   node_modules/axios/dist/esm/axios.min.js.map
+	new file:   node_modules/axios/dist/node/axios.cjs
+	new file:   node_modules/axios/dist/node/axios.cjs.map
+	new file:   node_modules/axios/index.d.cts
+	new file:   node_modules/axios/index.d.ts
+	new file:   node_modules/axios/index.js
+	new file:   node_modules/axios/lib/adapters/README.md
+	new file:   node_modules/axios/lib/adapters/adapters.js
+	new file:   node_modules/axios/lib/adapters/fetch.js
+	new file:   node_modules/axios/lib/adapters/http.js
+	new file:   node_modules/axios/lib/adapters/xhr.js
+	new file:   node_modules/axios/lib/axios.js
+	new file:   node_modules/axios/lib/cancel/CancelToken.js
+	new file:   node_modules/axios/lib/cancel/CanceledError.js
+	new file:   node_modules/axios/lib/cancel/isCancel.js
+	new file:   node_modules/axios/lib/core/Axios.js
+	new file:   node_modules/axios/lib/core/AxiosError.js
+	new file:   node_modules/axios/lib/core/AxiosHeaders.js
+	new file:   node_modules/axios/lib/core/InterceptorManager.js
+	new file:   node_modules/axios/lib/core/README.md
+	new file:   node_modules/axios/lib/core/buildFullPath.js
+	new file:   node_modules/axios/lib/core/dispatchRequest.js
+	new file:   node_modules/axios/lib/core/mergeConfig.js
+	new file:   node_modules/axios/lib/core/settle.js
+	new file:   node_modules/axios/lib/core/transformData.js
+	new file:   node_modules/axios/lib/defaults/index.js
+	new file:   node_modules/axios/lib/defaults/transitional.js
+	new file:   node_modules/axios/lib/env/README.md
+	new file:   node_modules/axios/lib/env/classes/FormData.js
+	new file:   node_modules/axios/lib/env/data.js
+	new file:   node_modules/axios/lib/helpers/AxiosTransformStream.js
+	new file:   node_modules/axios/lib/helpers/AxiosURLSearchParams.js
+	new file:   node_modules/axios/lib/helpers/HttpStatusCode.js
+	new file:   node_modules/axios/lib/helpers/README.md
+	new file:   node_modules/axios/lib/helpers/ZlibHeaderTransformStream.js
+	new file:   node_modules/axios/lib/helpers/bind.js
+	new file:   node_modules/axios/lib/helpers/buildURL.js
+	new file:   node_modules/axios/lib/helpers/callbackify.js
+	new file:   node_modules/axios/lib/helpers/combineURLs.js
+	new file:   node_modules/axios/lib/helpers/composeSignals.js
+	new file:   node_modules/axios/lib/helpers/cookies.js
+	new file:   node_modules/axios/lib/helpers/deprecatedMethod.js
+	new file:   node_modules/axios/lib/helpers/estimateDataURLDecodedBytes.js
+	new file:   node_modules/axios/lib/helpers/formDataToJSON.js
+	new file:   node_modules/axios/lib/helpers/formDataToStream.js
+	new file:   node_modules/axios/lib/helpers/fromDataURI.js
+	new file:   node_modules/axios/lib/helpers/isAbsoluteURL.js
+	new file:   node_modules/axios/lib/helpers/isAxiosError.js
+	new file:   node_modules/axios/lib/helpers/isURLSameOrigin.js
+	new file:   node_modules/axios/lib/helpers/null.js
+	new file:   node_modules/axios/lib/helpers/parseHeaders.js
+	new file:   node_modules/axios/lib/helpers/parseProtocol.js
+	new file:   node_modules/axios/lib/helpers/progressEventReducer.js
+	new file:   node_modules/axios/lib/helpers/readBlob.js
+	new file:   node_modules/axios/lib/helpers/resolveConfig.js
+	new file:   node_modules/axios/lib/helpers/speedometer.js
+	new file:   node_modules/axios/lib/helpers/spread.js
+	new file:   node_modules/axios/lib/helpers/throttle.js
+	new file:   node_modules/axios/lib/helpers/toFormData.js
+	new file:   node_modules/axios/lib/helpers/toURLEncodedForm.js
+	new file:   node_modules/axios/lib/helpers/trackStream.js
+	new file:   node_modules/axios/lib/helpers/validator.js
+	new file:   node_modules/axios/lib/platform/browser/classes/Blob.js
+	new file:   node_modules/axios/lib/platform/browser/classes/FormData.js
+	new file:   node_modules/axios/lib/platform/browser/classes/URLSearchParams.js
+	new file:   node_modules/axios/lib/platform/browser/index.js
+	new file:   node_modules/axios/lib/platform/common/utils.js
+	new file:   node_modules/axios/lib/platform/index.js
+	new file:   node_modules/axios/lib/platform/node/classes/FormData.js
+	new file:   node_modules/axios/lib/platform/node/classes/URLSearchParams.js
+	new file:   node_modules/axios/lib/platform/node/index.js
+	new file:   node_modules/axios/lib/utils.js
+	new file:   node_modules/axios/package.json
+	new file:   node_modules/call-bind-apply-helpers/.eslintrc
+	new file:   node_modules/call-bind-apply-helpers/.github/FUNDING.yml
+	new file:   node_modules/call-bind-apply-helpers/.nycrc
+	new file:   node_modules/call-bind-apply-helpers/CHANGELOG.md
+	new file:   node_modules/call-bind-apply-helpers/LICENSE
+	new file:   node_modules/call-bind-apply-helpers/README.md
+	new file:   node_modules/call-bind-apply-helpers/actualApply.d.ts
+	new file:   node_modules/call-bind-apply-helpers/actualApply.js
+	new file:   node_modules/call-bind-apply-helpers/applyBind.d.ts
+	new file:   node_modules/call-bind-apply-helpers/applyBind.js
+	new file:   node_modules/call-bind-apply-helpers/functionApply.d.ts
+	new file:   node_modules/call-bind-apply-helpers/functionApply.js
+	new file:   node_modules/call-bind-apply-helpers/functionCall.d.ts
+	new file:   node_modules/call-bind-apply-helpers/functionCall.js
+	new file:   node_modules/call-bind-apply-helpers/index.d.ts
+	new file:   node_modules/call-bind-apply-helpers/index.js
+	new file:   node_modules/call-bind-apply-helpers/package.json
+	new file:   node_modules/call-bind-apply-helpers/reflectApply.d.ts
+	new file:   node_modules/call-bind-apply-helpers/reflectApply.js
+	new file:   node_modules/call-bind-apply-helpers/test/index.js
+	new file:   node_modules/call-bind-apply-helpers/tsconfig.json
+	new file:   node_modules/combined-stream/License
+	new file:   node_modules/combined-stream/Readme.md
+	new file:   node_modules/combined-stream/lib/combined_stream.js
+	new file:   node_modules/combined-stream/package.json
+	new file:   node_modules/combined-stream/yarn.lock
+	new file:   node_modules/delayed-stream/.npmignore
+	new file:   node_modules/delayed-stream/License
+	new file:   node_modules/delayed-stream/Makefile
+	new file:   node_modules/delayed-stream/Readme.md
+	new file:   node_modules/delayed-stream/lib/delayed_stream.js
+	new file:   node_modules/delayed-stream/package.json
+	new file:   node_modules/dunder-proto/.eslintrc
+	new file:   node_modules/dunder-proto/.github/FUNDING.yml
+	new file:   node_modules/dunder-proto/.nycrc
+	new file:   node_modules/dunder-proto/CHANGELOG.md
+	new file:   node_modules/dunder-proto/LICENSE
+	new file:   node_modules/dunder-proto/README.md
+	new file:   node_modules/dunder-proto/get.d.ts
+	new file:   node_modules/dunder-proto/get.js
+	new file:   node_modules/dunder-proto/package.json
+	new file:   node_modules/dunder-proto/set.d.ts
+	new file:   node_modules/dunder-proto/set.js
+	new file:   node_modules/dunder-proto/test/get.js
+	new file:   node_modules/dunder-proto/test/index.js
+	new file:   node_modules/dunder-proto/test/set.js
+	new file:   node_modules/dunder-proto/tsconfig.json
+	new file:   node_modules/es-define-property/.eslintrc
+	new file:   node_modules/es-define-property/.github/FUNDING.yml
+	new file:   node_modules/es-define-property/.nycrc
+	new file:   node_modules/es-define-property/CHANGELOG.md
+	new file:   node_modules/es-define-property/LICENSE
+	new file:   node_modules/es-define-property/README.md
+	new file:   node_modules/es-define-property/index.d.ts
+	new file:   node_modules/es-define-property/index.js
+	new file:   node_modules/es-define-property/package.json
+	new file:   node_modules/es-define-property/test/index.js
+	new file:   node_modules/es-define-property/tsconfig.json
+	new file:   node_modules/es-errors/.eslintrc
+	new file:   node_modules/es-errors/.github/FUNDING.yml
+	new file:   node_modules/es-errors/CHANGELOG.md
+	new file:   node_modules/es-errors/LICENSE
+	new file:   node_modules/es-errors/README.md
+	new file:   node_modules/es-errors/eval.d.ts
+	new file:   node_modules/es-errors/eval.js
+	new file:   node_modules/es-errors/index.d.ts
+	new file:   node_modules/es-errors/index.js
+	new file:   node_modules/es-errors/package.json
+	new file:   node_modules/es-errors/range.d.ts
+	new file:   node_modules/es-errors/range.js
+	new file:   node_modules/es-errors/ref.d.ts
+	new file:   node_modules/es-errors/ref.js
+	new file:   node_modules/es-errors/syntax.d.ts
+	new file:   node_modules/es-errors/syntax.js
+	new file:   node_modules/es-errors/test/index.js
+	new file:   node_modules/es-errors/tsconfig.json
+	new file:   node_modules/es-errors/type.d.ts
+	new file:   node_modules/es-errors/type.js
+	new file:   node_modules/es-errors/uri.d.ts
+	new file:   node_modules/es-errors/uri.js
+	new file:   node_modules/es-object-atoms/.eslintrc
+	new file:   node_modules/es-object-atoms/.github/FUNDING.yml
+	new file:   node_modules/es-object-atoms/CHANGELOG.md
+	new file:   node_modules/es-object-atoms/LICENSE
+	new file:   node_modules/es-object-atoms/README.md
+	new file:   node_modules/es-object-atoms/RequireObjectCoercible.d.ts
+	new file:   node_modules/es-object-atoms/RequireObjectCoercible.js
+	new file:   node_modules/es-object-atoms/ToObject.d.ts
+	new file:   node_modules/es-object-atoms/ToObject.js
+	new file:   node_modules/es-object-atoms/index.d.ts
+	new file:   node_modules/es-object-atoms/index.js
+	new file:   node_modules/es-object-atoms/isObject.d.ts
+	new file:   node_modules/es-object-atoms/isObject.js
+	new file:   node_modules/es-object-atoms/package.json
+	new file:   node_modules/es-object-atoms/test/index.js
+	new file:   node_modules/es-object-atoms/tsconfig.json
+	new file:   node_modules/es-set-tostringtag/.eslintrc
+	new file:   node_modules/es-set-tostringtag/.nycrc
+	new file:   node_modules/es-set-tostringtag/CHANGELOG.md
+	new file:   node_modules/es-set-tostringtag/LICENSE
+	new file:   node_modules/es-set-tostringtag/README.md
+	new file:   node_modules/es-set-tostringtag/index.d.ts
+	new file:   node_modules/es-set-tostringtag/index.js
+	new file:   node_modules/es-set-tostringtag/package.json
+	new file:   node_modules/es-set-tostringtag/test/index.js
+	new file:   node_modules/es-set-tostringtag/tsconfig.json
+	new file:   node_modules/follow-redirects/LICENSE
+	new file:   node_modules/follow-redirects/README.md
+	new file:   node_modules/follow-redirects/debug.js
+	new file:   node_modules/follow-redirects/http.js
+	new file:   node_modules/follow-redirects/https.js
+	new file:   node_modules/follow-redirects/index.js
+	new file:   node_modules/follow-redirects/package.json
+	new file:   node_modules/form-data/CHANGELOG.md
+	new file:   node_modules/form-data/License
+	new file:   node_modules/form-data/README.md
+	new file:   node_modules/form-data/index.d.ts
+	new file:   node_modules/form-data/lib/browser.js
+	new file:   node_modules/form-data/lib/form_data.js
+	new file:   node_modules/form-data/lib/populate.js
+	new file:   node_modules/form-data/package.json
+	new file:   node_modules/function-bind/.eslintrc
+	new file:   node_modules/function-bind/.github/FUNDING.yml
+	new file:   node_modules/function-bind/.github/SECURITY.md
+	new file:   node_modules/function-bind/.nycrc
+	new file:   node_modules/function-bind/CHANGELOG.md
+	new file:   node_modules/function-bind/LICENSE
+	new file:   node_modules/function-bind/README.md
+	new file:   node_modules/function-bind/implementation.js
+	new file:   node_modules/function-bind/index.js
+	new file:   node_modules/function-bind/package.json
+	new file:   node_modules/function-bind/test/.eslintrc
+	new file:   node_modules/function-bind/test/index.js
+	new file:   node_modules/get-intrinsic/.eslintrc
+	new file:   node_modules/get-intrinsic/.github/FUNDING.yml
+	new file:   node_modules/get-intrinsic/.nycrc
+	new file:   node_modules/get-intrinsic/CHANGELOG.md
+	new file:   node_modules/get-intrinsic/LICENSE
+	new file:   node_modules/get-intrinsic/README.md
+	new file:   node_modules/get-intrinsic/index.js
+	new file:   node_modules/get-intrinsic/package.json
+	new file:   node_modules/get-intrinsic/test/GetIntrinsic.js
+	new file:   node_modules/get-proto/.eslintrc
+	new file:   node_modules/get-proto/.github/FUNDING.yml
+	new file:   node_modules/get-proto/.nycrc
+	new file:   node_modules/get-proto/CHANGELOG.md
+	new file:   node_modules/get-proto/LICENSE
+	new file:   node_modules/get-proto/Object.getPrototypeOf.d.ts
+	new file:   node_modules/get-proto/Object.getPrototypeOf.js
+	new file:   node_modules/get-proto/README.md
+	new file:   node_modules/get-proto/Reflect.getPrototypeOf.d.ts
+	new file:   node_modules/get-proto/Reflect.getPrototypeOf.js
+	new file:   node_modules/get-proto/index.d.ts
+	new file:   node_modules/get-proto/index.js
+	new file:   node_modules/get-proto/package.json
+	new file:   node_modules/get-proto/test/index.js
+	new file:   node_modules/get-proto/tsconfig.json
+	new file:   node_modules/gopd/.eslintrc
+	new file:   node_modules/gopd/.github/FUNDING.yml
+	new file:   node_modules/gopd/CHANGELOG.md
+	new file:   node_modules/gopd/LICENSE
+	new file:   node_modules/gopd/README.md
+	new file:   node_modules/gopd/gOPD.d.ts
+	new file:   node_modules/gopd/gOPD.js
+	new file:   node_modules/gopd/index.d.ts
+	new file:   node_modules/gopd/index.js
+	new file:   node_modules/gopd/package.json
+	new file:   node_modules/gopd/test/index.js
+	new file:   node_modules/gopd/tsconfig.json
+	new file:   node_modules/has-symbols/.eslintrc
+	new file:   node_modules/has-symbols/.github/FUNDING.yml
+	new file:   node_modules/has-symbols/.nycrc
+	new file:   node_modules/has-symbols/CHANGELOG.md
+	new file:   node_modules/has-symbols/LICENSE
+	new file:   node_modules/has-symbols/README.md
+	new file:   node_modules/has-symbols/index.d.ts
+	new file:   node_modules/has-symbols/index.js
+	new file:   node_modules/has-symbols/package.json
+	new file:   node_modules/has-symbols/shams.d.ts
+	new file:   node_modules/has-symbols/shams.js
+	new file:   node_modules/has-symbols/test/index.js
+	new file:   node_modules/has-symbols/test/shams/core-js.js
+	new file:   node_modules/has-symbols/test/shams/get-own-property-symbols.js
+	new file:   node_modules/has-symbols/test/tests.js
+	new file:   node_modules/has-symbols/tsconfig.json
+	new file:   node_modules/has-tostringtag/.eslintrc
+	new file:   node_modules/has-tostringtag/.github/FUNDING.yml
+	new file:   node_modules/has-tostringtag/.nycrc
+	new file:   node_modules/has-tostringtag/CHANGELOG.md
+	new file:   node_modules/has-tostringtag/LICENSE
+	new file:   node_modules/has-tostringtag/README.md
+	new file:   node_modules/has-tostringtag/index.d.ts
+	new file:   node_modules/has-tostringtag/index.js
+	new file:   node_modules/has-tostringtag/package.json
+	new file:   node_modules/has-tostringtag/shams.d.ts
+	new file:   node_modules/has-tostringtag/shams.js
+	new file:   node_modules/has-tostringtag/test/index.js
+	new file:   node_modules/has-tostringtag/test/shams/core-js.js
+	new file:   node_modules/has-tostringtag/test/shams/get-own-property-symbols.js
+	new file:   node_modules/has-tostringtag/test/tests.js
+	new file:   node_modules/has-tostringtag/tsconfig.json
+	new file:   node_modules/hasown/.eslintrc
+	new file:   node_modules/hasown/.github/FUNDING.yml
+	new file:   node_modules/hasown/.nycrc
+	new file:   node_modules/hasown/CHANGELOG.md
+	new file:   node_modules/hasown/LICENSE
+	new file:   node_modules/hasown/README.md
+	new file:   node_modules/hasown/index.d.ts
+	new file:   node_modules/hasown/index.js
+	new file:   node_modules/hasown/package.json
+	new file:   node_modules/hasown/tsconfig.json
+	new file:   node_modules/math-intrinsics/.eslintrc
+	new file:   node_modules/math-intrinsics/.github/FUNDING.yml
+	new file:   node_modules/math-intrinsics/CHANGELOG.md
+	new file:   node_modules/math-intrinsics/LICENSE
+	new file:   node_modules/math-intrinsics/README.md
+	new file:   node_modules/math-intrinsics/abs.d.ts
+	new file:   node_modules/math-intrinsics/abs.js
+	new file:   node_modules/math-intrinsics/constants/maxArrayLength.d.ts
+	new file:   node_modules/math-intrinsics/constants/maxArrayLength.js
+	new file:   node_modules/math-intrinsics/constants/maxSafeInteger.d.ts
+	new file:   node_modules/math-intrinsics/constants/maxSafeInteger.js
+	new file:   node_modules/math-intrinsics/constants/maxValue.d.ts
+	new file:   node_modules/math-intrinsics/constants/maxValue.js
+	new file:   node_modules/math-intrinsics/floor.d.ts
+	new file:   node_modules/math-intrinsics/floor.js
+	new file:   node_modules/math-intrinsics/isFinite.d.ts
+	new file:   node_modules/math-intrinsics/isFinite.js
+	new file:   node_modules/math-intrinsics/isInteger.d.ts
+	new file:   node_modules/math-intrinsics/isInteger.js
+	new file:   node_modules/math-intrinsics/isNaN.d.ts
+	new file:   node_modules/math-intrinsics/isNaN.js
+	new file:   node_modules/math-intrinsics/isNegativeZero.d.ts
+	new file:   node_modules/math-intrinsics/isNegativeZero.js
+	new file:   node_modules/math-intrinsics/max.d.ts
+	new file:   node_modules/math-intrinsics/max.js
+	new file:   node_modules/math-intrinsics/min.d.ts
+	new file:   node_modules/math-intrinsics/min.js
+	new file:   node_modules/math-intrinsics/mod.d.ts
+	new file:   node_modules/math-intrinsics/mod.js
+	new file:   node_modules/math-intrinsics/package.json
+	new file:   node_modules/math-intrinsics/pow.d.ts
+	new file:   node_modules/math-intrinsics/pow.js
+	new file:   node_modules/math-intrinsics/round.d.ts
+	new file:   node_modules/math-intrinsics/round.js
+	new file:   node_modules/math-intrinsics/sign.d.ts
+	new file:   node_modules/math-intrinsics/sign.js
+	new file:   node_modules/math-intrinsics/test/index.js
+	new file:   node_modules/math-intrinsics/tsconfig.json
+	new file:   node_modules/mime-db/HISTORY.md
+	new file:   node_modules/mime-db/LICENSE
+	new file:   node_modules/mime-db/README.md
+	new file:   node_modules/mime-db/db.json
+	new file:   node_modules/mime-db/index.js
+	new file:   node_modules/mime-db/package.json
+	new file:   node_modules/mime-types/HISTORY.md
+	new file:   node_modules/mime-types/LICENSE
+	new file:   node_modules/mime-types/README.md
+	new file:   node_modules/mime-types/index.js
+	new file:   node_modules/mime-types/package.json
+	new file:   node_modules/proxy-from-env/.eslintrc
+	new file:   node_modules/proxy-from-env/.travis.yml
+	new file:   node_modules/proxy-from-env/LICENSE
+	new file:   node_modules/proxy-from-env/README.md
+	new file:   node_modules/proxy-from-env/index.js
+	new file:   node_modules/proxy-from-env/package.json
+	new file:   node_modules/proxy-from-env/test.js
+	modified:   package-lock.json
+	modified:   package.json
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   frontend/package-lock.json
+	modified:   node_modules/.package-lock.json
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	branches.txt
+	status.txt
+

@@ -42,16 +42,27 @@ router.get("/dashboard/:id", verifyToken, async (req,res)=>{
   }
 });
 
-// GET All Cases for Advocate
-router.get("/cases/:id", verifyToken, async (req,res)=>{
+// GET All/Filtered Cases for Advocate
+router.get("/cases/:id", verifyToken, async (req, res) => {
   const advocateId = req.user.user_id;
+  const { status, period } = req.query;
 
   try {
-    const result = await pool.query(
-      "SELECT * FROM cases WHERE advocate_id = $1 ORDER BY created_at DESC",
-      [advocateId]
-    );
+    let query = "SELECT * FROM cases WHERE advocate_id = $1";
+    const params = [advocateId];
 
+    if (status) {
+      params.push(status);
+      query += ` AND status = $${params.length}`;
+    }
+
+    if (period === "week") {
+      query += " AND created_at >= NOW() - INTERVAL '7 days'";
+    }
+
+    query += " ORDER BY created_at DESC";
+
+    const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
     console.error(err);

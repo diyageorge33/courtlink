@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation, Outlet } from "react-router-dom";
-import AdvocateSidebar from "../../components/AdvocateSidebar";
-import { fetchAdvocateDashboardStats } from "../../api/advocateApi";
+import { useNavigate } from "react-router-dom";
+import { 
+  fetchAdvocateDashboardStats, 
+  fetchAdvocateCases, 
+  fetchAdvocateClients 
+} from "../../api/advocateApi";
 import "../../newstyles.css";
 
 function AdvocateDashboard() {
   const navigate = useNavigate();
-  const location = useLocation();
   const userName = localStorage.getItem("userName") || "Advocate";
+  const advocateId = localStorage.getItem("user_id");
 
   const [stats, setStats] = useState({
     totalCases: 0,
@@ -17,32 +20,46 @@ function AdvocateDashboard() {
   });
 
   const [loading, setLoading] = useState(true);
-
-  // Check if we are exactly on /dashboard/advocate
-  const isBaseRoute = location.pathname === "/dashboard/advocate";
+  const [detailMode, setDetailMode] = useState(null); // 'total', 'ongoing', 'weekly', 'clients'
+  const [detailData, setDetailData] = useState([]);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
-  const loadStats = async () => {
-    try {
-      const advocateId = localStorage.getItem("user_id");
-
-      if (!advocateId) {
-        console.log("Advocate not logged in");
-        return;
+    const loadStats = async () => {
+      try {
+        if (!advocateId) return;
+        const data = await fetchAdvocateDashboardStats(advocateId);
+        setStats(data);
+      } catch (err) {
+        console.error("Error fetching dashboard stats:", err);
+      } finally {
+        setLoading(false);
       }
+    };
+    loadStats();
+  }, [advocateId]);
 
-      const data = await fetchAdvocateDashboardStats(advocateId);
-      setStats(data);
-
+  const handleStatClick = async (type) => {
+    setDetailMode(type);
+    setDetailLoading(true);
+    try {
+      let data = [];
+      if (type === "total") {
+        data = await fetchAdvocateCases(advocateId);
+      } else if (type === "ongoing") {
+        data = await fetchAdvocateCases(advocateId, { status: "ONGOING" });
+      } else if (type === "weekly") {
+        data = await fetchAdvocateCases(advocateId, { period: "week" });
+      } else if (type === "clients") {
+        data = await fetchAdvocateClients();
+      }
+      setDetailData(data);
     } catch (err) {
-      console.error("Error fetching dashboard stats:", err);
+      console.error("Error fetching details:", err);
     } finally {
-      setLoading(false);
+      setDetailLoading(false);
     }
   };
-
-  loadStats();
-}, []);
 
   return (
     <div className="client-dashboard-new">
@@ -57,25 +74,113 @@ function AdvocateDashboard() {
 
       {!loading && (
         <div className="stats-grid-new">
-          <div className="stat-card-new">
+          <div className={`stat-card-new clickable-stat ${detailMode === 'total' ? 'active' : ''}`} onClick={() => handleStatClick("total")}>
             <h3>Total Cases</h3>
             <p>{stats.totalCases}</p>
           </div>
 
-          <div className="stat-card-new">
+          <div className={`stat-card-new clickable-stat ${detailMode === 'ongoing' ? 'active' : ''}`} onClick={() => handleStatClick("ongoing")}>
             <h3>Ongoing Cases</h3>
             <p>{stats.openCases}</p>
           </div>
 
-          <div className="stat-card-new">
+          <div className={`stat-card-new clickable-stat ${detailMode === 'weekly' ? 'active' : ''}`} onClick={() => handleStatClick("weekly")}>
             <h3>Cases This Week</h3>
             <p>{stats.weeklyCases}</p>
           </div>
 
-          <div className="stat-card-new">
+          <div className={`stat-card-new clickable-stat ${detailMode === 'clients' ? 'active' : ''}`} onClick={() => handleStatClick("clients")}>
             <h3>Total Clients</h3>
             <p>{stats.clients}</p>
           </div>
+        </div>
+      )}
+
+      {/* DETAIL VIEW SECTION */}
+      {detailMode && (
+        <div className="detail-view-container-new anim-fade-in">
+          <div className="detail-view-header-new">
+            <h2>
+              {detailMode === "total" && "All Assigned Cases"}
+              {detailMode === "ongoing" && "Ongoing Cases"}
+              {detailMode === "weekly" && "Cases Added This Week"}
+              {detailMode === "clients" && "Your Clients"}
+            </h2>
+            <button className="close-details-btn" onClick={() => setDetailMode(null)}>
+              Close Details ×
+            </button>
+          </div>
+
+          {detailLoading ? (
+            <div className="loading-spinner-simple">Loading items...</div>
+          ) : (
+            <div className="table-container-new">
+              <table className="custom-table-new">
+                {detailMode === "clients" ? (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Client Name</th>
+                        <th>Email Address</th>
+                        <th style={{ textAlign: "right" }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailData.map((client, idx) => (
+                        <tr key={client.user_id}>
+                          <td>{idx + 1}</td>
+                          <td className="bold-text">{client.full_name}</td>
+                          <td>{client.email}</td>
+                          <td style={{ textAlign: "right" }}>
+                            <button className="icon-btn-view" onClick={() => navigate(`/dashboard/advocate/addcase?clientId=${client.user_id}`)}>
+                               New Case
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                ) : (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Case Title</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th style={{ textAlign: "right" }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailData.map((c, idx) => (
+                        <tr key={c.case_id}>
+                          <td>{idx + 1}</td>
+                          <td className="bold-text">{c.case_title}</td>
+                          <td>{c.case_type}</td>
+                          <td>
+                            <span className={`status-pill ${c.status.toLowerCase()}`}>
+                                {c.status}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            <button className="icon-btn-view" onClick={() => navigate(`/dashboard/advocate/case/${c.case_id}`)}>
+                               View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
+              </table>
+              {detailData.length === 0 && (
+                <p style={{ textAlign: "center", color: "#94a3b8", marginTop: "20px" }}>
+                  No records found.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
 

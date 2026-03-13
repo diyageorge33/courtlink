@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import DashboardLayout from "../../layouts/DashboardLayout";
+import "../../newstyles.css";
 
 function AddCase() {
-  const advocateId = localStorage.getItem("user_id");
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -20,146 +19,92 @@ function AddCase() {
       [e.target.name]: e.target.value,
     });
   };
-const handleSubmit = async (e) => {
-  e.preventDefault();
 
-  try {
-    const advocate_id = localStorage.getItem("user_id");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    await axios.post("http://localhost:5000/api/advocate/add-case", {
-      ...formData,
-      advocate_id
-    });
+    try {
+      const advocate_id = localStorage.getItem("user_id");
 
-    navigate("/dashboard/advocate/cases");
+      await axios.post("http://localhost:5000/api/advocate/add-case", {
+        ...formData,
+        advocate_id
+      });
 
-  } catch (err) {
-    console.error("FULL ERROR:", err);
-    console.error("SERVER ERROR:", err.response?.data);
-    alert("Error adding case");
-  }
-};
-return (
-  <DashboardLayout role="advocate">
+      alert("Case filed successfully!");
+      navigate("/dashboard/advocate/cases");
 
-    <div className="add-case-card">
+    } catch (err) {
+      console.error("FULL ERROR:", err);
+      console.error("SERVER ERROR:", err.response?.data);
+      alert("Error adding case");
+    }
+  };
 
-      <h2 style={{ marginBottom: "20px", textAlign: "center" }}>
-        Add New Case
-      </h2>
-
-      <form onSubmit={handleSubmit} className="add-case-form">
-
-        <div className="form-group">
-          <label>Case Title</label>
-          <input
-            type="text"
-            name="case_title"
-            value={formData.case_title}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Case Type</label>
-          <input
-            type="text"
-            name="case_type"
-            value={formData.case_type}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Case Description</label>
-          <textarea
-            name="case_description"
-            value={formData.case_description}
-            onChange={handleChange}
-            rows="4"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Client ID</label>
-          <input
-            type="number"
-            name="client_id"
-            value={formData.client_id}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit" className="submit-btn">
-          Create Case
-        </button>
-
-      </form>
-
-    </div>
-
-  </DashboardLayout>
-);
- 
   return (
-    <div className="add-case-container">
-      <h2>Add New Case</h2>
+    <div className="client-dashboard-new">
+      {/* HEADER */}
+      <div className="documents-header-new">
+        <h1 className="page-title-new">Add New Case</h1>
+        <div className="documents-header-buttons">
+          <button
+            className="dashboard-btn-new"
+            onClick={() => navigate("/dashboard/advocate")}
+          >
+            ← Dashboard
+          </button>
+        </div>
+      </div>
 
-      <form onSubmit={handleSubmit} className="add-case-form">
-
-        <div className="form-group">
+      <div className="upload-box-new">
+        <div className="form-card-new">
+          <form onSubmit={handleSubmit}>
             <label>Case Title</label>
             <input
-            type="text"
-            name="case_title"
-            value={formData.case_title}
-            onChange={handleChange}
-            required
+              type="text"
+              name="case_title"
+              value={formData.case_title}
+              onChange={handleChange}
+              placeholder="Enter case title"
+              required
             />
-        </div>
 
-        <div className="form-group">
             <label>Case Type</label>
             <input
-            type="text"
-            name="case_type"
-            value={formData.case_type}
-            onChange={handleChange}
-            required
+              type="text"
+              name="case_type"
+              value={formData.case_type}
+              onChange={handleChange}
+              placeholder="Civil / Criminal / Family..."
+              required
             />
-        </div>
 
-        <div className="form-group">
             <label>Case Description</label>
             <textarea
-            name="case_description"
-            value={formData.case_description}
-            onChange={handleChange}
-            rows="4"
-            required
+              name="case_description"
+              value={formData.case_description}
+              onChange={handleChange}
+              rows="6"
+              placeholder="Explain the case details..."
+              required
             />
-        </div>
 
-        <div className="form-group">
             <label>Client ID</label>
             <input
-            type="number"
-            name="client_id"
-            value={formData.client_id}
-            onChange={handleChange}
-            required
+              type="number"
+              name="client_id"
+              value={formData.client_id}
+              onChange={handleChange}
+              placeholder="Enter client's user ID"
+              required
             />
+
+            <button type="submit" className="primary-btn-new">
+              Create Case Request
+            </button>
+          </form>
         </div>
-
-        <button type="submit" className="submit-btn">
-            Create Case
-        </button>
-
-        </form>
+      </div>
     </div>
   );
 }

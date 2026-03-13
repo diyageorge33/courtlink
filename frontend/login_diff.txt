@@ -1,0 +1,19 @@
+﻿commit 976c471e0310d14ccd687f7a2468e4cf78f2fafe
+Author: KrishnaSLaiju <krishnaslaiju10@gmail.com>
+Date:   Thu Mar 12 09:23:18 2026 +0530
+
+    Features added to admin dashboard
+
+diff --git a/frontend/src/pages/Login.jsx b/frontend/src/pages/Login.jsx
+index a852db9..9d40b20 100644
+--- a/frontend/src/pages/Login.jsx
++++ b/frontend/src/pages/Login.jsx
+@@ -104,7 +104,7 @@ const handleLogin = async (e) => {
+           <div className="mb-3 d-flex justify-content-center">
+             <ReCAPTCHA
+               ref={captchaRef}
+-              sitekey="6LfVGIYsAAAAAAAxRrwAcFWKlyu0-rmgqODgq1GQ"
++              sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+               onChange={(token) => setCaptchaToken(token)}
+             />
+           </div>
