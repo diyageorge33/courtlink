@@ -160,7 +160,7 @@ function Aiassistant() {
       </div>
 
       <p className="ai-tagline-new">
-        Ask questions related to CourtLink and Indian legal procedures.
+        Ask questions related to Indian legal procedures.
       </p>
 
       {/* CHAT BOX */}
