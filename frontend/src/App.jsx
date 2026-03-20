@@ -46,7 +46,7 @@ import Casetypepage from "./pages/Casetypepage";
 
 import AddCase from "./pages/advocate/AddCase";
 import AdvocateCases from "./pages/advocate/AdvocateCases";
-import ScheduleHearing from "./pages/advocate/ScheduleHearing";
+import MySchedules from "./pages/advocate/MySchedules";
 import UploadOrder from "./pages/advocate/UploadOrder";
 import Clients from "./pages/advocate/Clients";
 import CaseDetails from "./pages/advocate/CaseDetails";
@@ -149,8 +149,8 @@ function App() {
               element={<ProtectedRoute roleRequired="ADVOCATE"><AddCase /></ProtectedRoute>}
             />
             <Route
-              path="/dashboard/advocate/hearings"
-              element={<ProtectedRoute roleRequired="ADVOCATE"><ScheduleHearing /></ProtectedRoute>}
+              path="/dashboard/advocate/schedules"
+              element={<ProtectedRoute roleRequired="ADVOCATE"><MySchedules /></ProtectedRoute>}
             />
             <Route
               path="/dashboard/advocate/uploadorder"

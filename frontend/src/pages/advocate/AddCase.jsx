@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 import "../../newstyles.css";
 
 function AddCase() {
@@ -28,7 +29,7 @@ function AddCase() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        alert("Please login first");
+        toast.warn("Please login first");
         navigate("/login");
         return;
       }
@@ -50,13 +51,13 @@ function AddCase() {
         }
       );
 
-      alert("Case filed successfully!");
+      toast.success("Case filed successfully!");
       navigate("/dashboard/advocate/cases");
 
     } catch (err) {
       console.error("FULL ERROR:", err);
       console.error("SERVER ERROR:", err.response?.data);
-      alert("Error adding case");
+      toast.error("Error adding case");
     }
   };
 

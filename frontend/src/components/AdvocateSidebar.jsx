@@ -28,8 +28,8 @@ function AdvocateSidebar() {
           Clients
         </li>
 
-        <li onClick={() => navigate("/dashboard/advocate/hearings")}>
-          Schedule Hearing
+        <li onClick={() => navigate("/dashboard/advocate/schedules")}>
+          My Schedules
         </li>
 
         <li

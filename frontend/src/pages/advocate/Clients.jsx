@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "../../newstyles.css";
 
 function Clients() {
@@ -32,7 +33,7 @@ function Clients() {
 
       } catch (err) {
         console.error("Error fetching clients:", err);
-        alert("Failed to load clients");
+        toast.error("Failed to load clients");
       } finally {
         setLoading(false);
       }

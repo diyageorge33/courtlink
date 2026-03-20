@@ -4,8 +4,12 @@ import { jwtDecode } from "jwt-decode";
 import {
   fetchAdvocateDashboardStats,
   fetchAdvocateCases,
-  fetchAdvocateClients
+  fetchAdvocateClients,
+  checkResignationStatus,
+  submitResignationRequest,
+  cancelResignationRequest
 } from "../../api/advocateApi";
+import { toast } from "react-toastify";
 import "../../newstyles.css";
 
 function AdvocateDashboard() {
@@ -33,6 +37,13 @@ function AdvocateDashboard() {
   const [detailData, setDetailData] = useState([]);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Resignation states
+  const [hasPendingResignation, setHasPendingResignation] = useState(false);
+  const [showResignationModal, setShowResignationModal] = useState(false);
+  const [resignationReason, setResignationReason] = useState("");
+  const [resignationConfirm, setResignationConfirm] = useState(false);
+  const [showCancelResignationModal, setShowCancelResignationModal] = useState(false);
+
   useEffect(() => {
     const loadStats = async () => {
       try {
@@ -43,6 +54,10 @@ function AdvocateDashboard() {
 
         const data = await fetchAdvocateDashboardStats(advocateId);
         setStats(data);
+
+        // Check resignation status
+        const statusData = await checkResignationStatus();
+        setHasPendingResignation(statusData.hasPendingRequest);
 
       } catch (err) {
         console.error("Error fetching dashboard stats:", err);
@@ -84,15 +99,43 @@ function AdvocateDashboard() {
     }
   };
 
+  const handleResignationSubmit = async () => {
+    try {
+      await submitResignationRequest(resignationReason);
+      toast.success("Resignation request submitted successfully.");
+      setShowResignationModal(false);
+      setHasPendingResignation(true);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to submit resignation request.");
+    }
+  };
+
+  const handleCancelClick = () => {
+    setShowCancelResignationModal(true);
+  };
+
+  const confirmCancelResignation = async () => {
+    try {
+      await cancelResignationRequest();
+      toast.success("Resignation request formally cancelled.");
+      setHasPendingResignation(false);
+      setResignationReason("");
+      setResignationConfirm(false);
+      setShowCancelResignationModal(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to cancel request.");
+    }
+  };
+
   return (
     <div className="client-dashboard-new">
 
       <div className="dashboard-header-new">
         <div>
-          <div className="welcome-header-new">
-            <h1>Welcome, {userName}</h1>
+          <div className="welcome-header-new" style={{ marginBottom: "4px" }}>
+            <h1 style={{ margin: 0 }}>Welcome Adv. {userName}!</h1>
           </div>
-          <p>Here you can manage assigned cases and hearings.</p>
+          <p style={{ marginTop: 0 }}>A centralized workspace to manage cases, hearings, and legal responsibilities.</p>
         </div>
       </div>
 
@@ -273,10 +316,10 @@ function AdvocateDashboard() {
 
         <div
           className="action-tile-new"
-          onClick={() => navigate("/dashboard/advocate/hearings")}
+          onClick={() => navigate("/dashboard/advocate/schedules")}
         >
-          <h3>Schedule Hearing</h3>
-          <p>Schedule or update hearing dates.</p>
+          <h3>My Schedules</h3>
+          <p>Add busy dates and calendar reminders.</p>
         </div>
 
         <div
@@ -288,6 +331,91 @@ function AdvocateDashboard() {
         </div>
 
       </div>
+
+      {/* Floating Resignation Button */}
+      {!hasPendingResignation ? (
+        <div style={{ position: "fixed", bottom: "30px", right: "30px", zIndex: 1000 }}>
+          <button 
+            className="btn-danger" 
+            style={{ borderRadius: "50px", padding: "12px 24px", boxShadow: "0 4px 15px rgba(239, 68, 68, 0.4)", fontWeight: "600", cursor: "pointer", border: "none", background: "#ef4444", color: "white" }}
+            onClick={() => setShowResignationModal(true)}
+          >
+            Request Account Closure
+          </button>
+        </div>
+      ) : (
+        <div style={{ position: "fixed", bottom: "30px", right: "30px", zIndex: 1000, display: "flex", flexDirection: "column", gap: "10px", alignItems: "flex-end" }}>
+          <div style={{ background: "#475569", color: "white", padding: "12px 24px", borderRadius: "50px", fontSize: "14px", fontWeight: "600", boxShadow: "0 4px 15px rgba(0,0,0,0.5)" }}>
+            Closure Requested (Pending)
+          </div>
+          <button 
+            style={{ background: "transparent", border: "1px solid #ef4444", color: "#ef4444", padding: "6px 16px", borderRadius: "50px", fontSize: "13px", cursor: "pointer", transition: "all 0.2s" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            onClick={handleCancelClick}
+          >
+            Cancel Request
+          </button>
+        </div>
+      )}
+
+      {/* Resignation Modal Overlay */}
+      {showResignationModal && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal-card" style={{ maxWidth: "500px", textAlign: "left" }}>
+            <h3 style={{ marginBottom: "15px", color: "#ef4444" }}>Request Account Closure</h3>
+            <p style={{ fontSize: "14px", color: "#cbd5e1", marginBottom: "20px" }}>
+              Are you sure you want to close your advocate account? All your existing and pending cases will be reassigned to other advocates by the administrator.
+            </p>
+            
+            <label style={{ display: "block", margin: "0 0 8px 0", fontSize: "14px", color: "#94a3b8" }}>Reason for Resignation</label>
+            <textarea 
+              style={{ width: "100%", padding: "12px", borderRadius: "8px", background: "#0f172a", color: "white", border: "1px solid #334155", minHeight: "80px", marginBottom: "20px", boxSizing: "border-box", fontFamily: "inherit" }}
+              value={resignationReason}
+              onChange={(e) => setResignationReason(e.target.value)}
+              placeholder="Please provide a brief reason..."
+            />
+
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", marginBottom: "25px", background: "rgba(15, 23, 42, 0.4)", padding: "12px", borderRadius: "8px", border: "1px solid #334155" }}>
+              <input 
+                type="checkbox" 
+                checked={resignationConfirm} 
+                onChange={(e) => setResignationConfirm(e.target.checked)} 
+                style={{ cursor: "pointer", width: "18px", height: "18px" }}
+              />
+              <span style={{ fontSize: "13px", color: "#cbd5e1" }}>I understand that my pending cases will be reassigned.</span>
+            </label>
+
+            <div className="custom-modal-actions">
+              <button className="btn-secondary" onClick={() => setShowResignationModal(false)}>Cancel</button>
+              <button 
+                className="btn-danger" 
+                disabled={!resignationReason.trim() || !resignationConfirm}
+                style={{ opacity: (!resignationReason.trim() || !resignationConfirm) ? 0.5 : 1 }}
+                onClick={handleResignationSubmit}
+              >
+                Submit Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Resignation Modal Overlay */}
+      {showCancelResignationModal && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal-card" style={{ maxWidth: "450px" }}>
+            <h3 style={{ marginBottom: "15px", color: "white" }}>Cancel Resignation?</h3>
+            <p style={{ fontSize: "14px", color: "#cbd5e1", margin: "0 0 25px 0" }}>
+              Are you sure you want to continuously keep your account open and cancel the closure request?
+            </p>
+            <div className="custom-modal-actions">
+              <button className="btn-secondary" onClick={() => setShowCancelResignationModal(false)}>Discard</button>
+              <button className="btn-danger" onClick={confirmCancelResignation}>Accept</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

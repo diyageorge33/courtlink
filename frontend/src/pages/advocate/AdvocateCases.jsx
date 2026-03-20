@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 import "../../newstyles.css";
 
 function AdvocateCases() {
   const [cases, setCases] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -53,12 +56,15 @@ function AdvocateCases() {
     fetchCases();
   }, [advocateId, token, navigate]);
 
-  const deleteCase = async (caseId) => {
-    if (!window.confirm("Are you sure you want to delete this case?")) return;
+  const promptDelete = (caseId) => {
+    setDeleteConfirmId(caseId);
+    setShowDeleteModal(true);
+  };
 
+  const confirmDelete = async () => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/advocate/delete-case/${caseId}`,
+        `http://localhost:5000/api/advocate/delete-case/${deleteConfirmId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -66,10 +72,12 @@ function AdvocateCases() {
         }
       );
 
-      setCases(cases.filter((c) => c.case_id !== caseId));
+      setCases(cases.filter((c) => c.case_id !== deleteConfirmId));
+      toast.success("Case deleted successfully");
+      setShowDeleteModal(false);
     } catch (err) {
       console.error(err);
-      alert("Error deleting case");
+      toast.error("Error deleting case");
     }
   };
 
@@ -146,18 +154,16 @@ function AdvocateCases() {
                       className="icon-btn-edit"
                       disabled={c.status === "CLOSED"}
                       onClick={() =>
-                        navigate(
-                          `/dashboard/advocate/hearings?case=${c.case_id}`
-                        )
+                        navigate("/dashboard/advocate/schedules")
                       }
-                      title="Schedule Hearing"
+                      title="Manage My Schedules"
                     >
                       Schedule
                     </button>
 
                     <button
                       className="icon-btn-delete"
-                      onClick={() => deleteCase(c.case_id)}
+                      onClick={() => promptDelete(c.case_id)}
                       title="Remove Case"
                     >
                       Delete
@@ -169,6 +175,22 @@ function AdvocateCases() {
           </tbody>
         </table>
       </div>
+
+      {showDeleteModal && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal-card" style={{ maxWidth: "450px" }}>
+            <h3 style={{ marginBottom: "15px", color: "white" }}>Delete Case?</h3>
+            <p style={{ fontSize: "14px", color: "#cbd5e1", margin: "0 0 25px 0" }}>
+              Are you sure you want to firmly delete this case and remove its records from your dashboard permanently?
+            </p>
+            <div className="custom-modal-actions">
+              <button className="btn-secondary" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+              <button className="btn-danger" onClick={confirmDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
