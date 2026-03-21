@@ -265,3 +265,30 @@ VALUES
 'ADMIN',
 true
 );
+
+21/3/26
+
+ALTER TABLE users
+ADD COLUMN account_status VARCHAR(20) DEFAULT 'ACTIVE';
+
+ALTER TABLE advocate_profiles
+ADD COLUMN phone VARCHAR(15);
+
+ALTER TABLE advocate_profiles
+RENAME COLUMN bar_enrollment_no TO office_id;
+
+ALTER TABLE cases
+ADD COLUMN advocate_change_requested BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE cases
+DROP CONSTRAINT cases_status_check;
+ALTER TABLE cases
+ADD CONSTRAINT cases_status_check
+CHECK (status IN (
+  'PENDING',
+  'APPROVED',
+  'REJECTED',
+  'ONGOING',
+  'CLOSED',
+  'WITHDRAWN'
+));

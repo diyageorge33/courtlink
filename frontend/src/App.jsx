@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 import Navbar from "./components/Navbar";
 import ScrollToTop from "./components/ScrollToTop";
@@ -37,13 +38,16 @@ import Mycase from "./pages/Mycase";
 
 import FileCase from "./pages/FileCase";
 import UploadDocuments from "./pages/UploadDocuments";
-
+import ClientNotifications from "./pages/client/ClientNotifications";
 import PaymentHistory from "./pages/client/PaymentHistory";
 import CaseTypeGuide from "./pages/client/CaseTypeGuide";
 import Clientsetting from "./pages/client/Clientsetting";
-
+import ClientOngoingCases from "./pages/client/ClientOngoingCases";
+import ClientClosedCases from "./pages/client/ClientClosedCases";
+import ClientHearings from "./pages/client/ClientHearings";
+import ClientAdvocates from "./pages/client/ClientAdvocates";
 import Casetypepage from "./pages/Casetypepage";
-
+import ClientOrders from "./pages/client/ClientOrders";
 import AddCase from "./pages/advocate/AddCase";
 import AdvocateCases from "./pages/advocate/AdvocateCases";
 import ScheduleHearing from "./pages/advocate/ScheduleHearing";
@@ -58,13 +62,13 @@ function App() {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-
+      <Toaster position="top-right" />
       <BrowserRouter>
         <ScrollToTop />
 
         <div className="app-container">
           <Navbar />
-
+        
           <Routes>
 
             {/* PUBLIC PAGES */}
@@ -94,10 +98,61 @@ function App() {
             <Route path="/terms" element={<Terms />} />
 
             {/* CLIENT DASHBOARD */}
+            <Route path="/dashboard/client" element={<ProtectedRoute roleRequired="CLIENT"><ClientDashboard /></ProtectedRoute>}  />
             <Route
-              path="/dashboard/client"
-              element={<ProtectedRoute roleRequired="CLIENT"><ClientDashboard /></ProtectedRoute>}
+            path="/dashboard/client/ongoing"
+            element={
+            <ProtectedRoute roleRequired="CLIENT">
+            <ClientOngoingCases />
+            </ProtectedRoute>
+          }
+          />
+
+          <Route
+          path="/dashboard/client/closed"
+          element={
+          <ProtectedRoute roleRequired="CLIENT">
+          <ClientClosedCases />
+          </ProtectedRoute>
+            }
+          />
+
+            <Route
+            path="/dashboard/client/orders"
+            element={
+            <ProtectedRoute roleRequired="CLIENT">
+            <ClientOrders />
+            </ProtectedRoute>
+            }
             />
+
+          <Route
+          path="/dashboard/client/hearings"
+          element={
+          <ProtectedRoute roleRequired="CLIENT">
+            <ClientHearings />
+          </ProtectedRoute>
+          }
+          />
+
+              <Route
+          path="/dashboard/client/advocates"
+          element={
+          <ProtectedRoute roleRequired="CLIENT">
+          <ClientAdvocates />
+          </ProtectedRoute>
+        }
+        />
+
+          <Route
+          path="/dashboard/client/notifications"
+          element={
+          <ProtectedRoute roleRequired="CLIENT">
+          <ClientNotifications />
+          </ProtectedRoute>
+          }
+          />
+
             <Route
               path="/dashboard/client/aiassistant"
               element={<ProtectedRoute roleRequired="CLIENT"><Aiassistant /></ProtectedRoute>}

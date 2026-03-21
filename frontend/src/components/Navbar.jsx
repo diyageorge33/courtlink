@@ -1,30 +1,50 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 import "../newstyles.css";
 
 function Navbar() {
-
   const navigate = useNavigate();
   const location = useLocation();
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+
+    if (!token) {
+      setIsLoggedIn(false);
+      setRole(null);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(token);
+
+      // check expiry
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp < currentTime) {
+        handleLogout();
+        return;
+      }
+
+      setIsLoggedIn(true);
+      setRole(decoded.role);
+
+    } catch (err) {
+      console.error("Invalid token");
+      handleLogout();
+    }
+
   }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("role");
     navigate("/login");
   };
 
-  //Redirect home based on role
   const handleHomeClick = () => {
-
-    const role = localStorage.getItem("role");
-
     if (!isLoggedIn) {
       navigate("/");
       return;
@@ -68,10 +88,6 @@ function Navbar() {
         </li>
 
         <li>
-          <Link to="/services">Services</Link>
-        </li>
-
-        <li>
           <Link to="/Legalexperts">Legal Experts</Link>
         </li>
 
@@ -83,19 +99,15 @@ function Navbar() {
 
       {/* AUTH SECTION */}
       {!isLoggedIn && !isDashboardPage ? (
-
         <div className="auth-links">
           <Link to="/login">Login</Link>
           <span className="separator"> / </span>
           <Link to="/register">Sign Up</Link>
         </div>
-
       ) : isLoggedIn ? (
-
         <button className="btn-primary" onClick={handleLogout}>
           Logout
         </button>
-
       ) : null}
 
     </nav>

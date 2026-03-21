@@ -133,7 +133,7 @@ function Document() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      View / Download
+                      View
                     </a>
 
                   </td>

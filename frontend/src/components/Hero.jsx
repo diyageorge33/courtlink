@@ -19,7 +19,7 @@ const navigate = useNavigate();
               className="btn-primary"
               onClick={() => navigate("/login")}
             >
-                Login to CourtLink
+                Get Started
             </button>
 
 
@@ -44,3 +44,4 @@ const navigate = useNavigate();
 }
 
 export default Hero;
+

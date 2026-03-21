@@ -75,7 +75,8 @@ exports.login = async (req, res) => {
       const token = jwt.sign(
       {
         user_id: user.user_id,   // using your original naming
-        role: user.role
+        role: user.role,
+        full_name: user.full_name
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
@@ -151,11 +152,11 @@ exports.register = async (req, res) => {
     if (role === "ADVOCATE") {
       await pool.query(
         `INSERT INTO advocate_profiles
-         (advocate_id, bar_enrollment_no, specialization, experience_years)
+         (advocate_id, office_id, specialization, experience_years)
          VALUES ($1,$2,$3,$4)`,
         [
           userId,
-          barEnrollmentNo,
+          officeId,
           specialization,
           experienceYears
         ]

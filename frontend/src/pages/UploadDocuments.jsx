@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -22,10 +21,8 @@ function UploadDocuments() {
 
     const loadCases = async () => {
       try {
-
         const caseData = await fetchClientCases();
         setCases(caseData);
-
       } catch (err) {
         console.error("Error loading cases:", err);
       } finally {
@@ -51,6 +48,31 @@ function UploadDocuments() {
         return;
       }
 
+      // ✅ File type validation
+      const allowedTypes = [
+        "application/pdf",
+        "text/plain",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "audio/mpeg",
+        "audio/wav",
+        "image/jpeg",
+        "image/png"
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        alert("Unsupported file type!");
+        return;
+      }
+
+      // ✅ File size validation (10MB)
+      const maxSize = 10 * 1024 * 1024;
+
+      if (file.size > maxSize) {
+        alert("File too large! Max 10MB allowed.");
+        return;
+      }
+
       setUploading(true);
 
       const formData = new FormData();
@@ -61,14 +83,11 @@ function UploadDocuments() {
 
       alert("Document uploaded successfully!");
 
-      // Redirect to My Documents page
       navigate("/dashboard/client/document");
 
     } catch (err) {
-
       console.error("Upload error:", err);
       alert("Upload failed");
-
     } finally {
       setUploading(false);
     }
@@ -80,7 +99,6 @@ function UploadDocuments() {
     <div className="client-dashboard-new">
 
       {/* PAGE HEADER */}
-
       <div className="documents-header-new">
 
         <h1 className="page-title-new">Upload Documents</h1>
@@ -91,7 +109,7 @@ function UploadDocuments() {
             className="dashboard-btn-new"
             onClick={() => navigate("/dashboard/client/document")}
           >
-           + My Documents
+            + My Documents
           </button>
 
           <button
@@ -104,7 +122,6 @@ function UploadDocuments() {
         </div>
 
       </div>
-
 
       {loading ? (
         <p>Loading...</p>
@@ -127,15 +144,19 @@ function UploadDocuments() {
                 {c.case_title} (#{c.case_id})
               </option>
             ))}
-
           </select>
 
           <label>Choose File</label>
 
           <input
             type="file"
+            accept=".pdf,.txt,.doc,.docx,.mp3,.wav,.jpg,.jpeg,.png"
             onChange={(e) => setFile(e.target.files[0])}
           />
+
+          <p style={{ fontSize: "12px", color: "#94a3b8" }}>
+            Allowed: PDF, DOC, TXT, MP3, Images (Max 10MB)
+          </p>
 
           <button
             className="primary-btn-new"

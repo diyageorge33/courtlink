@@ -1,7 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchClientCases } from "../api/clientApi";
+import { toast } from "react-toastify";
 import "../newstyles.css";
 
 function Mycase() {
@@ -11,31 +11,91 @@ function Mycase() {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCase, setSelectedCase] = useState(null);
+  const [confirmCase, setConfirmCase] = useState(null);
 
   useEffect(() => {
-
-    const loadCases = async () => {
-      try {
-
-        const data = await fetchClientCases();
-        setCases(data);
-
-      } catch (err) {
-        console.error("Error fetching cases:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadCases();
-
   }, []);
+
+  const loadCases = async () => {
+    try {
+      const data = await fetchClientCases();
+      setCases(data);
+    } catch (err) {
+      console.error("Error fetching cases:", err);
+      toast.error("Failed to load cases");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getHearingDate = (date) => {
+    if (!date) return "N/A";
+
+    const today = new Date();
+    const hearingDate = new Date(date);
+
+    today.setHours(0, 0, 0, 0);
+    hearingDate.setHours(0, 0, 0, 0);
+
+    return hearingDate >= today
+      ? hearingDate.toLocaleDateString()
+      : "N/A";
+  };
+
+  const handleWithdraw = async (caseId) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5000/api/client/withdraw-case/${caseId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+      toast.success(data.message);
+
+      loadCases();
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Error withdrawing case");
+    }
+  };
+
+  const handleResubmit = async (caseId) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5000/api/client/resubmit-case/${caseId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+      toast.success(data.message);
+
+      loadCases();
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Error resubmitting case");
+    }
+  };
 
   return (
 
     <div className="client-dashboard-new">
-
-      {/* HEADER */}
 
       <div className="documents-header-new">
 
@@ -83,6 +143,7 @@ function Mycase() {
                 <th>Status</th>
                 <th>Next Hearing</th>
                 <th>Created At</th>
+                <th>Action</th>
               </tr>
             </thead>
 
@@ -107,14 +168,32 @@ function Mycase() {
 
                   <td>{c.status}</td>
 
-                  <td>
-                    {c.next_hearing_date
-                      ? new Date(c.next_hearing_date).toLocaleDateString()
-                      : "N/A"}
-                  </td>
+                  <td>{getHearingDate(c.next_hearing_date)}</td>
 
                   <td>
                     {new Date(c.created_at).toLocaleDateString()}
+                  </td>
+
+                  <td>
+
+                    {c.status === "PENDING" && (
+                      <button
+                        className="mycase-danger-btn"
+                        onClick={() => setConfirmCase(c.case_id)}
+                      >
+                        Withdraw
+                      </button>
+                    )}
+
+                    {c.status === "WITHDRAWN" && (
+                      <button
+                        className="mycase-primary-btn"
+                        onClick={() => handleResubmit(c.case_id)}
+                      >
+                        Resubmit
+                      </button>
+                    )}
+
                   </td>
 
                 </tr>
@@ -129,24 +208,49 @@ function Mycase() {
 
       )}
 
+      {/* 🔥 CONFIRMATION MODAL */}
+      {confirmCase && (
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+
+            <p>Are you sure you want to withdraw this case?</p>
+
+            <div className="confirm-actions">
+
+              <button
+                className="mycase-danger-btn"
+                onClick={() => {
+                  handleWithdraw(confirmCase);
+                  setConfirmCase(null);
+                }}
+              >
+                Yes, Withdraw
+              </button>
+
+              <button
+                className="mycase-primary-btn"
+                onClick={() => setConfirmCase(null)}
+              >
+                Cancel
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
       {selectedCase && (
-
         <div className="case-description-card">
-
           <h3>Case Description</h3>
-
           <p>
             {selectedCase.case_description || "No description available."}
           </p>
-
         </div>
-
       )}
 
     </div>
-
   );
-
 }
 
 export default Mycase;

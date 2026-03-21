@@ -1,10 +1,87 @@
+// import api from "./api";
+
+// export const fetchClientDashboardStats = async () => {
+//   const res = await api.get(`/client/dashboard/stats`);
+//   return res.data;
+// };
+
+// export const fetchClientCases = async () => {
+//   const res = await api.get(`/client/cases`);
+//   return res.data;
+// };
+
+// export const fileNewCase = async (caseData) => {
+//   const res = await api.post("/client/filecase", caseData);
+//   return res.data;
+// };
+
+// export const uploadClientDocument = async (formData) => {
+//   const res = await api.post("/client/upload-document", formData, {
+//     headers: {
+//       "Content-Type": "multipart/form-data",
+//     },
+//   });
+//   return res.data;
+// };
+
+// export const fetchClientDocuments = async () => {
+//   const res = await api.get(`/client/documents/client`);
+//   return res.data;
+// };
+
+// export const fetchClientSettings = async () => {
+//   const res = await api.get(`/client/settings`);
+//   return res.data;
+// };
+
+// export const updateClientSettings = async (data) => {
+//   const res = await api.put(`/client/settings`, data);
+//   return res.data;
+// };
+
+// export const deleteClientDocument = async (documentId) => {
+
+//   const token = localStorage.getItem("token");
+
+//   const res = await fetch(
+//     `http://localhost:5000/api/client/documents/${documentId}`,
+//     {
+//       method: "DELETE",
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     }
+//   );
+
+//   return res.json();
+// };
+
+// export const fetchClientAdvocates = async () => {
+
+//   const token = localStorage.getItem("token");
+
+//   const res = await fetch(
+//     "http://localhost:5000/api/client/advocates",
+//     {
+//       headers: {
+//         Authorization: `Bearer ${token}`
+//       }
+//     }
+//   );
+
+//   return res.json();
+
+// };
+
 import api from "./api";
 
+/* DASHBOARD */
 export const fetchClientDashboardStats = async () => {
   const res = await api.get(`/client/dashboard/stats`);
   return res.data;
 };
 
+/* CASES */
 export const fetchClientCases = async () => {
   const res = await api.get(`/client/cases`);
   return res.data;
@@ -15,6 +92,7 @@ export const fileNewCase = async (caseData) => {
   return res.data;
 };
 
+/* DOCUMENTS */
 export const uploadClientDocument = async (formData) => {
   const res = await api.post("/client/upload-document", formData, {
     headers: {
@@ -29,6 +107,12 @@ export const fetchClientDocuments = async () => {
   return res.data;
 };
 
+export const deleteClientDocument = async (documentId) => {
+  const res = await api.delete(`/client/documents/${documentId}`);
+  return res.data;
+};
+
+/* SETTINGS */
 export const fetchClientSettings = async () => {
   const res = await api.get(`/client/settings`);
   return res.data;
@@ -39,36 +123,19 @@ export const updateClientSettings = async (data) => {
   return res.data;
 };
 
-export const deleteClientDocument = async (documentId) => {
-
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(
-    `http://localhost:5000/api/client/documents/${documentId}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return res.json();
+/* 🔥 ACCOUNT CLOSURE */
+export const requestAccountClosure = async () => {
+  const res = await api.post(`/client/request-closure`);
+  return res.data;
 };
 
+export const cancelAccountClosure = async () => {
+  const res = await api.post(`/client/cancel-closure`);
+  return res.data;
+};
+
+/* ADVOCATES */
 export const fetchClientAdvocates = async () => {
-
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(
-    "http://localhost:5000/api/client/advocates",
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  );
-
-  return res.json();
-
+  const res = await api.get(`/client/advocates`);
+  return res.data;
 };

@@ -10,10 +10,10 @@ function AdvocateRegister() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [barEnrollmentNo, setBarEnrollmentNo] = useState("");
+  const [officeId, setOfficeId] = useState(""); // ✅ CHANGED
   const [experienceYears, setExperienceYears] = useState("");
   const [specializations, setSpecializations] = useState([]);
-  const [role, setRole] = useState("ADVOCATE"); // default
+  const [role, setRole] = useState("ADVOCATE");
 
   const specializationList = [
     "Criminal",
@@ -46,7 +46,7 @@ function AdvocateRegister() {
       !email ||
       !password ||
       !confirmPassword ||
-      !barEnrollmentNo ||
+      !officeId ||   // ✅ CHANGED
       !experienceYears ||
       specializations.length === 0
     ) {
@@ -68,7 +68,7 @@ function AdvocateRegister() {
           email: email.trim().toLowerCase(),
           password,
           role: "ADVOCATE",
-          barEnrollmentNo,
+          officeId, // ✅ CHANGED
           experienceYears: Number(experienceYears),
           specialization: specializations.join(", "),
         }),
@@ -102,47 +102,51 @@ function AdvocateRegister() {
 
         <div className="register-form">
 
-          
           <label>I am *</label>
-            <select
+          <select
             value={role}
             onChange={(e) => {
-            const selectedRole = e.target.value;
-            setRole(selectedRole);
+              const selectedRole = e.target.value;
+              setRole(selectedRole);
 
-            if (selectedRole === "CLIENT") {
-            navigate("/register");
-          }
-        }}
-        >
-        <option value="CLIENT">Client</option>
-        <option value="ADVOCATE">Advocate</option>
-        </select>
+              if (selectedRole === "CLIENT") {
+                navigate("/register");
+              }
+            }}
+          >
+            <option value="CLIENT">Client</option>
+            <option value="ADVOCATE">Advocate</option>
+          </select>
 
           <label>Full Name *</label>
-          <input value={fullName} placeholder="Full Name" onChange={(e) => setFullName(e.target.value)} />
+          <input value={fullName} onChange={(e) => setFullName(e.target.value)} />
 
           <label>Email *</label>
-          <input value={email} placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+          <input value={email} onChange={(e) => setEmail(e.target.value)} />
 
           <label>Password *</label>
-          <input type="password" value={password} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
           <label>Confirm Password *</label>
-          <input type="password" value={confirmPassword} placeholder="Confirm Password" onChange={(e) => setConfirmPassword(e.target.value)} />
+          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
 
-          <label>Bar Enrollment Number *</label>
-          <input value={barEnrollmentNo} placeholder="Bar Enrollment Number" onChange={(e) => setBarEnrollmentNo(e.target.value)} />
+          {/* 🔥 CHANGED FIELD */}
+          <label>Office ID *</label>
+          <input
+            value={officeId}
+            placeholder="Office ID"
+            onChange={(e) => setOfficeId(e.target.value)}
+          />
 
           <label>Years of Experience *</label>
           <input
             type="number"
-            placeholder="Years of Experience"
             value={experienceYears}
             onChange={(e) => setExperienceYears(e.target.value)}
           />
 
           <p className="section-label">Case Specialization *</p>
+
           <div className="checkbox-grid">
             {specializationList.map((item) => (
               <label className="checkbox-item" key={item}>
@@ -159,6 +163,7 @@ function AdvocateRegister() {
           <button className="register-btn" onClick={handleRegister}>
             Register
           </button>
+
         </div>
       </div>
     </div>

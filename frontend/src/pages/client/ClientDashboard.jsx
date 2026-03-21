@@ -1,17 +1,15 @@
-
-
 import { useNavigate } from "react-router-dom";
 import { fetchClientDashboardStats } from "../../api/clientApi";
 import PayConsultation from "../../components/PayConsultation";
 import { useEffect, useState } from "react";
-import { FaCog } from "react-icons/fa";
+import { FaCog, FaRobot, FaGem, FaBell } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
 import "../../newstyles.css";
-import {FaGem} from "react-icons/fa";
 
 function ClientDashboard() {
   const navigate = useNavigate();
-  const userName = localStorage.getItem("userName") || "Client";
 
+  const [userName, setUserName] = useState("Client");
   const [stats, setStats] = useState({
     ongoingCases: 0,
     upcomingHearings: 0,
@@ -21,6 +19,21 @@ function ClientDashboard() {
 
   const [consultationPaid, setConsultationPaid] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // 🔐 JWT decode for username
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return;
+
+    try {
+      const decoded = jwtDecode(token);
+      setUserName(decoded.full_name || "Client");
+    } catch (err) {
+      console.error("Invalid token");
+      setUserName("Client");
+    }
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -40,10 +53,9 @@ function ClientDashboard() {
         const paymentData = await res.json();
         setConsultationPaid(paymentData.consultation_paid);
 
-        // Update pending payment dynamically
-        setStats(prev => ({
+        setStats((prev) => ({
           ...prev,
-          pendingPayments: paymentData.consultation_paid ? 0 : 500
+          pendingPayments: paymentData.consultation_paid ? 0 : 500,
         }));
       } catch (err) {
         console.error(err);
@@ -63,22 +75,41 @@ function ClientDashboard() {
 
         <div>
           <div className="welcome-header-new">
-              <h1>Welcome, {userName}</h1>
+            <h1>Welcome, {userName}</h1>
 
-              {consultationPaid && (
-                <span className="premium-badge-new">
-                  <FaGem className="diamond-icon" />
-                  Premium Member
-                </span>
-              )}
+            {consultationPaid && (
+              <span className="premium-badge-new">
+                <FaGem className="diamond-icon" />
+                Premium Member
+              </span>
+            )}
           </div>
+
           <p>Manage your cases and legal documents.</p>
         </div>
 
-        <FaCog
-          className="settings-icon-new"
-          onClick={() => navigate("/dashboard/client/clientsetting")}
-        />
+        {/* 🔥 ICON SECTION */}
+        <div className="header-icons">
+
+          
+
+          <FaRobot
+            className="ai-icon-new"
+            onClick={() => navigate("/dashboard/client/aiassistant")}
+          />
+
+          {/* 🔔 NOTIFICATION BELL */}
+          <FaBell
+            className="notification-icon-new"
+            onClick={() => navigate("/dashboard/client/notifications")}
+          />
+
+          <FaCog
+            className="settings-icon-new"
+            onClick={() => navigate("/dashboard/client/clientsetting")}
+          />
+
+        </div>
 
       </div>
 
@@ -86,24 +117,28 @@ function ClientDashboard() {
       {!loading && (
         <div className="stats-grid-new">
 
-          <div className="stat-card-new">
+          <div
+            className="stat-card-new stat-green"
+            onClick={() => navigate("/dashboard/client/ongoing")}
+          >
             <h3>Ongoing Cases</h3>
             <p>{stats.ongoingCases}</p>
           </div>
 
-          <div className="stat-card-new">
+          <div
+            className="stat-card-new stat-yellow"
+            onClick={() => navigate("/dashboard/client/hearings")}
+          >
             <h3>Upcoming Hearings</h3>
             <p>{stats.upcomingHearings}</p>
           </div>
 
-          <div className="stat-card-new">
+          <div
+            className="stat-card-new stat-red"
+            onClick={() => navigate("/dashboard/client/closed")}
+          >
             <h3>Closed Cases</h3>
             <p>{stats.closedCases}</p>
-          </div>
-
-          <div className="stat-card-new">
-            <h3>Pending Payments</h3>
-            <p>₹ {stats.pendingPayments}</p>
           </div>
 
         </div>
@@ -147,8 +182,6 @@ function ClientDashboard() {
           <p>Upload supporting documents.</p>
         </div>
 
-        
-
         <div
           className="action-tile-new"
           onClick={() => navigate("/dashboard/client/paymenthistory")}
@@ -157,9 +190,6 @@ function ClientDashboard() {
           <p>View all your transactions.</p>
         </div>
 
-        
-
-        
         <div
           className={`action-tile-new ${!consultationPaid ? "tile-locked" : ""}`}
           onClick={() => consultationPaid && navigate("/Mycase")}
@@ -174,10 +204,10 @@ function ClientDashboard() {
 
         <div
           className="action-tile-new"
-          onClick={() => navigate("/dashboard/client/aiassistant")}
+          onClick={() => navigate("/dashboard/client/orders")}
         >
-          <h3>AI Assistant</h3>
-          <p>Ask legal questions instantly.</p>
+          <h3>Download Orders</h3>
+          <p>Access and download your case orders</p>
         </div>
 
         <div
@@ -188,13 +218,14 @@ function ClientDashboard() {
           <p>View and manage uploaded documents.</p>
         </div>
 
-        <div className="action-tile-new"
-        onClick={() => navigate("/dashboard/client/advocates")}>
-           <h3>My Advocates</h3>
-           <p>View your assigned advocates.</p>
-      </div>
+        <div
+          className="action-tile-new"
+          onClick={() => navigate("/dashboard/client/advocates")}
+        >
+          <h3>My Advocates</h3>
+          <p>View your assigned advocates.</p>
+        </div>
 
-        
       </div>
 
     </div>
