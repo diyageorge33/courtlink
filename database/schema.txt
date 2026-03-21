@@ -292,3 +292,14 @@ CHECK (status IN (
   'CLOSED',
   'WITHDRAWN'
 ));
+
+CREATE TABLE orders (
+  order_id SERIAL PRIMARY KEY,
+  case_id INT REFERENCES cases(case_id) ON DELETE CASCADE,
+  uploaded_by INT REFERENCES users(user_id) ON DELETE CASCADE,
+  file_name TEXT,
+  file_url TEXT,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE orders
+ADD COLUMN advocate_id INT REFERENCES users(user_id) ON DELETE CASCADE;

@@ -206,8 +206,8 @@ function ClientDashboard() {
           className="action-tile-new"
           onClick={() => navigate("/dashboard/client/orders")}
         >
-          <h3>Download Orders</h3>
-          <p>Access and download your case orders</p>
+          <h3>View Orders</h3>
+          <p>Access your case orders</p>
         </div>
 
         <div

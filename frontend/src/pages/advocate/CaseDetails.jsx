@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import "../../newstyles.css";
 
 function CaseDetails() {
@@ -33,7 +34,7 @@ function CaseDetails() {
 
       } catch (err) {
         console.error("Error fetching case:", err);
-        alert("Failed to load case details");
+        toast.error("Failed to load case details");
       } finally {
         setLoading(false);
       }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 import "../../newstyles.css";
 
 function UploadOrder() {
@@ -11,6 +12,8 @@ function UploadOrder() {
   const [file, setFile] = useState(null);
   const [orders, setOrders] = useState([]);
   const [cases, setCases] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   const token = localStorage.getItem("token");
 
@@ -27,18 +30,43 @@ function UploadOrder() {
         return;
       }
 
-      const [ordersRes, casesRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/orders/my-orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(
-          `http://localhost:5000/api/advocate/cases/${advocateId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        ),
-      ]);
+      // const [ordersRes, casesRes] = await Promise.all([
+      //   axios.get("http://localhost:5000/api/orders/my-orders", {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //   }),
+      //   axios.get(
+      //     `http://localhost:5000/api/advocate/cases/${advocateId}`,
+      //     {
+      //       headers: { Authorization: `Bearer ${token}` },
+      //     }
+      //   ),
+      // ]);
 
+      let ordersRes, casesRes;
+
+try {
+  ordersRes = await axios.get("http://localhost:5000/api/orders/my-orders", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+} catch (err) {
+  console.error("Orders API failed:", err);
+  ordersRes = { data: [] }; // fallback
+}
+
+try {
+  casesRes = await axios.get(
+    `http://localhost:5000/api/advocate/cases/${advocateId}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+} catch (err) {
+  console.error("Cases API failed:", err);
+  casesRes = { data: [] };
+}
+
+setOrders(ordersRes.data);
+setCases(casesRes.data);
       setOrders(ordersRes.data);
       setCases(casesRes.data);
 
@@ -55,7 +83,7 @@ function UploadOrder() {
     e.preventDefault();
 
     if (!caseId) {
-      alert("Please select a case");
+      toast.warn("Please select a case");
       return;
     }
 
@@ -74,7 +102,7 @@ function UploadOrder() {
         }
       );
 
-      alert("Order uploaded successfully");
+      toast.success("Order uploaded successfully");
 
       setFile(null);
       setCaseId("");
@@ -83,26 +111,31 @@ function UploadOrder() {
 
     } catch (err) {
       console.error(err);
-      alert("Error uploading order");
+      toast.error("Error uploading order");
     }
   };
 
-  const handleDelete = async (orderId) => {
-    if (!window.confirm("Are you sure you want to delete this order?")) return;
+  const promptDelete = (orderId) => {
+    setDeleteConfirmId(orderId);
+    setShowDeleteModal(true);
+  };
 
+  const confirmDelete = async () => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/orders/delete/${orderId}`,
+        `http://localhost:5000/api/orders/delete/${deleteConfirmId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
+      toast.success("Order deleted successfully");
+      setShowDeleteModal(false);
       fetchData();
 
     } catch (err) {
       console.error(err);
-      alert("Error deleting order");
+      toast.error("Error deleting order");
     }
   };
 
@@ -193,7 +226,7 @@ function UploadOrder() {
                   <td style={{ textAlign: "right" }}>
                     <button
                       className="icon-btn-delete"
-                      onClick={() => handleDelete(o.order_id)}
+                      onClick={() => promptDelete(o.order_id)}
                     >
                       Delete
                     </button>
@@ -207,6 +240,21 @@ function UploadOrder() {
         )}
 
       </div>
+
+      {showDeleteModal && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal-card" style={{ maxWidth: "450px" }}>
+            <h3 style={{ marginBottom: "15px", color: "white" }}>Delete Order?</h3>
+            <p style={{ fontSize: "14px", color: "#cbd5e1", margin: "0 0 25px 0" }}>
+              Are you sure you want to delete this court order document?
+            </p>
+            <div className="custom-modal-actions">
+              <button className="btn-secondary" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+              <button className="btn-danger" onClick={confirmDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

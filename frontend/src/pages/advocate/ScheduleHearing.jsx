@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "../../newstyles.css";
 
 function ScheduleHearing() {
@@ -21,7 +22,7 @@ function ScheduleHearing() {
     e.preventDefault();
 
     if (!caseId || !date) {
-      alert("Please fill all fields");
+      toast.warn("Please fill all fields");
       return;
     }
 
@@ -43,13 +44,13 @@ function ScheduleHearing() {
         }
       );
 
-      alert("Hearing scheduled successfully");
+      toast.success("Hearing scheduled successfully");
       navigate("/dashboard/advocate/cases");
 
     } catch (err) {
       console.error("FULL ERROR:", err);
       console.error("SERVER ERROR:", err.response?.data);
-      alert("Error scheduling hearing");
+      toast.error("Error scheduling hearing");
     }
   };
 
