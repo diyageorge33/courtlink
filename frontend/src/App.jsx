@@ -54,6 +54,7 @@ import MySchedules from "./pages/advocate/MySchedules";
 import UploadOrder from "./pages/advocate/UploadOrder";
 import Clients from "./pages/advocate/Clients";
 import CaseDetails from "./pages/advocate/CaseDetails";
+import AdminPendingAdvocates from "./pages/AdminPendingAdvocates";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -225,6 +226,8 @@ function App() {
               path="/dashboard/admin"
               element={<ProtectedRoute roleRequired="ADMIN"><AdminDashboard /></ProtectedRoute>}
             />
+
+            <Route path="/admin/pending" element={<AdminPendingAdvocates />} />
 
           </Routes>
         </div>

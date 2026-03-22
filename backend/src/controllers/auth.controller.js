@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 exports.login = async (req, res) => {
   console.log("LOGIN API HIT");
   console.log("Request body:", req.body);
+
   const { email, password, captchaToken } = req.body;
 
   if (!email || !password || !captchaToken) {
@@ -17,6 +18,7 @@ exports.login = async (req, res) => {
   }
 
   try {
+    //  CAPTCHA VERIFY
     const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
     const captchaRes = await axios.post(
       verifyUrl,
@@ -25,40 +27,85 @@ exports.login = async (req, res) => {
         response: captchaToken,
       })
     );
+
     const captchaData = captchaRes.data;
     console.log("Captcha response:", captchaData);
 
     if (!captchaData.success) {
-      console.log("Captcha failed");
       return res.status(403).json({ message: "Captcha verification failed" });
     }
 
     // Normalize email
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Fetch user by email
+    //  CHECK USERS TABLE FIRST
     const result = await pool.query(
-      "SELECT user_id, role, full_name, password_hash, is_verified FROM users WHERE email = $1",
+      "SELECT user_id, role, full_name, password_hash, is_verified, account_status FROM users WHERE email = $1",
       [normalizedEmail]
     );
 
     console.log("User fetched:", result.rows[0]);
 
-
+    //  IF NOT FOUND IN USERS → CHECK PENDING
     if (result.rows.length === 0) {
-      console.log("User not found in DB");
+
+      const pending = await pool.query(
+        "SELECT is_verified, status FROM pending_advocates WHERE email = $1",
+        [normalizedEmail]
+      );
+
+      if (pending.rows.length > 0) {
+
+        const user = pending.rows[0];
+
+        //  VERY IMPORTANT: CHECK REJECTED FIRST
+        if (user.status === "REJECTED") {
+          return res.status(403).json({
+            message: "Your request was denied by admin"
+          });
+        }
+
+        //  NOT VERIFIED
+        if (!user.is_verified) {
+          return res.status(403).json({
+            message: "Please verify your email first"
+          });
+        }
+
+        //  STILL PENDING
+        return res.status(403).json({
+          message: "Your account is pending admin approval"
+        });
+      }
+
+      //  NOT FOUND ANYWHERE
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const user = result.rows[0];
 
+    //  BLOCK REJECTED USERS (from users table)
+    if (user.account_status === "REJECTED") {
+      return res.status(403).json({
+        message: "Your registration was rejected by admin"
+      });
+    }
+
+    //  BLOCK PENDING USERS (if you use this)
+    if (user.account_status === "PENDING") {
+      return res.status(403).json({
+        message: "Your account is under admin review"
+      });
+    }
+
+    //  VERIFY EMAIL
     if (!user.is_verified) {
       return res.status(403).json({
         message: "Please verify your email before logging in"
-    });
-}
+      });
+    }
 
-   // Compare hashed password
+    //  PASSWORD CHECK
     console.log("Entered password:", password);
     console.log("Stored hash:", user.password_hash);
 
@@ -68,13 +115,12 @@ exports.login = async (req, res) => {
 
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
-}
+    }
 
-
-    // Login success-generate jwt
-      const token = jwt.sign(
+    //  GENERATE TOKEN
+    const token = jwt.sign(
       {
-        user_id: user.user_id,   // using your original naming
+        user_id: user.user_id,
         role: user.role,
         full_name: user.full_name
       },
@@ -90,107 +136,245 @@ exports.login = async (req, res) => {
 
   } catch (err) {
     console.error("LOGIN CRITICAL ERROR:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "An internal server error occurred during login. Please contact support.",
-      error: err.message 
+      error: err.message
     });
   }
+};
 
+/*pending advocates*/
+/* GET PENDING ADVOCATES */
+exports.getPendingAdvocates = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, full_name, email, office_id, specialization, experience_years
+       FROM pending_advocates
+       WHERE is_verified = true
+       AND status = 'PENDING'
+       ORDER BY created_at DESC`
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+    res.status(500).json({ message: "Error fetching pending advocates" });
+  }
 };
 
 
+/* REJECT ADVOCATE */
+exports.rejectAdvocate = async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    console.log(" Reject request received for ID:", id);
+
+    const check = await pool.query(
+      "SELECT id, status FROM pending_advocates WHERE id = $1",
+      [id]
+    );
+
+    if (check.rows.length === 0) {
+      return res.status(404).json({
+        message: "Advocate not found"
+      });
+    }
+
+    const update = await pool.query(
+      `UPDATE pending_advocates
+       SET status = 'REJECTED'
+       WHERE id = $1
+       RETURNING id, status`,
+      [id]
+    );
+
+    console.log(" Updated:", update.rows);
+
+    res.json({
+      message: "Advocate rejected successfully"
+    });
+
+  } catch (err) {
+    console.error(" REJECT ERROR:", err);
+    res.status(500).json({
+      message: "Error rejecting advocate"
+    });
+  }
+};
+
+/* REJECT ADVOCATE */
+exports.rejectAdvocate = async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    console.log(" Reject request received for ID:", id);
+
+    //  check if record exists
+    const check = await pool.query(
+      "SELECT id, status FROM pending_advocates WHERE id = $1",
+      [id]
+    );
+
+    console.log(" DB check result:", check.rows);
+
+    if (check.rows.length === 0) {
+      return res.status(404).json({
+        message: "Advocate not found (ID mismatch)"
+      });
+    }
+
+    //  update status
+    const update = await pool.query(
+      `UPDATE pending_advocates
+       SET status = 'REJECTED'
+       WHERE id = $1
+       RETURNING id, status`,
+      [id]
+    );
+
+    console.log(" Update result:", update.rows);
+
+    res.json({
+      message: "Advocate rejected successfully",
+      updated: update.rows
+    });
+
+  } catch (err) {
+    console.error(" REJECT ERROR:", err);
+    res.status(500).json({
+      message: "Error rejecting advocate",
+      error: err.message
+    });
+  }
+};
+
+/* APPROVE ADVOCATE */
+exports.approveAdvocate = async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    //  get pending advocate
+    const result = await pool.query(
+      "SELECT * FROM pending_advocates WHERE id = $1",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    const adv = result.rows[0];
+
+    //  insert into users
+    const userRes = await pool.query(
+      `INSERT INTO users (full_name, email, password_hash, role, is_verified)
+       VALUES ($1,$2,$3,'ADVOCATE',true)
+       RETURNING user_id`,
+      [adv.full_name, adv.email, adv.password_hash]
+    );
+
+    const userId = userRes.rows[0].user_id;
+
+    //  insert into advocate_profiles
+    await pool.query(
+      `INSERT INTO advocate_profiles
+       (advocate_id, office_id, specialization, experience_years)
+       VALUES ($1,$2,$3,$4)`,
+      [
+        userId,
+        adv.office_id,
+        adv.specialization,
+        adv.experience_years
+      ]
+    );
+
+    //  delete from pending after approval
+    await pool.query(
+      "DELETE FROM pending_advocates WHERE id = $1",
+      [id]
+    );
+
+    res.json({ message: "Advocate approved successfully" });
+
+  } catch (err) {
+    console.error("APPROVE ERROR:", err);
+    res.status(500).json({ message: "Error approving advocate" });
+  }
+};
+
+/* REGISTER AS ADVOCATE*/
 exports.register = async (req, res) => {
   const {
     fullName,
     email,
     password,
-    role,
-    barEnrollmentNo,
+    officeId,
     specialization,
     experienceYears
   } = req.body;
 
+  if (
+    !fullName ||
+    !email ||
+    !password ||
+    !officeId ||
+    !specialization ||
+    !experienceYears
+  ) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
   try {
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
-
-    // Check if email already exists
-    const existingUser = await pool.query(
-      "SELECT is_verified FROM users WHERE email = $1",
+    // check existing
+    const existing = await pool.query(
+      "SELECT * FROM pending_advocates WHERE email = $1",
       [normalizedEmail]
     );
 
-    if (existingUser.rows.length > 0) {
-      if (!existingUser.rows[0].is_verified) {
-        return res.status(400).json({
-          message: "Email already registered but not verified"
-        });
-      }
-      return res.status(400).json({ message: "Email already exists" });
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ message: "Email already registered" });
     }
 
-    //Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Insert user
-    const userResult = await pool.query(
-      `INSERT INTO users 
-       (full_name, email, password_hash, role, otp, otp_expiry, is_verified)
-       VALUES ($1,$2,$3,$4,$5,$6,false)
-       RETURNING user_id`,
-      [fullName, normalizedEmail, hashedPassword, role, otp, otpExpiry]
+    //  insert into pending
+    await pool.query(
+      `INSERT INTO pending_advocates
+       (full_name, email, password_hash, office_id, specialization, experience_years, otp, otp_expiry, is_verified)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,false)`,
+      [
+        fullName,
+        normalizedEmail,
+        hashedPassword,
+        officeId,
+        specialization,
+        experienceYears,
+        otp,
+        otpExpiry
+      ]
     );
 
-    const userId = userResult.rows[0].user_id;
-
-    //Insert advocate profile BEFORE OTP (if advocate)
-
-    if (role === "ADVOCATE") {
-      await pool.query(
-        `INSERT INTO advocate_profiles
-         (advocate_id, office_id, specialization, experience_years)
-         VALUES ($1,$2,$3,$4)`,
-        [
-          userId,
-          officeId,
-          specialization,
-          experienceYears
-        ]
-      );
-    }
-
-    //Send OTP email
+    // send OTP
     await transporter.sendMail({
-      from: `"CourtLink Support" <${process.env.EMAIL_USER}>`,
       to: normalizedEmail,
-      subject: "Verify your CourtLink account",
-      html: `
-        <h3>Email Verification</h3>
-        <p>Your OTP is:</p>
-        <h2>${otp}</h2>
-        <p>This OTP expires in 10 minutes.</p>
-      `,
+      subject: "Verify your account",
+      html: `<h2>${otp}</h2>`
     });
 
-    res.status(201).json({
-      message: "Registration successful. OTP sent to email."
-    });
+    res.json({ message: "OTP sent" });
 
   } catch (err) {
     console.error(err);
-    if (err.code === "23505") {
-      res.status(400).json({ message: "Email already exists" });
-    } else {
-      res.status(500).json({ message: "Server error" });
-    }
+    res.status(500).json({ message: "Server error" });
   }
 };
-
-
 
 /* FORGOT PASSWORD*/
 exports.forgotPassword = async (req, res) => {
@@ -276,34 +460,36 @@ exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
 
   try {
-    const user = await pool.query(
-      `SELECT otp, otp_expiry FROM users WHERE email=$1`,
+    const result = await pool.query(
+      "SELECT otp, otp_expiry FROM pending_advocates WHERE email = $1",
       [email]
     );
 
-    if (user.rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const user = result.rows[0];
+
     if (
-      user.rows[0].otp !== otp ||
-      new Date(user.rows[0].otp_expiry) < new Date()
+      user.otp !== otp ||
+      new Date(user.otp_expiry) < new Date()
     ) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+      return res.status(400).json({ message: "Invalid OTP" });
     }
 
     await pool.query(
-      `UPDATE users
-       SET is_verified=true, otp=NULL, otp_expiry=NULL
+      `UPDATE pending_advocates
+       SET is_verified = true, otp=NULL, otp_expiry=NULL
        WHERE email=$1`,
       [email]
     );
 
-    res.json({ message: "Account verified successfully" });
+    res.json({ message: "Verified. Waiting for admin approval" });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "OTP verification failed" });
+    res.status(500).json({ message: "Error verifying OTP" });
   }
 };
 

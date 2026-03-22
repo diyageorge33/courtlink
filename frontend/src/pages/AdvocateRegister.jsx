@@ -46,7 +46,7 @@ function AdvocateRegister() {
       !email ||
       !password ||
       !confirmPassword ||
-      !officeId ||   // ✅ CHANGED
+      !officeId ||   
       !experienceYears ||
       specializations.length === 0
     ) {

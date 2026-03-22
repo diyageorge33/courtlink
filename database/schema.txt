@@ -303,3 +303,50 @@ CREATE TABLE orders (
 );
 ALTER TABLE orders
 ADD COLUMN advocate_id INT REFERENCES users(user_id) ON DELETE CASCADE;
+
+CREATE TABLE IF NOT EXISTS advocate_resignations (
+  request_id SERIAL PRIMARY KEY,
+  advocate_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+  reason TEXT NOT NULL,
+  status VARCHAR(20) DEFAULT 'PENDING',
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+22/3/26
+
+ALTER TABLE advocate_profiles
+DROP COLUMN fee_per_hour;
+
+ALTER TABLE advocate_profiles
+DROP CONSTRAINT advocate_profiles_pkey;
+
+ALTER TABLE advocate_profiles
+DROP COLUMN employee_id;
+
+ALTER TABLE advocate_profiles
+ADD PRIMARY KEY (advocate_id);
+
+ALTER TABLE users
+DROP CONSTRAINT users_role_check;
+
+ALTER TABLE users
+ADD CONSTRAINT users_role_check
+CHECK (role IN ('CLIENT', 'ADVOCATE', 'ADMIN', 'PENDING_ADVOCATE'));
+
+CREATE TABLE pending_advocates (
+  id SERIAL PRIMARY KEY,
+  full_name VARCHAR(100),
+  email VARCHAR(100) UNIQUE,
+  password_hash TEXT,
+  office_id VARCHAR(50),
+  specialization TEXT,
+  experience_years INT,
+  otp VARCHAR(6),
+  otp_expiry TIMESTAMP,
+  is_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE pending_advocates
+ADD COLUMN status VARCHAR(20) DEFAULT 'PENDING';
