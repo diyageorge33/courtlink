@@ -10,10 +10,25 @@ exports.getClients = async (req, res) => {
   try {
 
     const result = await pool.query(
-      `SELECT user_id, full_name, email
-       FROM users
-       WHERE role='CLIENT'
-       ORDER BY user_id DESC
+      `SELECT u.user_id,
+              u.full_name,
+              u.email,
+              cp.phone,
+              cp.address,
+              cp.dob,
+              cp.gender,
+              COALESCE(
+                (
+                  SELECT STRING_AGG(c.case_title, ', ' ORDER BY c.case_id)
+                  FROM cases c
+                  WHERE c.client_id = u.user_id
+                ),
+                'No cases filed'
+              ) AS case_names
+       FROM users u
+       LEFT JOIN client_profiles cp ON cp.client_id = u.user_id
+       WHERE u.role='CLIENT'
+       ORDER BY u.user_id DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset]
     );
@@ -561,5 +576,153 @@ exports.getAnalyticsData = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error fetching analytics" });
+  }
+};
+
+exports.getClosureRequests = async (req, res) => {
+  try {
+    const clientClosures = await pool.query(
+      `SELECT user_id,
+              full_name,
+              email,
+              'CLIENT' AS role,
+              account_status,
+              NULL AS reason,
+              NULL AS requested_at
+       FROM users
+       WHERE role = 'CLIENT'
+       AND account_status = 'PENDING_CLOSURE'
+       ORDER BY user_id DESC`
+    );
+
+    const advocateClosures = await pool.query(
+      `SELECT u.user_id,
+              u.full_name,
+              u.email,
+              'ADVOCATE' AS role,
+              ar.status AS account_status,
+              ar.reason,
+              ar.created_at AS requested_at
+       FROM advocate_resignations ar
+       JOIN users u ON u.user_id = ar.advocate_id
+       WHERE ar.status = 'PENDING'
+       ORDER BY ar.created_at DESC`
+    );
+
+    res.json({
+      clients: clientClosures.rows,
+      advocates: advocateClosures.rows,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching closure requests" });
+  }
+};
+
+exports.approveClientClosure = async (req, res) => {
+  const { clientId } = req.params;
+
+  try {
+    await pool.query(
+      `UPDATE users
+       SET account_status = 'CLOSED'
+       WHERE user_id = $1
+       AND role = 'CLIENT'`,
+      [clientId]
+    );
+
+    await pool.query(
+      `INSERT INTO audit_logs (action, performed_by)
+       VALUES ($1, $2)`,
+      [`Client Closure Approved: ${clientId}`, req.user.user_id]
+    );
+
+    res.json({ message: "Client closure approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error approving client closure" });
+  }
+};
+
+exports.rejectClientClosure = async (req, res) => {
+  const { clientId } = req.params;
+
+  try {
+    await pool.query(
+      `UPDATE users
+       SET account_status = 'ACTIVE'
+       WHERE user_id = $1
+       AND role = 'CLIENT'`,
+      [clientId]
+    );
+
+    await pool.query(
+      `INSERT INTO audit_logs (action, performed_by)
+       VALUES ($1, $2)`,
+      [`Client Closure Rejected: ${clientId}`, req.user.user_id]
+    );
+
+    res.json({ message: "Client closure rejected successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error rejecting client closure" });
+  }
+};
+
+exports.approveAdvocateClosure = async (req, res) => {
+  const { advocateId } = req.params;
+
+  try {
+    await pool.query(
+      `UPDATE advocate_resignations
+       SET status = 'APPROVED'
+       WHERE advocate_id = $1
+       AND status = 'PENDING'`,
+      [advocateId]
+    );
+
+    await pool.query(
+      `UPDATE users
+       SET is_active = false
+       WHERE user_id = $1
+       AND role = 'ADVOCATE'`,
+      [advocateId]
+    );
+
+    await pool.query(
+      `INSERT INTO audit_logs (action, performed_by)
+       VALUES ($1, $2)`,
+      [`Advocate Closure Approved: ${advocateId}`, req.user.user_id]
+    );
+
+    res.json({ message: "Advocate closure approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error approving advocate closure" });
+  }
+};
+
+exports.rejectAdvocateClosure = async (req, res) => {
+  const { advocateId } = req.params;
+
+  try {
+    await pool.query(
+      `UPDATE advocate_resignations
+       SET status = 'REJECTED'
+       WHERE advocate_id = $1
+       AND status = 'PENDING'`,
+      [advocateId]
+    );
+
+    await pool.query(
+      `INSERT INTO audit_logs (action, performed_by)
+       VALUES ($1, $2)`,
+      [`Advocate Closure Rejected: ${advocateId}`, req.user.user_id]
+    );
+
+    res.json({ message: "Advocate closure rejected successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error rejecting advocate closure" });
   }
 };
