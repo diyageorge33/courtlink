@@ -2,62 +2,76 @@ function Help() {
   return (
     <div className="info-page">
       <div className="info-container">
-        <h1>HELP CENTER</h1>
+        <h1>Help Center</h1>
 
         <p>
-          Welcome to the Help Center of CourtLink.
-          <br />
-          This page will guide you on how to use our platform smoothly and effectively.
+          Welcome to CourtLink Help Center. This guide will help you understand how to
+          use the platform to manage your cases, documents, and account efficiently.
         </p>
 
         <p>
-          CourtLink is designed for our law firm to provide clients and advocates
-          with a transparent and efficient way to manage legal services.
+          CourtLink is designed to simplify legal case management by providing clients
+          with a structured dashboard to track progress and communicate through the system.
         </p>
 
         <p><b>1. Creating an Account</b><br />
-          To create an account, go to the Sign Up page and enter your details such as
-          name, email, phone number, and password. Once registered, you can log in
-          and access the client dashboard.
+          To create an account, go to the registration page and enter your details.
+          You will receive an OTP via email for verification before your account is activated.
         </p>
 
         <p><b>2. Logging In</b><br />
-          Use your registered email and password to log in. After logging in, you will
-          be redirected to the appropriate dashboard based on your role (Client or Advocate).
+          Use your registered email and password to log in. Based on your role,
+          you will be redirected to your respective dashboard.
         </p>
 
-        <p><b>3. Filing a Case Request</b><br />
-          Clients can submit a new case request through the dashboard by selecting the
-          appropriate Practice Area and providing a short description of the issue.
+        <p><b>3. Filing a Case</b><br />
+          Clients can file a new case from the dashboard by providing case details
+          such as title, type, and description.
         </p>
 
-        <p><b>4. Uploading Documents</b><br />
-          Clients can upload important documents such as ID proof, evidence files, agreements,
-          and notices through the Documents section in the dashboard.
+        <p><b>4. Viewing and Managing Cases</b><br />
+          All your cases will be listed in your dashboard. You can view their status
+          (Pending, Ongoing, Closed, or Withdrawn) and track updates easily.
         </p>
 
-        <p><b>5. Tracking Case Status</b><br />
-          Once a case is submitted, clients can track the case status and progress updates
-          through the Case Status section. Updates will be provided by advocates and administrators.
+        <p><b>5. Uploading Documents</b><br />
+          You can upload important documents related to your case such as evidence,
+          agreements, and notices. These documents are securely linked to your case.
         </p>
 
-        <p><b>6. Downloading Court Orders</b><br />
-          Court orders and judgement documents uploaded by the advocate or admin can be downloaded
-          anytime from the Orders section in your dashboard.
+        <p><b>6. Advocate Assignment</b><br />
+          Once your case is reviewed, an advocate will be assigned. You can view
+          advocate details in your dashboard.
         </p>
 
-        <p><b>7. Forgot Password Support</b><br />
-          If you forget your password, click on "Forgot Password" on the login page. You will receive
-          an OTP via email to reset your password securely.
+        <p><b>7. Requesting Advocate Change</b><br />
+          If needed, you can request a change of advocate for a case. You also have
+          the option to cancel the request.
         </p>
 
-        <p><b>8. Contacting the Law Firm</b><br />
-          If you need further assistance, you can contact our law firm through the Contact Us page.
-          Our team will respond to your queries as soon as possible during working hours.
+        <p><b>8. Notifications and Updates</b><br />
+          You will receive updates about your case, such as document uploads and
+          upcoming hearings, through the notification system.
+        </p>
+
+        <p><b>9. Updating Profile Information</b><br />
+          You can update your personal details like name, phone number, address,
+          and date of birth from the Settings page.
+        </p>
+
+        <p><b>10. Account Closure</b><br />
+          You can request account closure from the Settings page. Your account will
+          be marked as "Pending Closure", and you can cancel the request if needed.
+        </p>
+
+        <p><b>11. Forgot Password</b><br />
+          If you forget your password, use the "Forgot Password" option on the login
+          page. An OTP will be sent to your email to reset your password.
         </p>
 
         <p style={{ marginTop: "25px", fontWeight: "600" }}>
-          ⚖️ CourtLink is committed to providing secure and professional legal support to every client.
+          ⚖️ CourtLink aims to provide a simple, transparent, and secure experience
+          for managing legal cases.
         </p>
       </div>
     </div>

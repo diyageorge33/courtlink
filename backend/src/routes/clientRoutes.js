@@ -186,7 +186,6 @@ router.post(
   }
 );
 
-
 // GET DOCUMENTS FOR A CASE
 
 router.get("/documents/case/:caseId", verifyToken, async (req, res) => {
@@ -225,9 +224,7 @@ router.get("/documents/case/:caseId", verifyToken, async (req, res) => {
   }
 });
 
-
 // GET ALL DOCUMENTS OF A CLIENT
-
 router.get("/documents/client", verifyToken, async (req, res) => {
   try {
     const clientId = req.user.user_id;
@@ -405,7 +402,7 @@ router.get("/cases/closed", verifyToken, async (req, res) => {
   }
 });
 
-// GET CLIENT ADVOCATES (FIXED VERSION)
+// GET CLIENT ADVOCATES 
 router.get("/advocates", verifyToken, async (req, res) => {
   try {
 
@@ -572,10 +569,9 @@ router.get("/notifications", verifyToken, async (req, res) => {
   try {
 
     const userId = req.user.user_id;
-
     const notifications = [];
 
-    // 📄 DOCUMENT UPLOAD NOTIFICATIONS
+    //  DOCUMENT UPLOAD NOTIFICATIONS
     const docs = await pool.query(
       `SELECT d.case_id, d.uploaded_at
        FROM documents d
@@ -592,24 +588,26 @@ router.get("/notifications", verifyToken, async (req, res) => {
       });
     });
 
-    // ⚖️ HEARING REMINDERS
+    // HEARING REMINDERS (NEXT 3 DAYS)
     const hearings = await pool.query(
       `SELECT case_title, next_hearing_date
-        FROM cases
-        WHERE client_id = $1
-        AND next_hearing_date BETWEEN NOW() AND NOW() + INTERVAL '3 days'`,
+       FROM cases
+       WHERE client_id = $1
+       AND next_hearing_date BETWEEN NOW() AND NOW() + INTERVAL '3 days'`,
       [userId]
     );
 
     hearings.rows.forEach(row => {
       notifications.push({
-        message: `Reminder: Hearing in 3 days for case '${row.case_title}'`,
+        message: `Upcoming hearing for case '${row.case_title}'`,
         date: row.next_hearing_date
       });
     });
 
-    // 🔥 SORT NEWEST FIRST
-    notifications.sort((a, b) => new Date(b.date) - new Date(a.date));
+    //newest first
+    notifications.sort((a, b) =>
+      new Date(b.date || 0) - new Date(a.date || 0)
+    );
 
     res.json(notifications);
 

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import "../newstyles.css"; 
 
 function AdminPendingAdvocates() {
   const [advocates, setAdvocates] = useState([]);
 
-  // 🔹 fetch pending advocates
   const fetchPending = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/auth/admin/pending-advocates");
@@ -20,10 +20,7 @@ function AdminPendingAdvocates() {
     fetchPending();
   }, []);
 
-  // 🔹 approve
   const handleApprove = async (id) => {
-    if (!window.confirm("Approve this advocate?")) return;
-
     try {
       const res = await fetch("http://localhost:5000/api/auth/admin/approve-advocate", {
         method: "PUT",
@@ -39,7 +36,7 @@ function AdminPendingAdvocates() {
       }
 
       toast.success("Approved!");
-      fetchPending(); // refresh list
+      fetchPending();
 
     } catch (err) {
       console.error(err);
@@ -47,10 +44,7 @@ function AdminPendingAdvocates() {
     }
   };
 
-  // 🔹 reject
   const handleReject = async (id) => {
-    if (!window.confirm("Reject this advocate?")) return;
-
     try {
       const res = await fetch("http://localhost:5000/api/auth/admin/reject-advocate", {
         method: "PUT",
@@ -67,10 +61,7 @@ function AdminPendingAdvocates() {
 
       toast.success("Rejected!");
 
-      // 🔥 remove from UI instantly (better UX)
       setAdvocates((prev) => prev.filter((adv) => adv.id !== id));
-
-      // 🔥 also refetch to stay in sync
       fetchPending();
 
     } catch (err) {
@@ -79,50 +70,126 @@ function AdminPendingAdvocates() {
     }
   };
 
+  const confirmApprove = (id) => {
+    toast(
+      ({ closeToast }) => (
+        <div>
+          <p>Approve this advocate?</p>
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <button
+              onClick={() => {
+                handleApprove(id);
+                closeToast();
+              }}
+              style={{
+                padding: "6px 12px",
+                background: "#16a34a",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer"
+              }}
+            >
+              Yes
+            </button>
+
+            <button
+              onClick={closeToast}
+              style={{
+                padding: "6px 12px",
+                background: "#64748b",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer"
+              }}
+            >
+              No
+            </button>
+          </div>
+        </div>
+      ),
+      { autoClose: false }
+    );
+  };
+
+  const confirmReject = (id) => {
+    toast(
+      ({ closeToast }) => (
+        <div>
+          <p>Reject this advocate?</p>
+          <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+            <button
+              onClick={() => {
+                handleReject(id);
+                closeToast();
+              }}
+              style={{
+                padding: "6px 12px",
+                background: "#dc2626",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer"
+              }}
+            >
+              Yes
+            </button>
+
+            <button
+              onClick={closeToast}
+              style={{
+                padding: "6px 12px",
+                background: "#64748b",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer"
+              }}
+            >
+              No
+            </button>
+          </div>
+        </div>
+      ),
+      { autoClose: false }
+    );
+  };
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Pending Advocates</h2>
+    <div className="pending-container">
+      <h2 className="pending-title">Pending Advocates</h2>
 
       {advocates.length === 0 ? (
-        <p>No pending advocates</p>
+        <p className="pending-empty-text">No pending advocates</p>
       ) : (
-        <table border="1" cellPadding="10">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Office ID</th>
-              <th>Specialization</th>
-              <th>Experience</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+        <div className="pending-card-grid">
+          {advocates.map((adv) => (
+            <div className="pending-adv-card" key={adv.id}>
+              <h3>{adv.full_name}</h3>
+              <p><strong>Email:</strong> {adv.email}</p>
+              <p><strong>Office ID:</strong> {adv.office_id}</p>
+              <p><strong>Specialization:</strong> {adv.specialization}</p>
+              <p><strong>Experience:</strong> {adv.experience_years} yrs</p>
 
-          <tbody>
-            {advocates.map((adv) => (
-              <tr key={adv.id}>
-                <td>{adv.full_name}</td>
-                <td>{adv.email}</td>
-                <td>{adv.office_id}</td>
-                <td>{adv.specialization}</td>
-                <td>{adv.experience_years} yrs</td>
+              <div className="pending-card-actions">
+                <button
+                  className="pending-approve-btn"
+                  onClick={() => confirmApprove(adv.id)}
+                >
+                  Approve
+                </button>
 
-                <td>
-                  <button onClick={() => handleApprove(adv.id)}>
-                    Approve
-                  </button>
-
-                  <button
-                    onClick={() => handleReject(adv.id)}
-                    style={{ marginLeft: "10px" }}
-                  >
-                    Reject
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                <button
+                  className="pending-reject-btn"
+                  onClick={() => confirmReject(adv.id)}
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

@@ -1254,3 +1254,69 @@ nav.navbar{
   justify-content: space-between;
   margin-top: 15px;
 }
+
+/*pending advocates-admin*/
+.pending-container {
+  padding: 20px;
+}
+
+.pending-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.pending-empty-text {
+  text-align: center;
+  color: gray;
+}
+
+.pending-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.pending-adv-card {
+  background: #1e293b;
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  transition: 0.2s;
+  border: 1px solid #334155;
+}
+
+.pending-adv-card:hover {
+  transform: translateY(-5px);
+}
+
+.pending-card-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.pending-approve-btn {
+  background: #16a34a;
+  border: none;
+  padding: 8px 14px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pending-reject-btn {
+  background: #dc2626;
+  border: none;
+  padding: 8px 14px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pending-approve-btn:hover {
+  background: #15803d;
+}
+
+.pending-reject-btn:hover {
+  background: #b91c1c;
+}

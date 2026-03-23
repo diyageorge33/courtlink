@@ -19,14 +19,15 @@ function Clientsetting() {
   const [showModal, setShowModal] = useState(false); // 🔥 modal state
 
   const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    phone: "",
-    address: "",
-    dob: "",
-    gender: "",
-    role: "",
-  });
+  user_id: "", 
+  full_name: "",
+  email: "",
+  phone: "",
+  address: "",
+  dob: "",
+  gender: "",
+  role: "",
+});
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -34,6 +35,7 @@ function Clientsetting() {
         const data = await fetchClientSettings();
 
         setFormData({
+          user_id: data.user_id || "", // ✅ added
           full_name: data.full_name || "",
           email: data.email || "",
           phone: data.phone || "",
@@ -122,7 +124,7 @@ function Clientsetting() {
       </div>
 
       <p className="ai-tagline-new">
-        Manage your profile details and account preferences.
+        Manage your profile details
       </p>
 
       {loading ? (
@@ -135,7 +137,7 @@ function Clientsetting() {
           <div className="profile-summary-card-new">
 
             <h2>My Profile</h2>
-
+            <p><b>Client ID/User ID:</b> {formData.user_id || "Not Available"}</p>
             <p><b>Name:</b> {formData.full_name || "Not Provided"}</p>
             <p><b>Email:</b> {formData.email || "Not Provided"}</p>
             <p><b>Phone:</b> {formData.phone || "Not Provided"}</p>
