@@ -6,6 +6,7 @@ require("dotenv").config({ path: path.join(__dirname, "../.env") });
 const app = express();
 const pool = require("./db");
 const { ensureAuditLogsTable } = require("./utils/auditLogs");
+const cookieParser = require("cookie-parser");
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
@@ -23,6 +24,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.use("/api/client", clientRoutes);
@@ -32,8 +34,9 @@ app.use("/api/payment", require("./routes/payment.routes"));
 app.use("/api/ai", aiRoutes);
 app.use("/api/advocate", advocateRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/bookings", require("./routes/booking.routes"));
 
-// 🔥 IMPORTANT (DO NOT CHANGE AGAIN)
+// IMPORTANT (DO NOT CHANGE AGAIN)
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Test route

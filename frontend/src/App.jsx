@@ -55,6 +55,8 @@ import UploadOrder from "./pages/advocate/UploadOrder";
 import Clients from "./pages/advocate/Clients";
 import CaseDetails from "./pages/advocate/CaseDetails";
 import AdminPendingAdvocates from "./pages/AdminPendingAdvocates";
+import AdvocateSettings from "./pages/advocate/AdvocateSettings";
+import AdvocateAppointments from "./pages/advocate/AdvocateAppointments";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -220,6 +222,15 @@ function App() {
               path="/dashboard/advocate/case/:id"
               element={<ProtectedRoute roleRequired="ADVOCATE"><CaseDetails /></ProtectedRoute>}
             />
+            <Route
+              path="/dashboard/advocate/settings"
+              element={<ProtectedRoute roleRequired="ADVOCATE"><AdvocateSettings /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/advocate/appointments"
+              element={<ProtectedRoute roleRequired="ADVOCATE"><AdvocateAppointments /></ProtectedRoute>}
+            />
+
 
             {/* ADMIN DASHBOARD */}
             <Route

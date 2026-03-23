@@ -7,10 +7,11 @@ function AdvocateRegister() {
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState(""); // ✅ added
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [officeId, setOfficeId] = useState(""); // ✅ CHANGED
+  const [officeId, setOfficeId] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
   const [specializations, setSpecializations] = useState([]);
   const [role, setRole] = useState("ADVOCATE");
@@ -44,13 +45,19 @@ function AdvocateRegister() {
     if (
       !fullName ||
       !email ||
+      !phone ||
       !password ||
       !confirmPassword ||
-      !officeId ||   
+      !officeId ||
       !experienceYears ||
       specializations.length === 0
     ) {
       toast.error("Please fill all required fields");
+      return;
+    }
+
+    if (phone.length < 10) {
+      toast.error("Enter valid phone number");
       return;
     }
 
@@ -67,8 +74,10 @@ function AdvocateRegister() {
           fullName,
           email: email.trim().toLowerCase(),
           password,
+          confirmPassword,
           role: "ADVOCATE",
-          officeId, // ✅ CHANGED
+          phone, // ✅ added
+          officeId,
           experienceYears: Number(experienceYears),
           specialization: specializations.join(", "),
         }),
@@ -118,32 +127,74 @@ function AdvocateRegister() {
             <option value="ADVOCATE">Advocate</option>
           </select>
 
-          <label>Full Name *</label>
-          <input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          {/* 🔥 TWO COLUMN START */}
+          <div className="two-column">
+            <div>
+              <label>Full Name *</label>
+              <input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
 
-          <label>Email *</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} />
+            <div>
+              <label>Email *</label>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+          </div>
 
-          <label>Password *</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <div className="two-column">
+            <div>
+              <label>Phone Number *</label>
+              <input
+                type="tel"
+                placeholder="+91"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
 
-          <label>Confirm Password *</label>
-          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            <div>
+              <label>Office ID *</label>
+              <input
+                value={officeId}
+                placeholder="Office ID"
+                onChange={(e) => setOfficeId(e.target.value)}
+              />
+            </div>
+          </div>
 
-          {/* 🔥 CHANGED FIELD */}
-          <label>Office ID *</label>
-          <input
-            value={officeId}
-            placeholder="Office ID"
-            onChange={(e) => setOfficeId(e.target.value)}
-          />
+          <div className="two-column">
+            <div>
+              <label>Password *</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
 
-          <label>Years of Experience *</label>
-          <input
-            type="number"
-            value={experienceYears}
-            onChange={(e) => setExperienceYears(e.target.value)}
-          />
+            <div>
+              <label>Confirm Password *</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label>Years of Experience *</label>
+            <input
+              type="number"
+              value={experienceYears}
+              onChange={(e) => setExperienceYears(e.target.value)}
+            />
+          </div>
 
           <p className="section-label">Case Specialization *</p>
 

@@ -8,7 +8,7 @@ function Register() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("CLIENT"); // default
+  const [role, setRole] = useState("CLIENT");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
@@ -18,7 +18,17 @@ function Register() {
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
-      return; // stop API call
+      return;
+    }
+
+    if (!phone || phone.length < 10) {
+      toast.error("Enter valid phone number");
+      return;
+    }
+
+    if (!dob) {
+      toast.error("Date of birth is required");
+      return;
     }
 
     try {
@@ -31,6 +41,7 @@ function Register() {
           fullName,
           email,
           password,
+          confirmPassword,
           role,
           phone,
           dob,
@@ -68,7 +79,6 @@ function Register() {
             <p>Join CourtLink to connect with legal professionals or clients.</p>
           </div>
 
-          {/* FORM */}
           <div className="register-form">
             <label>I am *</label>
             <select
@@ -85,9 +95,6 @@ function Register() {
         <option value="CLIENT">Client</option>
         <option value="ADVOCATE">Advocate</option>
         </select>
-
-
-
             <div className="two-column">
               <div>
                 <label>Full Name *</label>
@@ -132,7 +139,6 @@ function Register() {
               </div>
             </div>
 
-            {/*PASSWORD FIELDS */}
             <div className="two-column">
               <div>
                 <label>Password *</label>
@@ -158,10 +164,10 @@ function Register() {
 
             <button
               type="button"
-              className="login-btn"
+              className="register-btn"
               onClick={handleRegister}
             >
-            Register
+              Register
             </button>
 
 

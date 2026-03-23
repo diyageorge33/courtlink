@@ -11,7 +11,7 @@ const { verifyToken } = require("../middleware/authMiddleware");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); 
+    cb(null, path.join(__dirname, "../../uploads"));
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
@@ -69,19 +69,38 @@ router.get("/dashboard/stats", verifyToken, async (req, res) => {
 
 router.get("/cases", verifyToken, async (req, res) => {
   try {
+
     const clientId = req.user.user_id;
 
-    const result = await pool.query(
-  `SELECT case_id, case_title, case_type, case_description, status, next_hearing_date, created_at
-   FROM cases
-   WHERE client_id = $1
-   ORDER BY created_at DESC`,
-  [clientId]
-);
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const offset = (page - 1) * limit;
 
-    res.json(result.rows);
+    // get data
+    const result = await pool.query(
+      `SELECT *
+       FROM cases
+       WHERE client_id = $1
+       ORDER BY created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [clientId, limit, offset]
+    );
+
+    // get total count
+    const countResult = await pool.query(
+      `SELECT COUNT(*) FROM cases WHERE client_id = $1`,
+      [clientId]
+    );
+
+    const total = parseInt(countResult.rows[0].count);
+
+    res.json({
+      data: result.rows,
+      total
+    });
+
   } catch (err) {
-    console.error("Error fetching client cases:", err);
+    console.error("Fetch cases error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -105,26 +124,26 @@ router.post("/filecase", verifyToken, async (req, res) => {
       [clientId, case_title, case_type, case_description]
     );
 
-    res.status(201).json({
-      message: "Case filed successfully",
-      case: result.rows[0],
-    });
-
-    /* LOG ACTIVITY */
+    // LOG FIRST
     await pool.query(
       `INSERT INTO audit_logs (case_id, action, performed_by)
        VALUES ($1, $2, $3)`,
       [result.rows[0].case_id, 'Case Filed', clientId]
     );
 
+    // THEN RETURN RESPONSE
+    return res.status(201).json({
+      message: "Case filed successfully",
+      case: result.rows[0],
+    });
+
   } catch (err) {
     console.error("Error filing case:", err);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
 // UPLOAD DOCUMENT (CLIENT)
-
 router.post(
   "/upload-document",
   verifyToken,
@@ -146,7 +165,7 @@ router.post(
         });
       }
 
-      // Verify that this case actually belongs to this client
+      // verify ownership
       const caseCheck = await pool.query(
         `SELECT case_id FROM cases WHERE case_id = $1 AND client_id = $2`,
         [case_id, clientId]
@@ -167,28 +186,27 @@ router.post(
         [case_id, clientId, req.file.originalname, fileUrl]
       );
 
-      res.status(201).json({
-        message: "Document uploaded successfully",
-        document: result.rows[0],
-      });
-
-      /* LOG ACTIVITY */
+      //  LOG FIRST
       await pool.query(
         `INSERT INTO audit_logs (case_id, action, performed_by)
          VALUES ($1, $2, $3)`,
         [case_id, 'Document Uploaded: ' + req.file.originalname, clientId]
       );
 
+      //  THEN RETURN RESPONSE
+      return res.status(201).json({
+        message: "Document uploaded successfully",
+        document: result.rows[0],
+      });
+
     } catch (err) {
       console.error("Upload document error:", err);
-      res.status(500).json({ message: "Server error" });
+      return res.status(500).json({ message: "Server error" });
     }
   }
 );
 
-
 // GET DOCUMENTS FOR A CASE
-
 router.get("/documents/case/:caseId", verifyToken, async (req, res) => {
   try {
     const caseId = parseInt(req.params.caseId);
@@ -227,21 +245,32 @@ router.get("/documents/case/:caseId", verifyToken, async (req, res) => {
 
 
 // GET ALL DOCUMENTS OF A CLIENT
-
 router.get("/documents/client", verifyToken, async (req, res) => {
   try {
+
     const clientId = req.user.user_id;
 
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+
     const result = await pool.query(
-      `SELECT d.document_id, d.case_id, d.file_name, d.file_url, d.uploaded_at
+      `SELECT 
+          d.document_id,
+          d.case_id,
+          d.file_name,
+          d.file_url,
+          d.uploaded_at
        FROM documents d
-       INNER JOIN cases c ON d.case_id = c.case_id
+       JOIN cases c ON d.case_id = c.case_id
        WHERE c.client_id = $1
-       ORDER BY d.uploaded_at DESC`,
-      [clientId]
+       ORDER BY d.uploaded_at DESC
+       LIMIT $2 OFFSET $3`,
+      [clientId, limit, offset]
     );
 
     res.json(result.rows);
+
   } catch (err) {
     console.error("Fetch client documents error:", err);
     res.status(500).json({ message: "Server error" });
@@ -405,7 +434,7 @@ router.get("/cases/closed", verifyToken, async (req, res) => {
   }
 });
 
-// GET CLIENT ADVOCATES (FIXED VERSION)
+// GET CLIENT ADVOCATES 
 router.get("/advocates", verifyToken, async (req, res) => {
   try {
 
@@ -567,83 +596,30 @@ router.post("/request-advocate-change/:caseId", verifyToken, async (req, res) =>
   }
 });
 
-// GET CLIENT NOTIFICATIONS (NEWEST FIRST)
+
+// GET CLIENT NOTIFICATIONS (NEWEST FIRST + PAGINATION)
 router.get("/notifications", verifyToken, async (req, res) => {
   try {
 
     const userId = req.user.user_id;
 
-    const notifications = [];
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
 
-    // 📄 DOCUMENT UPLOAD NOTIFICATIONS
-    const docs = await pool.query(
-      `SELECT d.case_id, d.uploaded_at
-       FROM documents d
-       INNER JOIN cases c ON d.case_id = c.case_id
-       WHERE c.client_id = $1
-       ORDER BY d.uploaded_at DESC`,
-      [userId]
+    const result = await pool.query(
+      `SELECT notification_id, message, is_read, created_at
+       FROM notifications
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [userId, limit, offset]
     );
 
-    docs.rows.forEach(row => {
-      notifications.push({
-        message: `A document was uploaded for your case (#${row.case_id})`,
-        date: row.uploaded_at
-      });
-    });
-
-    // ⚖️ HEARING REMINDERS
-    const hearings = await pool.query(
-      `SELECT case_title, next_hearing_date
-        FROM cases
-        WHERE client_id = $1
-        AND next_hearing_date BETWEEN NOW() AND NOW() + INTERVAL '3 days'`,
-      [userId]
-    );
-
-    hearings.rows.forEach(row => {
-      notifications.push({
-        message: `Reminder: Hearing in 3 days for case '${row.case_title}'`,
-        date: row.next_hearing_date
-      });
-    });
-
-    // 🔥 SORT NEWEST FIRST
-    notifications.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    res.json(notifications);
+    res.json(result.rows);
 
   } catch (err) {
     console.error("Notification error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// WITHDRAW CASE
-router.put("/withdraw-case/:caseId", verifyToken, async (req, res) => {
-  try {
-    const userId = req.user.user_id;
-    const caseId = req.params.caseId;
-
-    // check ownership
-    const check = await pool.query(
-      "SELECT * FROM cases WHERE case_id = $1 AND client_id = $2",
-      [caseId, userId]
-    );
-
-    if (check.rows.length === 0) {
-      return res.status(403).json({ message: "Access denied" });
-    }
-
-    await pool.query(
-      "UPDATE cases SET status = 'WITHDRAWN' WHERE case_id = $1",
-      [caseId]
-    );
-
-    res.json({ message: "Case withdrawn successfully" });
-
-  } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });

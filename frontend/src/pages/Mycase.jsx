@@ -13,14 +13,23 @@ function Mycase() {
   const [selectedCase, setSelectedCase] = useState(null);
   const [confirmCase, setConfirmCase] = useState(null);
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
   useEffect(() => {
     loadCases();
-  }, []);
+  }, [page]);
 
   const loadCases = async () => {
     try {
-      const data = await fetchClientCases();
-      setCases(data);
+      const res = await fetchClientCases(page);
+
+      setCases(res.data);
+
+      // ✅ correct next button logic
+      const totalPages = Math.ceil(res.total / 5);
+      setHasMore(page < totalPages);
+
     } catch (err) {
       console.error("Error fetching cases:", err);
       toast.error("Failed to load cases");
@@ -131,84 +140,109 @@ function Mycase() {
         <p>No cases found.</p>
       ) : (
 
-        <div className="cases-table-wrapper-new">
+        <>
+          <div className="cases-table-wrapper-new">
 
-          <table className="cases-table-new">
+            <table className="cases-table-new">
 
-            <thead>
-              <tr>
-                <th>Case ID</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Next Hearing</th>
-                <th>Created At</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {cases.map((c) => (
-
-                <tr key={c.case_id}>
-
-                  <td>{c.case_id}</td>
-
-                  <td>
-                    <span
-                      className="case-title-link"
-                      onClick={() => setSelectedCase(c)}
-                    >
-                      {c.case_title}
-                    </span>
-                  </td>
-
-                  <td>{c.case_type}</td>
-
-                  <td>{c.status}</td>
-
-                  <td>{getHearingDate(c.next_hearing_date)}</td>
-
-                  <td>
-                    {new Date(c.created_at).toLocaleDateString()}
-                  </td>
-
-                  <td>
-
-                    {c.status === "PENDING" && (
-                      <button
-                        className="mycase-danger-btn"
-                        onClick={() => setConfirmCase(c.case_id)}
-                      >
-                        Withdraw
-                      </button>
-                    )}
-
-                    {c.status === "WITHDRAWN" && (
-                      <button
-                        className="mycase-primary-btn"
-                        onClick={() => handleResubmit(c.case_id)}
-                      >
-                        Resubmit
-                      </button>
-                    )}
-
-                  </td>
-
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Case ID</th>
+                  <th>Title</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Next Hearing</th>
+                  <th>Created At</th>
+                  <th>Action</th>
                 </tr>
+              </thead>
 
-              ))}
+              <tbody>
 
-            </tbody>
+                {cases.map((c, index) => (
 
-          </table>
+                  <tr key={c.case_id}>
 
-        </div>
+                    <td>{(page - 1) * 5 + index + 1}</td>
 
+                    <td>{c.case_id}</td>
+
+                    <td>
+                      <span
+                        className="case-title-link"
+                        onClick={() => setSelectedCase(c)}
+                      >
+                        {c.case_title}
+                      </span>
+                    </td>
+
+                    <td>{c.case_type}</td>
+
+                    <td>{c.status}</td>
+
+                    <td>{getHearingDate(c.next_hearing_date)}</td>
+
+                    <td>
+                      {new Date(c.created_at).toLocaleDateString()}
+                    </td>
+
+                    <td>
+
+                      {c.status === "PENDING" && (
+                        <button
+                          className="mycase-danger-btn"
+                          onClick={() => setConfirmCase(c.case_id)}
+                        >
+                          Withdraw
+                        </button>
+                      )}
+
+                      {c.status === "WITHDRAWN" && (
+                        <button
+                          className="mycase-primary-btn"
+                          onClick={() => handleResubmit(c.case_id)}
+                        >
+                          Resubmit
+                        </button>
+                      )}
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+          {/* ✅ PAGINATION */}
+          <div style={{ marginTop: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
+
+            <button
+              onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </button>
+
+            <span>Page {page}</span>
+
+            <button
+              onClick={() => setPage(prev => prev + 1)}
+              disabled={!hasMore}
+            >
+              Next
+            </button>
+
+          </div>
+        </>
       )}
 
-      {/* 🔥 CONFIRMATION MODAL */}
+      {/* CONFIRM MODAL */}
       {confirmCase && (
         <div className="confirm-overlay">
           <div className="confirm-box">

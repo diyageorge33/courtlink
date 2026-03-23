@@ -1,0 +1,54 @@
+Microsoft Windows [Version 10.0.22631.5472]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\admin>git --version
+git version 2.50.1.windows.1
+
+C:\Users\admin>mkdir frontend
+
+C:\Users\admin>cd frontend
+
+C:\Users\admin\frontend>git clone https://github.com/keer-git/hackathon.git
+Cloning into 'hackathon'...
+remote: Enumerating objects: 41, done.
+remote: Counting objects: 100% (41/41), done.
+remote: Compressing objects: 100% (34/34), done.
+remote: Total 41 (delta 6), reused 0 (delta 0), pack-reused 0 (from 0)
+Receiving objects: 100% (41/41), 43.99 KiB | 346.00 KiB/s, done.
+Resolving deltas: 100% (6/6), done.
+
+C:\Users\admin\frontend>cd hackathon
+
+C:\Users\admin\frontend\hackathon>git remote remove origin
+
+C:\Users\admin\frontend\hackathon>git remote -v
+
+C:\Users\admin\frontend\hackathon>git remote -v
+
+C:\Users\admin\frontend\hackathon>git remote add origin https://github.com/diyageorge33/hackathon_genesis
+
+C:\Users\admin\frontend\hackathon>git remote -v
+origin  https://github.com/diyageorge33/hackathon_genesis (fetch)
+origin  https://github.com/diyageorge33/hackathon_genesis (push)
+
+C:\Users\admin\frontend\hackathon>code .
+
+C:\Users\admin\frontend\hackathon>cd C:\Users\admin\frontend\hackathon\frontend
+
+C:\Users\admin\frontend\hackathon\frontend>dir package.json
+ Volume in drive C is Acer
+ Volume Serial Number is 6042-7170
+
+ Directory of C:\Users\admin\frontend\hackathon\frontend
+
+10-07-2025  20:54               776 package.json
+               1 File(s)            776 bytes
+               0 Dir(s)  84,888,027,136 bytes free
+
+C:\Users\admin\frontend\hackathon\frontend>code .
+
+
+That folder is now linked to GitHub. So any changes inside that folder are tracked by Git and can be pushed to GitHub with:
+git add .
+git commit -m "your update message"
+git push

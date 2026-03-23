@@ -27,12 +27,29 @@ router.post("/upload", verifyToken, upload.single("order"), async (req, res) => 
 
     const filePath = "uploads/orders/" + req.file.filename;
 
+    //  Insert order
     const result = await pool.query(
       `INSERT INTO orders (case_id, advocate_id, file_name, file_url)
        VALUES ($1,$2,$3,$4) RETURNING *`,
       [case_id, advocateId, req.file.filename, filePath]
     );
 
+    //  Get client_id of that case
+    const caseResult = await pool.query(
+      `SELECT client_id FROM cases WHERE case_id = $1`,
+      [case_id]
+    );
+
+    const clientId = caseResult.rows[0].client_id;
+
+    // Insert notification
+    await pool.query(
+      `INSERT INTO notifications (user_id, message)
+       VALUES ($1, $2)`,
+      [clientId, "Your advocate has uploaded a new order."]
+    );
+
+    // 4️⃣ Send response
     res.json(result.rows[0]);
 
   } catch (err) {
@@ -89,10 +106,16 @@ router.delete("/delete/:id", verifyToken, async (req, res) => {
 });
 
 
-// ================== CLIENT VIEW ORDERS ==================
+// ================== CLIENT VIEW ORDERS (PAGINATION) ==================
 router.get("/client-orders", verifyToken, async (req, res) => {
   try {
+
     const clientId = req.user.user_id;
+
+    // pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // you can change (5,10, etc)
+    const offset = (page - 1) * limit;
 
     const result = await pool.query(
       `SELECT 
@@ -104,8 +127,9 @@ router.get("/client-orders", verifyToken, async (req, res) => {
        FROM orders o
        JOIN cases c ON o.case_id = c.case_id
        WHERE c.client_id = $1
-       ORDER BY o.uploaded_at DESC`,
-      [clientId]
+       ORDER BY o.uploaded_at DESC
+       LIMIT $2 OFFSET $3`,
+      [clientId, limit, offset]
     );
 
     res.json(result.rows);

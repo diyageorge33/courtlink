@@ -14,12 +14,13 @@ function Document() {
 
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1); // ✅ NEW
 
   useEffect(() => {
 
     const loadDocuments = async () => {
       try {
-        const data = await fetchClientDocuments();
+        const data = await fetchClientDocuments(page); // ✅ UPDATED
         setDocuments(data);
       } catch (err) {
         console.error("Error fetching documents:", err);
@@ -31,31 +32,66 @@ function Document() {
 
     loadDocuments();
 
-  }, []);
+  }, [page]); // ✅ UPDATED
 
-  const handleDelete = async (documentId) => {
+  const handleDelete = (documentId) => {
 
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this document?"
+    toast(
+      ({ closeToast }) => (
+        <div>
+          <p>Are you sure you want to delete?</p>
+
+          <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+            
+            <button
+              onClick={async () => {
+                try {
+                  await deleteClientDocument(documentId);
+
+                  const updatedDocs = await fetchClientDocuments(page); // ✅ UPDATED
+                  setDocuments(updatedDocs);
+
+                  toast.success("Document deleted successfully!");
+                } catch (err) {
+                  console.error("Delete error:", err);
+                  toast.error("Failed to delete document.");
+                }
+                closeToast();
+              }}
+              style={{
+                background: "#dc2626",
+                color: "#fff",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer"
+              }}
+            >
+              Yes
+            </button>
+
+            <button
+              onClick={closeToast}
+              style={{
+                background: "#6b7280",
+                color: "#fff",
+                border: "none",
+                padding: "5px 10px",
+                cursor: "pointer"
+              }}
+            >
+              Cancel
+            </button>
+
+          </div>
+        </div>
+      ),
+      {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+      }
     );
-
-    if (!confirmDelete) return;
-
-    try {
-
-      await deleteClientDocument(documentId);
-
-      const updatedDocs = await fetchClientDocuments();
-      setDocuments(updatedDocs);
-
-      toast.success("Document deleted successfully!");
-
-    } catch (err) {
-
-      console.error("Delete error:", err);
-      toast.error("Failed to delete document.");
-
-    }
 
   };
 
@@ -63,7 +99,6 @@ function Document() {
 
     <div className="client-dashboard-new">
 
-      {/* HEADER */}
       <div className="documents-header-new">
 
         <h1 className="page-title-new">My Documents</h1>
@@ -94,68 +129,92 @@ function Document() {
         <p>No documents uploaded yet.</p>
       ) : (
 
-        <div className="cases-table-wrapper-new">
+        <>
+          <div className="cases-table-wrapper-new">
 
-          <table className="cases-table-new">
+            <table className="cases-table-new">
 
-            <thead>
-              <tr>
-                <th>Document ID</th>
-                <th>Case ID</th>
-                <th>File Name</th>
-                <th>Uploaded At</th>
-                <th>View</th>
-                <th>Delete</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {documents.map((doc) => (
-
-                <tr key={doc.document_id}>
-
-                  <td>{doc.document_id}</td>
-                  <td>{doc.case_id}</td>
-                  <td>{doc.file_name}</td>
-
-                  <td>
-                    {new Date(doc.uploaded_at).toLocaleDateString()}
-                  </td>
-
-                  <td>
-                    <a
-                    href={`http://localhost:5000${doc.file_url}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    >
-                    View
-                  </a>
-                  </td>
-
-                  <td>
-                    <button
-                      className="delete-btn-new"
-                      onClick={() => handleDelete(doc.document_id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Document ID</th>
+                  <th>Case ID</th>
+                  <th>File Name</th>
+                  <th>Uploaded At</th>
+                  <th>View</th>
+                  <th>Delete</th>
                 </tr>
+              </thead>
 
-              ))}
+              <tbody>
 
-            </tbody>
+                {documents.map((doc, index) => (
 
-          </table>
+                  <tr key={doc.document_id}>
 
-        </div>
+                    <td>{(page - 1) * 5 + index + 1}</td>
 
+                    <td>{doc.document_id}</td>
+                    <td>{doc.case_id}</td>
+                    <td>{doc.file_name}</td>
+
+                    <td>
+                      {new Date(doc.uploaded_at).toLocaleDateString()}
+                    </td>
+
+                    <td>
+                      <a
+                        href={`http://localhost:5000${doc.file_url}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        View
+                      </a>
+                    </td>
+
+                    <td>
+                      <button
+                        className="delete-btn-new"
+                        onClick={() => handleDelete(doc.document_id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+          {/* ✅ PAGINATION BUTTONS */}
+          <div style={{ marginTop: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
+
+            <button
+              onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </button>
+
+            <span>Page {page}</span>
+
+            <button
+              onClick={() => setPage(prev => prev + 1)}
+              disabled={documents.length < 5}
+            >
+              Next
+            </button>
+
+          </div>
+        </>
       )}
 
     </div>
-
   );
 }
 
