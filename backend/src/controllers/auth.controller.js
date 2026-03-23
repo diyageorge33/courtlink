@@ -5,6 +5,32 @@ const bcrypt = require("bcrypt");
 const transporter = require("../utils/mailer");
 const jwt = require("jsonwebtoken");
 
+let pendingAdvocatesTableInitPromise = null;
+
+function ensurePendingAdvocatesTable() {
+  if (!pendingAdvocatesTableInitPromise) {
+    pendingAdvocatesTableInitPromise = pool.query(`
+      CREATE TABLE IF NOT EXISTS pending_advocates (
+        id SERIAL PRIMARY KEY,
+        full_name VARCHAR(100),
+        email VARCHAR(100) UNIQUE,
+        password_hash TEXT,
+        phone VARCHAR(15),
+        office_id VARCHAR(50),
+        specialization TEXT,
+        experience_years INT,
+        otp VARCHAR(6),
+        otp_expiry TIMESTAMP,
+        is_verified BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status VARCHAR(20) DEFAULT 'PENDING'
+      )
+    `);
+  }
+
+  return pendingAdvocatesTableInitPromise;
+}
+
 /* LOGIN */
 exports.login = async (req, res) => {
   console.log("LOGIN API HIT");
@@ -18,21 +44,45 @@ exports.login = async (req, res) => {
   }
 
   try {
+    if (!process.env.RECAPTCHA_SECRET) {
+      console.error("RECAPTCHA_SECRET is missing in backend environment");
+      return res.status(500).json({ message: "reCAPTCHA is not configured on the server" });
+    }
+
     //  CAPTCHA VERIFY
     const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
-    const captchaRes = await axios.post(
-      verifyUrl,
-      new URLSearchParams({
-        secret: process.env.RECAPTCHA_SECRET,
-        response: captchaToken,
-      })
-    );
+    let captchaData;
 
-    const captchaData = captchaRes.data;
-    console.log("Captcha response:", captchaData);
+    try {
+      const captchaRes = await axios.post(
+        verifyUrl,
+        new URLSearchParams({
+          secret: process.env.RECAPTCHA_SECRET,
+          response: captchaToken,
+        }).toString(),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          timeout: 10000,
+        }
+      );
+
+      captchaData = captchaRes.data;
+      console.log("Captcha response:", captchaData);
+    } catch (captchaErr) {
+      console.error("Captcha verification request failed:", captchaErr.response?.data || captchaErr.message);
+      return res.status(502).json({
+        message: "Could not verify reCAPTCHA right now",
+        error: captchaErr.response?.data || captchaErr.message,
+      });
+    }
 
     if (!captchaData.success) {
-      return res.status(403).json({ message: "Captcha verification failed" });
+      return res.status(403).json({
+        message: "Captcha verification failed",
+        error: captchaData["error-codes"] || [],
+      });
     }
 
     // Normalize email
@@ -48,6 +98,7 @@ exports.login = async (req, res) => {
 
     //  IF NOT FOUND IN USERS → CHECK PENDING
     if (result.rows.length === 0) {
+      await ensurePendingAdvocatesTable();
 
       const pending = await pool.query(
         "SELECT is_verified, status FROM pending_advocates WHERE email = $1",
@@ -84,14 +135,12 @@ exports.login = async (req, res) => {
 
     const user = result.rows[0];
 
-    //  BLOCK REJECTED USERS (from users table)
     if (user.account_status === "REJECTED") {
       return res.status(403).json({
         message: "Your registration was rejected by admin"
       });
     }
 
-    //  BLOCK PENDING USERS (if you use this)
     if (user.account_status === "PENDING") {
       return res.status(403).json({
         message: "Your account is under admin review"
@@ -137,15 +186,18 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error("LOGIN CRITICAL ERROR:", err);
     res.status(500).json({
-      message: "An internal server error occurred during login. Please contact support.",
+      message: "Login failed on the server",
       error: err.message
     });
   }
 };
 
+/*pending advocates*/
 /* GET PENDING ADVOCATES */
 exports.getPendingAdvocates = async (req, res) => {
   try {
+    await ensurePendingAdvocatesTable();
+
     const result = await pool.query(
       `SELECT id, full_name, email, office_id, specialization, experience_years
        FROM pending_advocates
@@ -162,11 +214,14 @@ exports.getPendingAdvocates = async (req, res) => {
   }
 };
 
+
 /* REJECT ADVOCATE */
 exports.rejectAdvocate = async (req, res) => {
   const { id } = req.body;
 
   try {
+    await ensurePendingAdvocatesTable();
+
     console.log(" Reject request received for ID:", id);
 
     const check = await pool.query(
@@ -207,6 +262,8 @@ exports.rejectAdvocate = async (req, res) => {
   const { id } = req.body;
 
   try {
+    await ensurePendingAdvocatesTable();
+
     console.log(" Reject request received for ID:", id);
 
     //  check if record exists
@@ -253,6 +310,8 @@ exports.approveAdvocate = async (req, res) => {
   const { id } = req.body;
 
   try {
+    await ensurePendingAdvocatesTable();
+
     //  get pending advocate
     const result = await pool.query(
       "SELECT * FROM pending_advocates WHERE id = $1",
@@ -302,7 +361,7 @@ exports.approveAdvocate = async (req, res) => {
   }
 };
 
-/* REGISTER */
+/* REGISTER AS ADVOCATE*/
 exports.register = async (req, res) => {
   const {
     fullName,
@@ -317,7 +376,6 @@ exports.register = async (req, res) => {
     experienceYears
   } = req.body;
 
-  //  basic validation
   if (!fullName || !email || !password || !confirmPassword || !role) {
     return res.status(400).json({ message: "Missing required fields" });
   }
@@ -329,7 +387,8 @@ exports.register = async (req, res) => {
   try {
     const normalizedEmail = email.trim().toLowerCase();
 
-    //  CHECK BOTH TABLES (IMPORTANT FIX)
+    await ensurePendingAdvocatesTable();
+
     const existingUser = await pool.query(
       "SELECT user_id FROM users WHERE email = $1",
       [normalizedEmail]
@@ -341,89 +400,84 @@ exports.register = async (req, res) => {
     );
 
     if (existingUser.rows.length > 0 || existingPending.rows.length > 0) {
-      return res.status(400).json({
-        message: "Email already registered"
-      });
+      return res.status(400).json({ message: "Email already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
-    // ================= CLIENT =================
     if (role === "CLIENT") {
-
       if (!phone || !dob) {
         return res.status(400).json({
           message: "Phone and Date of Birth are required"
         });
       }
 
-      const userRes = await pool.query(
-        `INSERT INTO users
-         (full_name, email, password_hash, role, otp, otp_expiry, is_verified)
-         VALUES ($1,$2,$3,'CLIENT',$4,$5,false)
+      const insertedUser = await pool.query(
+        `INSERT INTO users (full_name, email, password_hash, role, is_verified, otp, otp_expiry)
+         VALUES ($1, $2, $3, 'CLIENT', false, $4, $5)
          RETURNING user_id`,
         [fullName, normalizedEmail, hashedPassword, otp, otpExpiry]
       );
 
-      const userId = userRes.rows[0].user_id;
-
       await pool.query(
         `INSERT INTO client_profiles (client_id, phone, dob)
-         VALUES ($1,$2,$3)`,
-        [userId, phone, dob]
+         VALUES ($1, $2, $3)
+         ON CONFLICT (client_id)
+         DO UPDATE SET
+           phone = EXCLUDED.phone,
+           dob = EXCLUDED.dob`,
+        [insertedUser.rows[0].user_id, phone, dob]
       );
 
       await transporter.sendMail({
         to: normalizedEmail,
         subject: "Verify your account",
-        html: `<h2>${otp}</h2>`
+        html: `<h2>${otp}</h2>`,
       });
 
       return res.json({ message: "OTP sent to email" });
     }
 
-    // ================= ADVOCATE =================
-    if (role === "ADVOCATE") {
-
-      if (!phone || !officeId || !specialization || !experienceYears) {
-        return res.status(400).json({
-          message: "All advocate fields are required"
-        });
-      }
-
-      await pool.query(
-        `INSERT INTO pending_advocates
-         (full_name, email, password_hash, phone, office_id, specialization, experience_years, otp, otp_expiry, is_verified)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,false)`,
-        [
-          fullName,
-          normalizedEmail,
-          hashedPassword,
-          phone,
-          officeId,
-          specialization,
-          experienceYears,
-          otp,
-          otpExpiry
-        ]
-      );
-
-      await transporter.sendMail({
-        to: normalizedEmail,
-        subject: "Verify your account",
-        html: `<h2>${otp}</h2>`
-      });
-
-      return res.json({ message: "OTP sent" });
+    if (role !== "ADVOCATE") {
+      return res.status(400).json({ message: "Invalid role" });
     }
 
-    return res.status(400).json({ message: "Invalid role" });
+    if (!phone || !officeId || !specialization || !experienceYears) {
+      return res.status(400).json({
+        message: "All advocate fields are required"
+      });
+    }
+
+    await pool.query(
+      `INSERT INTO pending_advocates
+       (full_name, email, password_hash, phone, office_id, specialization, experience_years, otp, otp_expiry, is_verified)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,false)`,
+      [
+        fullName,
+        normalizedEmail,
+        hashedPassword,
+        phone,
+        officeId,
+        specialization,
+        experienceYears,
+        otp,
+        otpExpiry
+      ]
+    );
+
+    // send OTP
+    await transporter.sendMail({
+      to: normalizedEmail,
+      subject: "Verify your account",
+      html: `<h2>${otp}</h2>`
+    });
+
+    res.json({ message: "OTP sent" });
 
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -514,14 +568,15 @@ exports.verifyOtp = async (req, res) => {
   try {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 1. Check USERS (for CLIENT)
-    let result = await pool.query(
-      "SELECT otp, otp_expiry FROM users WHERE email = $1",
+    const userResult = await pool.query(
+      `SELECT otp, otp_expiry
+       FROM users
+       WHERE email = $1`,
       [normalizedEmail]
     );
 
-    if (result.rows.length > 0) {
-      const user = result.rows[0];
+    if (userResult.rows.length > 0) {
+      const user = userResult.rows[0];
 
       if (
         user.otp !== otp ||
@@ -532,16 +587,17 @@ exports.verifyOtp = async (req, res) => {
 
       await pool.query(
         `UPDATE users
-         SET is_verified = true, otp=NULL, otp_expiry=NULL
-         WHERE email=$1`,
+         SET is_verified = true, otp = NULL, otp_expiry = NULL
+         WHERE email = $1`,
         [normalizedEmail]
       );
 
       return res.json({ message: "Email verified successfully" });
     }
 
-    // 2. Check PENDING ADVOCATES
-    result = await pool.query(
+    await ensurePendingAdvocatesTable();
+
+    const result = await pool.query(
       "SELECT otp, otp_expiry FROM pending_advocates WHERE email = $1",
       [normalizedEmail]
     );
@@ -579,31 +635,64 @@ exports.resendOtp = async (req, res) => {
   const { email } = req.body;
 
   try {
+    const normalizedEmail = email.trim().toLowerCase();
+
     const user = await pool.query(
       `SELECT user_id FROM users 
        WHERE email=$1 AND is_verified=false`,
-      [email]
+      [normalizedEmail]
     );
 
-    if (user.rows.length === 0) {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    if (user.rows.length > 0) {
+      await pool.query(
+        `UPDATE users 
+         SET otp=$1, otp_expiry=$2 
+         WHERE email=$3`,
+        [otp, otpExpiry, normalizedEmail]
+      );
+
+      await transporter.sendMail({
+        from: `"CourtLink Support" <${process.env.EMAIL_USER}>`,
+        to: normalizedEmail,
+        subject: "Your new OTP",
+        html: `
+          <h3>Your new OTP</h3>
+          <h2>${otp}</h2>
+          <p>Valid for 10 minutes.</p>
+        `,
+      });
+
+      return res.json({ message: "OTP resent successfully" });
+    }
+
+    await ensurePendingAdvocatesTable();
+
+    const pendingAdvocate = await pool.query(
+      `SELECT id
+       FROM pending_advocates
+       WHERE email = $1 AND is_verified = false`,
+      [normalizedEmail]
+    );
+
+    if (pendingAdvocate.rows.length === 0) {
       return res.status(400).json({
         message: "User already verified or does not exist",
       });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-
     await pool.query(
-      `UPDATE users 
-       SET otp=$1, otp_expiry=$2 
-       WHERE email=$3`,
-      [otp, otpExpiry, email]
+      `UPDATE pending_advocates
+       SET otp = $1, otp_expiry = $2
+       WHERE email = $3`,
+      [otp, otpExpiry, normalizedEmail]
     );
 
     await transporter.sendMail({
       from: `"CourtLink Support" <${process.env.EMAIL_USER}>`,
-      to: email,
+      to: normalizedEmail,
       subject: "Your new OTP",
       html: `
         <h3>Your new OTP</h3>

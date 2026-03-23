@@ -58,14 +58,6 @@ import AdminPendingAdvocates from "./pages/AdminPendingAdvocates";
 import AdvocateSettings from "./pages/advocate/AdvocateSettings";
 import AdvocateAppointments from "./pages/advocate/AdvocateAppointments";
 
-import AdminClients from "./pages/admin/AdminClients";
-import AdminClientCases from "./pages/admin/AdminClientCases";
-import AdminAdvocates from "./pages/admin/AdminAdvocates";
-import AdminReview from "./pages/admin/AdminReview";
-import AdminCases from "./pages/admin/AdminCases";
-import AdminClosedCases from "./pages/admin/AdminClosedCases";
-import AdminAnalytics from "./pages/admin/AdminAnalytics";
-
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -245,35 +237,6 @@ function App() {
               path="/dashboard/admin"
               element={<ProtectedRoute roleRequired="ADMIN"><AdminDashboard /></ProtectedRoute>}
             />
-            <Route
-              path="/admin/clients"
-              element={<ProtectedRoute roleRequired="ADMIN"><AdminClients /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/client/:clientId"
-              element={<ProtectedRoute roleRequired="ADMIN"><AdminClientCases /></ProtectedRoute>}  
-            />
-            <Route
-              path="/admin/advocates"
-              element={<ProtectedRoute roleRequired="ADMIN"><AdminAdvocates /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/review"
-              element={<ProtectedRoute roleRequired="ADMIN"><AdminReview /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/assignment"
-              element={<ProtectedRoute roleRequired="ADMIN"><AdminCases /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/closed"
-              element={<ProtectedRoute roleRequired="ADMIN"><AdminClosedCases /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/analytics"
-              element={<ProtectedRoute roleRequired="ADMIN"><AdminAnalytics /></ProtectedRoute>}
-            />
-
 
             <Route path="/admin/pending" element={<AdminPendingAdvocates />} />
 

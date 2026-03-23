@@ -1,169 +1,126 @@
-import axios from "axios";
+import api from "./api";
 
-const API_BASE = "http://localhost:5000/api/admin";
-
-// 🔐 Helper for auth header
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return {
-    headers: { Authorization: `Bearer ${token}` },
-  };
-};
-
-// ==============================
-// CLIENTS
-// ==============================
-
-export const fetchClients = async () => {
-  const res = await axios.get(`${API_BASE}/clients`, getAuthHeader());
+export const fetchAdminClients = async (page = 1) => {
+  const res = await api.get(`/admin/clients?page=${page}`);
   return res.data;
 };
 
-// ==============================
-// ADVOCATES
-// ==============================
-
-export const fetchAdvocates = async () => {
-  const res = await axios.get(`${API_BASE}/advocates`, getAuthHeader());
+export const fetchAdminAdvocates = async () => {
+  const res = await api.get("/admin/advocates");
   return res.data;
 };
 
-// ==============================
-// CASES
-// ==============================
-
-export const fetchCases = async () => {
-  const res = await axios.get(`${API_BASE}/cases`, getAuthHeader());
+export const fetchAdminCases = async () => {
+  const res = await api.get("/admin/cases");
   return res.data;
 };
 
-// ==============================
-// CLIENT CASES
-// ==============================
-
-export const fetchClientCases = async (clientId) => {
-  const res = await axios.get(
-    `${API_BASE}/client-cases/${clientId}`,
-    getAuthHeader()
-  );
+export const fetchAdminClosedCases = async () => {
+  const res = await api.get("/admin/closed-cases");
   return res.data;
 };
-
-// ==============================
-// ASSIGN / REASSIGN
-// ==============================
-
-export const assignAdvocate = async (data) => {
-  const res = await axios.post(`${API_BASE}/assign`, data, getAuthHeader());
-  return res.data;
-};
-
-export const reassignAdvocate = async (data) => {
-  const res = await axios.post(`${API_BASE}/reassign`, data, getAuthHeader());
-  return res.data;
-};
-
-// ==============================
-// CASE ACTIONS
-// ==============================
-
-export const approveCase = async (caseId) => {
-  const res = await axios.put(
-    `${API_BASE}/approve-case/${caseId}`,
-    {},
-    getAuthHeader()
-  );
-  return res.data;
-};
-
-export const rejectCase = async (caseId) => {
-  const res = await axios.put(
-    `${API_BASE}/reject-case/${caseId}`,
-    {},
-    getAuthHeader()
-  );
-  return res.data;
-};
-
-export const closeCase = async (caseId) => {
-  const res = await axios.put(
-    `${API_BASE}/close-case/${caseId}`,
-    {},
-    getAuthHeader()
-  );
-  return res.data;
-};
-
-export const reopenCase = async (caseId) => {
-  const res = await axios.put(
-    `${API_BASE}/reopen-case/${caseId}`,
-    {},
-    getAuthHeader()
-  );
-  return res.data;
-};
-
-// ==============================
-// ADVOCATE MANAGEMENT
-// ==============================
-
-export const deleteAdvocate = async (id) => {
-  const res = await axios.delete(
-    `${API_BASE}/delete-advocate/${id}`,
-    getAuthHeader()
-  );
-  return res.data;
-};
-
-export const restoreAdvocate = async (id) => {
-  const res = await axios.put(
-    `${API_BASE}/restore-advocate/${id}`,
-    {},
-    getAuthHeader()
-  );
-  return res.data;
-};
-
-// ==============================
-// CLOSED / PENDING
-// ==============================
-
-export const fetchClosedCases = async () => {
-  const res = await axios.get(`${API_BASE}/closed-cases`, getAuthHeader());
-  return res.data;
-};
-
-export const fetchPendingCases = async () => {
-  const res = await axios.get(`${API_BASE}/pending-cases`, getAuthHeader());
-  return res.data;
-};
-
-// ==============================
-// ANALYTICS
-// ==============================
-
-export const fetchAnalytics = async () => {
-  const res = await axios.get(`${API_BASE}/analytics`, getAuthHeader());
-  return res.data;
-};
-
-// ==============================
-// TIMELINE
-// ==============================
-
-export const fetchCaseTimeline = async (caseId) => {
-  const res = await axios.get(
-    `${API_BASE}/case-timeline/${caseId}`,
-    getAuthHeader()
-  );
-  return res.data;
-};
-
-// ==============================
-// STATS
-// ==============================
 
 export const fetchAdminStats = async () => {
-  const res = await axios.get(`${API_BASE}/stats`, getAuthHeader());
+  const res = await api.get("/admin/stats");
+  return res.data;
+};
+
+export const fetchAdminPendingCases = async () => {
+  const res = await api.get("/admin/pending-cases");
+  return res.data;
+};
+
+export const fetchAdminAnalytics = async () => {
+  const res = await api.get("/admin/analytics");
+  return res.data;
+};
+
+export const fetchAdminClientCases = async (clientId) => {
+  const res = await api.get(`/admin/client-cases/${clientId}`);
+  return res.data;
+};
+
+export const fetchAdminCaseTimeline = async (caseId) => {
+  const res = await api.get(`/admin/case-timeline/${caseId}`);
+  return res.data;
+};
+
+export const assignAdminAdvocate = async (caseId, advocateId) => {
+  const res = await api.post("/admin/assign", { caseId, advocateId });
+  return res.data;
+};
+
+export const reassignAdminAdvocate = async (caseId, advocateId) => {
+  const res = await api.post("/admin/reassign", { caseId, advocateId });
+  return res.data;
+};
+
+export const closeAdminCase = async (caseId) => {
+  const res = await api.put(`/admin/close-case/${caseId}`);
+  return res.data;
+};
+
+export const reopenAdminCase = async (caseId) => {
+  const res = await api.put(`/admin/reopen-case/${caseId}`);
+  return res.data;
+};
+
+export const approveAdminCase = async (caseId) => {
+  const res = await api.put(`/admin/approve-case/${caseId}`);
+  return res.data;
+};
+
+export const rejectAdminCase = async (caseId) => {
+  const res = await api.put(`/admin/reject-case/${caseId}`);
+  return res.data;
+};
+
+export const deleteAdminAdvocate = async (advocateId) => {
+  const res = await api.delete(`/admin/delete-advocate/${advocateId}`);
+  return res.data;
+};
+
+export const restoreAdminAdvocate = async (advocateId) => {
+  const res = await api.put(`/admin/restore-advocate/${advocateId}`);
+  return res.data;
+};
+
+export const fetchPendingAdminAdvocates = async () => {
+  const res = await api.get("/auth/admin/pending-advocates");
+  return res.data;
+};
+
+export const approvePendingAdminAdvocate = async (id) => {
+  const res = await api.put("/auth/admin/approve-advocate", { id });
+  return res.data;
+};
+
+export const rejectPendingAdminAdvocate = async (id) => {
+  const res = await api.put("/auth/admin/reject-advocate", { id });
+  return res.data;
+};
+
+export const fetchAdminClosureRequests = async () => {
+  const res = await api.get("/admin/closure-requests");
+  return res.data;
+};
+
+export const approveAdminClientClosure = async (clientId) => {
+  const res = await api.put(`/admin/approve-client-closure/${clientId}`);
+  return res.data;
+};
+
+export const rejectAdminClientClosure = async (clientId) => {
+  const res = await api.put(`/admin/reject-client-closure/${clientId}`);
+  return res.data;
+};
+
+export const approveAdminAdvocateClosure = async (advocateId) => {
+  const res = await api.put(`/admin/approve-advocate-closure/${advocateId}`);
+  return res.data;
+};
+
+export const rejectAdminAdvocateClosure = async (advocateId) => {
+  const res = await api.put(`/admin/reject-advocate-closure/${advocateId}`);
   return res.data;
 };

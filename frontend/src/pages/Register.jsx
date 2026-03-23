@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -12,7 +11,7 @@ function Register() {
   const [role, setRole] = useState("CLIENT");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [dob, setDob] = useState(""); // ✅ added back
+  const [dob, setDob] = useState("");
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -45,7 +44,7 @@ function Register() {
           confirmPassword,
           role,
           phone,
-          dob, // ✅ send DOB
+          dob,
         }),
       });
 
@@ -61,7 +60,7 @@ function Register() {
       localStorage.setItem("pendingOtpEmail", email);
 
       setTimeout(() => {
-        navigate("/verify-otp");
+          navigate("/verify-otp");
       }, 1500);
 
     } catch (err) {
@@ -69,55 +68,57 @@ function Register() {
     }
   };
 
-  return (
-    <div className="info-page">
-      <div className="info-container">
-        <div className="register-header">
-          <div className="register-logo">⚖️</div>
-          <h2>Create Your Account</h2>
-          <p>Join CourtLink to connect with legal professionals or clients.</p>
-        </div>
 
-        <div className="register-form">
-          <label>I am *</label>
-          <select
-            value={role}
-            onChange={(e) => {
-              const selectedRole = e.target.value;
-              setRole(selectedRole);
 
-              if (selectedRole === "ADVOCATE") {
-                navigate("/register/advocate");
-              }
-            }}
-          >
-            <option value="CLIENT">Client</option>
-            <option value="ADVOCATE">Advocate</option>
-          </select>
-
-          <div className="two-column">
-            <div>
-              <label>Full Name *</label>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label>Email Address *</label>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+    return (
+      <div className="info-page">
+        <div className="info-container">
+          <div className="register-header">
+            <div className="register-logo">⚖️</div>
+            <h2>Create Your Account</h2>
+            <p>Join CourtLink to connect with legal professionals or clients.</p>
           </div>
 
-          <div className="two-column">
+          <div className="register-form">
+            <label>I am *</label>
+            <select
+            value={role}
+            onChange={(e) => {
+            const selectedRole = e.target.value;
+            setRole(selectedRole);
+
+            if (selectedRole === "ADVOCATE") {
+            navigate("/register/advocate");
+          }
+        }}
+        >
+        <option value="CLIENT">Client</option>
+        <option value="ADVOCATE">Advocate</option>
+        </select>
+            <div className="two-column">
+              <div>
+                <label>Full Name *</label>
+                <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label>Email Address *</label>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="two-column">
+
             <div>
               <label>Phone Number *</label>
               <input
@@ -135,47 +136,49 @@ function Register() {
                 value={dob}
                 onChange={(e) => setDob(e.target.value)}
               />
+              </div>
             </div>
+
+            <div className="two-column">
+              <div>
+                <label>Password *</label>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label>Confirm Password *</label>
+                <input
+                  type="password"
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="register-btn"
+              onClick={handleRegister}
+            >
+              Register
+            </button>
+
+
+            <p className="login-redirect">
+              Already have an account?{" "}
+              <span onClick={() => navigate("/login")}>Login</span>
+            </p>
           </div>
-
-          <div className="two-column">
-            <div>
-              <label>Password *</label>
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label>Confirm Password *</label>
-              <input
-                type="password"
-                placeholder="Confirm password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="register-btn"
-            onClick={handleRegister}
-          >
-            Register
-          </button>
-
-          <p className="login-redirect">
-            Already have an account?{" "}
-            <span onClick={() => navigate("/login")}>Login</span>
-          </p>
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
 export default Register;

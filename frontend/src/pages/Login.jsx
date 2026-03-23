@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 function Login() {
 const navigate = useNavigate();
@@ -15,6 +16,11 @@ const captchaRef = useRef(null);
 
 const handleLogin = async (e) => {
   e.preventDefault();
+
+  if (!RECAPTCHA_SITE_KEY) {
+    toast.error("reCAPTCHA site key is missing");
+    return;
+  }
 
   if (!captchaToken) {
     toast.error("Please verify reCAPTCHA");
@@ -36,7 +42,11 @@ const handleLogin = async (e) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      toast.error(errorData.message || "Login failed");
+      const errorMessage =
+        errorData.message === "Login failed on the server" && errorData.error
+          ? errorData.error
+          : errorData.message || errorData.error || "Login failed";
+      toast.error(errorMessage);
       captchaRef.current.reset();
       setCaptchaToken(null);
       return;
@@ -104,8 +114,13 @@ const handleLogin = async (e) => {
           <div className="mb-3 d-flex justify-content-center">
             <ReCAPTCHA
               ref={captchaRef}
-              sitekey="6LfUiEksAAAAADag55ZIgvka96w1QzPvdJjscUb2"
+              sitekey={RECAPTCHA_SITE_KEY}
               onChange={(token) => setCaptchaToken(token)}
+              onExpired={() => setCaptchaToken(null)}
+              onErrored={() => {
+                setCaptchaToken(null);
+                toast.error("reCAPTCHA failed to load");
+              }}
             />
           </div>
 
