@@ -1434,3 +1434,16 @@ nav.navbar{
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }
+
+.case-type-row-new {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.form-card-new form {
+  display: flex;
+  flex-direction: column;
+}
+
+

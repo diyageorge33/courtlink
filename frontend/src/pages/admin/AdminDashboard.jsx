@@ -55,9 +55,10 @@ function AdminDashboard() {
   const [pendingCases, setPendingCases] = useState([]);
   const [pendingAdvocates, setPendingAdvocates] = useState([]);
   const [closureRequests, setClosureRequests] = useState({
-    clients: [],
-    advocates: [],
-  });
+  clients: [],
+  advocates: [],
+  closedClients: [], 
+    });
   const [analyticsData, setAnalyticsData] = useState(null);
   const [caseTimeline, setCaseTimeline] = useState([]);
   const [stats, setStats] = useState({
@@ -160,6 +161,7 @@ function AdminDashboard() {
     }
   }, [view]);
 
+
   const handleFetchClientCases = async (client) => {
     try {
       const data = await fetchAdminClientCases(client.user_id);
@@ -172,6 +174,24 @@ function AdminDashboard() {
       console.error("Error fetching client cases:", error);
       toast.error("Failed to fetch client cases");
     }
+  };
+
+      const handleReviveClient = async (clientId) => {
+  try {
+    await fetch(`/api/admin/revive-client/${clientId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    toast.success("Client account revived");
+    await fetchClosureRequests();
+
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to revive account");
+  }
   };
 
   const handleAssignAdvocate = async (caseId, advocateId) => {
@@ -444,16 +464,18 @@ function AdminDashboard() {
       )}
 
       {view === "closures" && (
-        <ClosureRequestsView
-          advocateClosures={closureRequests.advocates}
-          clientClosures={closureRequests.clients}
-          onApproveAdvocate={handleApproveAdvocateClosure}
-          onApproveClient={handleApproveClientClosure}
-          onBack={() => setView("dashboard")}
-          onRejectAdvocate={handleRejectAdvocateClosure}
-          onRejectClient={handleRejectClientClosure}
-        />
-      )}
+    <ClosureRequestsView
+    advocateClosures={closureRequests.advocates}
+    clientClosures={closureRequests.clients}
+    closedClients={closureRequests.closedClients} // 👈 ADD
+    onApproveAdvocate={handleApproveAdvocateClosure}
+    onApproveClient={handleApproveClientClosure}
+    onRejectAdvocate={handleRejectAdvocateClosure}
+    onRejectClient={handleRejectClientClosure}
+    onReviveClient={handleReviveClient} // 👈 ADD
+    onBack={() => setView("dashboard")}
+  />
+)}
     </div>
   );
 }

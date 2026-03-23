@@ -54,7 +54,7 @@ exports.getClients = async (req, res) => {
 exports.getAdvocates = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT u.user_id, u.full_name, u.is_active,
+      `SELECT u.user_id, u.full_name, u.account_status,
             a.specialization, a.experience_years
        FROM users u
        JOIN advocate_profiles a
@@ -219,7 +219,7 @@ exports.suggestAdvocates = async (req, res) => {
        FROM advocate_profiles a
        JOIN users u
        ON a.advocate_id = u.user_id
-       WHERE u.is_active = true
+       WHERE u.account_status = true
        AND LOWER(a.specialization) LIKE
        '%' || LOWER((SELECT case_type FROM cases WHERE case_id=$1)) || '%'`,
       [caseId]
@@ -469,7 +469,7 @@ exports.deleteAdvocate = async (req, res) => {
 
     await pool.query(
       `UPDATE users
-       SET is_active = false
+       SET account_status = false
        WHERE user_id = $1`,
       [advocateId]
     );
@@ -505,7 +505,7 @@ exports.restoreAdvocate = async (req, res) => {
 
     await pool.query(
       `UPDATE users
-       SET is_active = true
+       SET account_status = true
        WHERE user_id = $1`,
       [advocateId]
     );
@@ -599,6 +599,8 @@ exports.getAnalyticsData = async (req, res) => {
 
 exports.getClosureRequests = async (req, res) => {
   try {
+
+    // 🟡 PENDING CLIENT CLOSURES
     const clientClosures = await pool.query(
       `SELECT user_id,
               full_name,
@@ -613,6 +615,22 @@ exports.getClosureRequests = async (req, res) => {
        ORDER BY user_id DESC`
     );
 
+    // 🔵 CLOSED CLIENTS (NEW - for revive)
+    const closedClients = await pool.query(
+      `SELECT user_id,
+              full_name,
+              email,
+              'CLIENT' AS role,
+              account_status,
+              NULL AS reason,
+              NULL AS requested_at
+       FROM users
+       WHERE role = 'CLIENT'
+       AND account_status = 'CLOSED'
+       ORDER BY user_id DESC`
+    );
+
+    // 🟣 ADVOCATE RESIGNATIONS
     const advocateClosures = await pool.query(
       `SELECT u.user_id,
               u.full_name,
@@ -629,8 +647,10 @@ exports.getClosureRequests = async (req, res) => {
 
     res.json({
       clients: clientClosures.rows,
+      closedClients: closedClients.rows, // 👈 NEW
       advocates: advocateClosures.rows,
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error fetching closure requests" });
@@ -701,7 +721,7 @@ exports.approveAdvocateClosure = async (req, res) => {
 
     await pool.query(
       `UPDATE users
-       SET is_active = false
+       SET account_status = false
        WHERE user_id = $1
        AND role = 'ADVOCATE'`,
       [advocateId]
@@ -742,5 +762,32 @@ exports.rejectAdvocateClosure = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error rejecting advocate closure" });
+  }
+};
+
+exports.reviveClientAccount = async (req, res) => {
+  const { clientId } = req.params;
+
+  try {
+
+    await pool.query(
+      `UPDATE users
+       SET account_status = 'ACTIVE'
+       WHERE user_id = $1
+       AND role = 'CLIENT'`,
+      [clientId]
+    );
+
+    await pool.query(
+      `INSERT INTO audit_logs (action, performed_by)
+       VALUES ($1, $2)`,
+      [`Client Account Revived: ${clientId}`, req.user.user_id]
+    );
+
+    res.json({ message: "Client account revived successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error reviving account" });
   }
 };

@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const isAdmin = require("../middleware/isAdmin");
+const adminController = require("../controllers/admin.controller");
 
 const { verifyToken } = require("../middleware/authMiddleware");
 
@@ -55,5 +57,7 @@ router.put("/reject-advocate-closure/:advocateId", verifyToken, rejectAdvocateCl
 router.put("/restore-advocate/:advocateId", verifyToken, restoreAdvocate);
 
 router.delete("/delete-advocate/:advocateId", verifyToken, deleteAdvocate);
+router.put("/revive-client/:clientId", verifyToken, isAdmin, adminController.reviveClientAccount);
+
 
 module.exports = router;

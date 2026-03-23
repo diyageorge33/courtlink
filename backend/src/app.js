@@ -1,11 +1,12 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config({ path: require("path").join(__dirname, "../.env"), });
+require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 
 const app = express();
 const pool = require("./db");
 const cookieParser = require("cookie-parser");
+const { ensureAuditLogsTable } = require("./utils/auditLogs");
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
@@ -53,5 +54,10 @@ if (process.env.NODE_ENV !== "test") {
     }
   });
 }
+
+// Audit logs init
+ensureAuditLogsTable()
+  .then(() => console.log("audit_logs table ready"))
+  .catch((err) => console.error("Failed to initialize audit_logs table", err));
 
 module.exports = app;

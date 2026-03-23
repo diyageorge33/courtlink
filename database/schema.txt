@@ -407,3 +407,12 @@ ADD COLUMN user_id INT REFERENCES users(user_id) ON DELETE SET NULL;
 
 ALTER TABLE bookings
 ADD COLUMN guest_id UUID;
+
+
+CREATE TABLE IF NOT EXISTS advocate_resignations (
+  request_id SERIAL PRIMARY KEY,
+  advocate_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+  reason TEXT NOT NULL,
+  status VARCHAR(20) DEFAULT 'PENDING',
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -49,7 +49,7 @@ exports.login = async (req, res) => {
       return res.status(500).json({ message: "reCAPTCHA is not configured on the server" });
     }
 
-    //  CAPTCHA VERIFY
+    // CAPTCHA VERIFY
     const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
     let captchaData;
 
@@ -85,10 +85,8 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Normalize email
     const normalizedEmail = email.trim().toLowerCase();
 
-    //  CHECK USERS TABLE FIRST
     const result = await pool.query(
       "SELECT user_id, role, full_name, password_hash, is_verified, account_status FROM users WHERE email = $1",
       [normalizedEmail]
@@ -96,7 +94,6 @@ exports.login = async (req, res) => {
 
     console.log("User fetched:", result.rows[0]);
 
-    //  IF NOT FOUND IN USERS → CHECK PENDING
     if (result.rows.length === 0) {
       await ensurePendingAdvocatesTable();
 
@@ -106,55 +103,43 @@ exports.login = async (req, res) => {
       );
 
       if (pending.rows.length > 0) {
-
         const user = pending.rows[0];
 
-        //  VERY IMPORTANT: CHECK REJECTED FIRST
         if (user.status === "REJECTED") {
           return res.status(403).json({
             message: "Your request was denied by admin"
           });
         }
 
-        //  NOT VERIFIED
         if (!user.is_verified) {
           return res.status(403).json({
             message: "Please verify your email first"
           });
         }
 
-        //  STILL PENDING
         return res.status(403).json({
           message: "Your account is pending admin approval"
         });
       }
 
-      //  NOT FOUND ANYWHERE
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const user = result.rows[0];
 
-    if (user.account_status === "REJECTED") {
+    // 🔥 MAIN FIX (THIS WAS MISSING)
+    if (user.account_status !== "ACTIVE") {
       return res.status(403).json({
-        message: "Your registration was rejected by admin"
+        message: "Account is closed or inactive. Contact admin.",
       });
     }
 
-    if (user.account_status === "PENDING") {
-      return res.status(403).json({
-        message: "Your account is under admin review"
-      });
-    }
-
-    //  VERIFY EMAIL
     if (!user.is_verified) {
       return res.status(403).json({
         message: "Please verify your email before logging in"
       });
     }
 
-    //  PASSWORD CHECK
     console.log("Entered password:", password);
     console.log("Stored hash:", user.password_hash);
 
@@ -166,7 +151,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    //  GENERATE TOKEN
     const token = jwt.sign(
       {
         user_id: user.user_id,
