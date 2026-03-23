@@ -4,6 +4,7 @@ function ClientNotifications() {
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1); //  NEW
 
   useEffect(() => {
 
@@ -12,7 +13,7 @@ function ClientNotifications() {
         const token = localStorage.getItem("token");
 
         const res = await fetch(
-          "http://localhost:5000/api/client/notifications",
+          `http://localhost:5000/api/client/notifications?page=${page}`, //  UPDATED
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -38,7 +39,7 @@ function ClientNotifications() {
 
     fetchNotifications();
 
-  }, []);
+  }, [page]); //  UPDATED
 
   return (
 
@@ -62,32 +63,54 @@ function ClientNotifications() {
         <p>No notifications yet</p>
       ) : (
 
-        <div className="cases-table-wrapper-new">
+        <>
+          <div className="cases-table-wrapper-new">
 
-          <table className="cases-table-new">
+            <table className="cases-table-new">
 
-            <thead>
-              <tr>
-                <th>Message</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {notifications.map((n, index) => (
-                <tr key={index}>
-                  <td>{n.message}</td>
-                  <td>
-                    {new Date(n.date).toLocaleDateString()}
-                  </td>
+              <thead>
+                <tr>
+                  <th>Message</th>
+                  <th>Date</th>
                 </tr>
-              ))}
-            </tbody>
+              </thead>
 
-          </table>
+              <tbody>
+                {notifications.map((n, index) => (
+                  <tr key={n.notification_id || n.created_at + index}>
+                    <td>{n.message}</td>
+                    <td>
+                      {new Date(n.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
 
-        </div>
+            </table>
 
+          </div>
+
+          {/*  PAGINATION BUTTONS */}
+          <div style={{ marginTop: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
+
+            <button
+              onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </button>
+
+            <span>Page {page}</span>
+
+            <button
+              onClick={() => setPage(prev => prev + 1)}
+              disabled={notifications.length < 10} // assuming backend limit = 10
+            >
+              Next
+            </button>
+
+          </div>
+        </>
       )}
 
     </div>

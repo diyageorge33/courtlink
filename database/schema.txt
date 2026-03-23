@@ -350,3 +350,7 @@ CREATE TABLE pending_advocates (
 
 ALTER TABLE pending_advocates
 ADD COLUMN status VARCHAR(20) DEFAULT 'PENDING';
+
+23/3/26
+ALTER TABLE pending_advocates
+ADD COLUMN phone VARCHAR(15);

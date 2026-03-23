@@ -4,6 +4,8 @@ import {
   fetchClientCases,
   uploadClientDocument
 } from "../api/clientApi";
+import { toast } from "react-toastify"; // ✅ NEW
+import "react-toastify/dist/ReactToastify.css";
 import "../newstyles.css";
 
 function UploadDocuments() {
@@ -21,10 +23,20 @@ function UploadDocuments() {
 
     const loadCases = async () => {
       try {
-        const caseData = await fetchClientCases();
-        setCases(caseData);
+        const res = await fetchClientCases();
+
+        if (Array.isArray(res)) {
+          setCases(res);
+        } else if (Array.isArray(res.data)) {
+          setCases(res.data);
+        } else {
+          setCases([]);
+        }
+
       } catch (err) {
         console.error("Error loading cases:", err);
+        setCases([]);
+        toast.error("Failed to load cases"); // ✅
       } finally {
         setLoading(false);
       }
@@ -39,16 +51,15 @@ function UploadDocuments() {
     try {
 
       if (!selectedCase) {
-        alert("Please select a case first.");
+        toast.warning("Please select a case first."); // ✅
         return;
       }
 
       if (!file) {
-        alert("Please choose a file to upload.");
+        toast.warning("Please choose a file."); // ✅
         return;
       }
 
-      // ✅ File type validation
       const allowedTypes = [
         "application/pdf",
         "text/plain",
@@ -61,15 +72,14 @@ function UploadDocuments() {
       ];
 
       if (!allowedTypes.includes(file.type)) {
-        alert("Unsupported file type!");
+        toast.error("Unsupported file type!");
         return;
       }
 
-      // ✅ File size validation (10MB)
       const maxSize = 10 * 1024 * 1024;
 
       if (file.size > maxSize) {
-        alert("File too large! Max 10MB allowed.");
+        toast.error("File too large! Max 10MB allowed.");
         return;
       }
 
@@ -81,13 +91,13 @@ function UploadDocuments() {
 
       await uploadClientDocument(formData);
 
-      alert("Document uploaded successfully!");
+      toast.success("Document uploaded successfully!"); // ✅
 
       navigate("/dashboard/client/document");
 
     } catch (err) {
       console.error("Upload error:", err);
-      alert("Upload failed");
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
     }
@@ -98,7 +108,6 @@ function UploadDocuments() {
 
     <div className="client-dashboard-new">
 
-      {/* PAGE HEADER */}
       <div className="documents-header-new">
 
         <h1 className="page-title-new">Upload Documents</h1>

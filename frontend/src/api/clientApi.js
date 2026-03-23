@@ -7,8 +7,8 @@ export const fetchClientDashboardStats = async () => {
 };
 
 /* CASES */
-export const fetchClientCases = async () => {
-  const res = await api.get("/client/cases");
+export const fetchClientCases = async (page = 1) => {
+  const res = await api.get(`/client/cases?page=${page}`);
   return res.data;
 };
 
@@ -27,9 +27,14 @@ export const uploadClientDocument = async (formData) => {
   return res.data;
 };
 
-export const fetchClientDocuments = async () => {
-  const res = await api.get("/client/documents/client");
-  return res.data;
+export const fetchClientDocuments = async (page = 1) => {
+  try {
+    const res = await api.get(`/client/documents/client?page=${page}`);
+    return res.data || [];
+  } catch (err) {
+    console.error("Fetch documents error:", err);
+    return []; // ✅ prevents crash
+  }
 };
 
 export const deleteClientDocument = async (documentId) => {
