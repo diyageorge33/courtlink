@@ -620,11 +620,11 @@ exports.getClosureRequests = async (req, res) => {
               'ADVOCATE' AS role,
               ar.status AS account_status,
               ar.reason,
-              ar.created_at AS requested_at
+              ar.requested_at
        FROM advocate_resignations ar
        JOIN users u ON u.user_id = ar.advocate_id
        WHERE ar.status = 'PENDING'
-       ORDER BY ar.created_at DESC`
+       ORDER BY ar.requested_at DESC`
     );
 
     res.json({

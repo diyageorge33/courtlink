@@ -115,22 +115,37 @@ function AdminDashboard() {
 
   useEffect(() => {
     const loadInitialData = async () => {
-      try {
-        await Promise.all([
-          fetchClients(),
-          fetchAdvocates(),
-          fetchCases(),
-          fetchClosedCases(),
-          fetchStats(),
-          fetchPendingCases(),
-          fetchPendingAdvocates(),
-          fetchClosureRequests(),
-          fetchAnalytics(),
-        ]);
-      } catch (error) {
-        console.error("Error loading admin dashboard:", error);
+      const requests = [
+        { label: "clients", run: () => fetchClients() },
+        { label: "advocates", run: () => fetchAdvocates() },
+        { label: "cases", run: () => fetchCases() },
+        { label: "closedCases", run: () => fetchClosedCases() },
+        { label: "stats", run: () => fetchStats() },
+        { label: "pendingCases", run: () => fetchPendingCases() },
+        { label: "pendingAdvocates", run: () => fetchPendingAdvocates() },
+        { label: "closureRequests", run: () => fetchClosureRequests() },
+        { label: "analytics", run: () => fetchAnalytics() },
+      ];
+
+      const results = await Promise.allSettled(
+        requests.map((request) => request.run())
+      );
+
+      const failedRequests = results
+        .map((result, index) => ({ result, label: requests[index].label }))
+        .filter(({ result }) => result.status === "rejected");
+
+      if (failedRequests.length === requests.length) {
+        failedRequests.forEach(({ label, result }) => {
+          console.error(`Admin dashboard request failed: ${label}`, result.reason);
+        });
         toast.error("Failed to load admin dashboard");
+        return;
       }
+
+      failedRequests.forEach(({ label, result }) => {
+        console.error(`Admin dashboard request failed: ${label}`, result.reason);
+      });
     };
 
     loadInitialData();
