@@ -5,6 +5,31 @@ const bcrypt = require("bcrypt");
 const transporter = require("../utils/mailer");
 const jwt = require("jsonwebtoken");
 
+let pendingAdvocatesTableInitPromise = null;
+
+function ensurePendingAdvocatesTable() {
+  if (!pendingAdvocatesTableInitPromise) {
+    pendingAdvocatesTableInitPromise = pool.query(`
+      CREATE TABLE IF NOT EXISTS pending_advocates (
+        id SERIAL PRIMARY KEY,
+        full_name VARCHAR(100),
+        email VARCHAR(100) UNIQUE,
+        password_hash TEXT,
+        office_id VARCHAR(50),
+        specialization TEXT,
+        experience_years INT,
+        otp VARCHAR(6),
+        otp_expiry TIMESTAMP,
+        is_verified BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status VARCHAR(20) DEFAULT 'PENDING'
+      )
+    `);
+  }
+
+  return pendingAdvocatesTableInitPromise;
+}
+
 /* LOGIN */
 exports.login = async (req, res) => {
   console.log("LOGIN API HIT");
@@ -72,6 +97,7 @@ exports.login = async (req, res) => {
 
     //  IF NOT FOUND IN USERS → CHECK PENDING
     if (result.rows.length === 0) {
+      await ensurePendingAdvocatesTable();
 
       const pending = await pool.query(
         "SELECT is_verified, status FROM pending_advocates WHERE email = $1",
@@ -157,6 +183,8 @@ exports.login = async (req, res) => {
 /* GET PENDING ADVOCATES */
 exports.getPendingAdvocates = async (req, res) => {
   try {
+    await ensurePendingAdvocatesTable();
+
     const result = await pool.query(
       `SELECT id, full_name, email, office_id, specialization, experience_years
        FROM pending_advocates
@@ -179,6 +207,8 @@ exports.rejectAdvocate = async (req, res) => {
   const { id } = req.body;
 
   try {
+    await ensurePendingAdvocatesTable();
+
     console.log(" Reject request received for ID:", id);
 
     const check = await pool.query(
@@ -219,6 +249,8 @@ exports.rejectAdvocate = async (req, res) => {
   const { id } = req.body;
 
   try {
+    await ensurePendingAdvocatesTable();
+
     console.log(" Reject request received for ID:", id);
 
     //  check if record exists
@@ -265,6 +297,8 @@ exports.approveAdvocate = async (req, res) => {
   const { id } = req.body;
 
   try {
+    await ensurePendingAdvocatesTable();
+
     //  get pending advocate
     const result = await pool.query(
       "SELECT * FROM pending_advocates WHERE id = $1",
@@ -378,6 +412,8 @@ exports.register = async (req, res) => {
     if (!officeId || !specialization || !experienceYears) {
       return res.status(400).json({ message: "All fields are required" });
     }
+
+    await ensurePendingAdvocatesTable();
 
     const existing = await pool.query(
       "SELECT * FROM pending_advocates WHERE email = $1",
@@ -533,6 +569,8 @@ exports.verifyOtp = async (req, res) => {
       return res.json({ message: "Email verified successfully" });
     }
 
+    await ensurePendingAdvocatesTable();
+
     const result = await pool.query(
       "SELECT otp, otp_expiry FROM pending_advocates WHERE email = $1",
       [normalizedEmail]
@@ -603,6 +641,8 @@ exports.resendOtp = async (req, res) => {
 
       return res.json({ message: "OTP resent successfully" });
     }
+
+    await ensurePendingAdvocatesTable();
 
     const pendingAdvocate = await pool.query(
       `SELECT id

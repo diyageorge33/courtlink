@@ -5,6 +5,7 @@ require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 const pool = require("./db");
+const { ensureAuditLogsTable } = require("./utils/auditLogs");
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
@@ -48,6 +49,10 @@ pool.query("SELECT NOW()", (err, result) => {
     console.log("DB connected at:", result.rows[0].now);
   }
 });
+
+ensureAuditLogsTable()
+  .then(() => console.log("audit_logs table ready"))
+  .catch((err) => console.error("Failed to initialize audit_logs table", err));
 
 // Start server
 const PORT = 5000;

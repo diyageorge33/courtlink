@@ -127,6 +127,15 @@ CREATE TABLE notifications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+10.1 audit_logs
+CREATE TABLE audit_logs (
+    log_id SERIAL PRIMARY KEY,
+    case_id INT REFERENCES cases(case_id) ON DELETE CASCADE,
+    action TEXT NOT NULL,
+    performed_by INT REFERENCES users(user_id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 11.CREATE OR REPLACE FUNCTION handle_admin_review()
 RETURNS TRIGGER
 AS $$

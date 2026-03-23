@@ -122,13 +122,13 @@
   border-radius:12px;
   cursor:pointer;
   transition:0.25s;
-  border: 1.5px solid rgb(67, 3, 65);
+  border: none;
   box-sizing:border-box;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.22);
 }
 
 .action-tile-new:hover{
   transform:translateY(-6px);
-  border:1px solid #3b82f6;
   box-shadow:0 8px 20px rgba(0,0,0,0.4);
 }
 

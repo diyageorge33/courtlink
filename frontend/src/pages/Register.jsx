@@ -10,6 +10,8 @@ function Register() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("CLIENT"); // default
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [dob, setDob] = useState("");
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -30,6 +32,8 @@ function Register() {
           email,
           password,
           role,
+          phone,
+          dob,
         }),
       });
 
@@ -110,12 +114,21 @@ function Register() {
 
             <div>
               <label>Phone Number *</label>
-              <input type="tel" placeholder="+91" />
+              <input
+                type="tel"
+                placeholder="+91"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
             </div>
 
             <div>
               <label>Date of Birth *</label>
-              <input type="date" />
+              <input
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+              />
               </div>
             </div>
 

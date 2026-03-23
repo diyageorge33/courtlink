@@ -537,11 +537,29 @@ exports.getCaseTimeline = async (req, res) => {
   const { caseId } = req.params;
   try {
     const result = await pool.query(
-      `SELECT a.action, a.created_at, u.full_name AS performed_by
-       FROM audit_logs a
-       JOIN users u ON a.performed_by = u.user_id
-       WHERE a.case_id = $1
-       ORDER BY a.created_at ASC`,
+      `SELECT timeline.action, timeline.created_at, timeline.performed_by
+       FROM (
+         SELECT a.action, a.created_at, u.full_name AS performed_by
+         FROM audit_logs a
+         LEFT JOIN users u ON a.performed_by = u.user_id
+         WHERE a.case_id = $1
+
+         UNION ALL
+
+         SELECT 'Case Filed' AS action,
+                c.created_at,
+                u.full_name AS performed_by
+         FROM cases c
+         JOIN users u ON u.user_id = c.client_id
+         WHERE c.case_id = $1
+           AND NOT EXISTS (
+             SELECT 1
+             FROM audit_logs a2
+             WHERE a2.case_id = c.case_id
+               AND a2.action = 'Case Filed'
+           )
+       ) AS timeline
+       ORDER BY timeline.created_at ASC`,
       [caseId]
     );
     res.json(result.rows);
