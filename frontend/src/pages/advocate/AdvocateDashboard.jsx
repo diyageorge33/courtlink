@@ -7,10 +7,15 @@ import {
   fetchAdvocateClients,
   checkResignationStatus,
   submitResignationRequest,
-  cancelResignationRequest
+  cancelResignationRequest,
+  fetchProfile,
+  uploadProfilePhoto,
+
+
 } from "../../api/advocateApi";
 import { toast } from "react-toastify";
 import "../../newstyles.css";
+import {FaCog} from "react-icons/fa";
 
 function AdvocateDashboard() {
   const navigate = useNavigate();
@@ -21,8 +26,13 @@ function AdvocateDashboard() {
   let advocateId = null;
 
   if (token) {
-    const decoded = jwtDecode(token);
-    advocateId = decoded.user_id;
+    try{
+      const decoded = jwtDecode(token);
+      advocateId = decoded.user_id;
+    } catch (err) {
+      console.error("Error decoding token:", err);
+      navigate("/login");
+    }
   }
 
   const [stats, setStats] = useState({
@@ -31,7 +41,7 @@ function AdvocateDashboard() {
     weeklyCases: 0,
     clients: 0,
   });
-
+  const[profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [detailMode, setDetailMode] = useState(null);
   const [detailData, setDetailData] = useState([]);
@@ -52,15 +62,30 @@ function AdvocateDashboard() {
           return;
         }
 
-        const data = await fetchAdvocateDashboardStats(advocateId);
-        setStats(data);
+        const[statsData, profileData, statusData] = await Promise.all([
+          fetchAdvocateDashboardStats(advocateId),
+          fetchProfile(),
+          checkResignationStatus()
+        ]);
 
-        // Check resignation status
-        const statusData = await checkResignationStatus();
+        console.log("Fetched stats:", statsData);
+        console.log("Fetched profile:", profileData);
+        console.log("Fetched resignation status:", statusData);
+
+        setStats(statsData);
+        setProfile(profileData || {});
         setHasPendingResignation(statusData.hasPendingRequest);
 
       } catch (err) {
         console.error("Error fetching dashboard stats:", err);
+        
+        try{
+          const profileData = await fetchProfile();
+          setProfile(profileData || {});
+        } catch (err) {
+          console.error("Error fetching profile:", err);
+          setProfile({});
+        }
       } finally {
         setLoading(false);
       }
@@ -131,13 +156,78 @@ function AdvocateDashboard() {
     <div className="client-dashboard-new">
 
       <div className="dashboard-header-new">
-        <div>
-          <div className="welcome-header-new" style={{ marginBottom: "4px" }}>
-            <h1 style={{ margin: 0 }}>Welcome Adv. {userName}!</h1>
-          </div>
-          <p style={{ marginTop: 0 }}>A centralized workspace to manage cases, hearings, and legal responsibilities.</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+
+            <div style={{ display: "flex", alignItems: "center",  gap: "15px" }}>
+
+              {/* Profile Image */}
+              <div style={{ position: "relative" }}>
+                <img
+                  src={
+                    profile && profile.profile_image
+                      ? `http://localhost:5000/uploads/${profile.profile_image}`
+                      : `https://ui-avatars.com/api/?name=${userName}`
+                  }
+                  alt="profile"
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                    border: "3px solid #6366f1"
+                  }}
+                  onClick={() => document.getElementById("profileUpload").click()}
+                />
+
+                {/* Hidden Upload Input */}
+                <input
+                  id="profileUpload"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    try {
+                      await uploadProfilePhoto(file);
+                      toast.success("Profile updated!");
+
+                      const updated = await fetchProfile();
+                      setProfile(updated);
+
+                    } catch (err) {
+                      toast.error("Upload failed");
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Welcome Text */}
+                  <div>
+                    <div className="welcome-header-new" style={{ marginBottom: "4px" }}>
+                      <h1 style={{ margin: 0 }}>Welcome Adv. {userName}!</h1>
+                    </div>
+                    <p style={{ marginTop: 0 }}>
+                      A centralized workspace to manage cases, hearings, and legal responsibilities.
+                    </p>
+                  </div>
+
+            </div>
+            <FaCog
+              style={{
+                fontSize: "22px",
+                color: "#94a3b8",
+                cursor: "pointer"
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#3b82f6")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+              onClick={() => navigate("/dashboard/advocate/settings")}
+            />
         </div>
       </div>
+
 
       {!loading && (
         <div className="stats-grid-new">
@@ -328,6 +418,14 @@ function AdvocateDashboard() {
         >
           <h3>Upload Order</h3>
           <p>Upload court orders and judgement documents.</p>
+        </div>
+
+        <div
+          className="action-tile-new"
+          onClick={() => navigate("/dashboard/advocate/appointments")}
+        >
+          <h3>Appointments</h3>
+          <p>View client bookings and consultation details.</p>
         </div>
 
       </div>

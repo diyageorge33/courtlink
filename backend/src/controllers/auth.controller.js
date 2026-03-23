@@ -317,7 +317,7 @@ exports.register = async (req, res) => {
     experienceYears
   } = req.body;
 
-  // ✅ basic validation
+  //  basic validation
   if (!fullName || !email || !password || !confirmPassword || !role) {
     return res.status(400).json({ message: "Missing required fields" });
   }
@@ -329,7 +329,7 @@ exports.register = async (req, res) => {
   try {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 🔥 CHECK BOTH TABLES (IMPORTANT FIX)
+    //  CHECK BOTH TABLES (IMPORTANT FIX)
     const existingUser = await pool.query(
       "SELECT user_id FROM users WHERE email = $1",
       [normalizedEmail]

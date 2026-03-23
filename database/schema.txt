@@ -282,6 +282,7 @@ ADD COLUMN advocate_change_requested BOOLEAN DEFAULT FALSE;
 
 ALTER TABLE cases
 DROP CONSTRAINT cases_status_check;
+
 ALTER TABLE cases
 ADD CONSTRAINT cases_status_check
 CHECK (status IN (
@@ -301,6 +302,7 @@ CREATE TABLE orders (
   file_url TEXT,
   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 ALTER TABLE orders
 ADD COLUMN advocate_id INT REFERENCES users(user_id) ON DELETE CASCADE;
 
@@ -352,5 +354,47 @@ ALTER TABLE pending_advocates
 ADD COLUMN status VARCHAR(20) DEFAULT 'PENDING';
 
 23/3/26
+
 ALTER TABLE pending_advocates
 ADD COLUMN phone VARCHAR(15);
+
+CREATE TABLE bookings (
+  booking_id SERIAL PRIMARY KEY,
+  name TEXT,
+  email TEXT,
+  phone TEXT,
+  preferred_date DATE,
+  advocate_name TEXT,
+  payment_id TEXT,
+  amount INT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+ALTER TABLE bookings ADD COLUMN advocate_id INT;
+
+ALTER TABLE bookings
+ADD CONSTRAINT fk_advocate
+FOREIGN KEY (advocate_id)
+REFERENCES users(user_id)
+ON DELETE CASCADE;
+
+CREATE TABLE advocate_schedules (
+  schedule_id SERIAL PRIMARY KEY,
+  advocate_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  reason TEXT,
+  slot TEXT CHECK (slot IN ('WHOLE_DAY', 'FN', 'AN')) DEFAULT 'WHOLE_DAY',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+ALTER TABLE advocate_profiles
+ADD COLUMN fee_per_hour INTEGER;
+
+ALTER TABLE bookings
+DROP COLUMN advocate_name;
+
+ALTER TABLE bookings
+ADD COLUMN user_id INT REFERENCES users(user_id) ON DELETE SET NULL;
+
+ALTER TABLE bookings
+ADD COLUMN guest_id UUID;
