@@ -24,7 +24,7 @@ exports.getClients = async (req, res) => {
 
     res.json({
       clients: result.rows,
-      total: total.rows[0].count
+      total: parseInt(total.rows[0].count)
     });
 
   } catch (err) {
@@ -378,11 +378,11 @@ exports.getAdminStats = async (req, res) => {
     );
 
     res.json({
-      totalCases: totalCases.rows[0].count,
-      activeCases: activeCases.rows[0].count,
-      closedCases: closedCases.rows[0].count,
-      totalAdvocates: totalAdvocates.rows[0].count,
-      pendingCases: pendingCases.rows[0].count
+      totalCases: parseInt(totalCases.rows[0].count),
+      activeCases: parseInt(activeCases.rows[0].count),
+      closedCases: parseInt(closedCases.rows[0].count),
+      totalAdvocates: parseInt(totalAdvocates.rows[0].count),
+      pendingCases: parseInt(pendingCases.rows[0].count)
     });
 
   } catch (err) {

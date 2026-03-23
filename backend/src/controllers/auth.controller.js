@@ -105,7 +105,7 @@ exports.register = async (req, res) => {
     email,
     password,
     role,
-    barEnrollmentNo,
+    officeId,
     specialization,
     experienceYears
   } = req.body;
@@ -146,6 +146,14 @@ exports.register = async (req, res) => {
     );
 
     const userId = userResult.rows[0].user_id;
+
+    if (role === "CLIENT") {
+      await pool.query(
+        `INSERT INTO client_profiles (client_id)
+        VALUES ($1)`,
+        [userId]
+      );
+    }
 
     //Insert advocate profile BEFORE OTP (if advocate)
 

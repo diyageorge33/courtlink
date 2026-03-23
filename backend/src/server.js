@@ -31,8 +31,9 @@ app.use("/api/payment", require("./routes/payment.routes"));
 app.use("/api/ai", aiRoutes);
 app.use("/api/advocate", advocateRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/booking", require("./routes/booking.routes"));
 
-// 🔥 IMPORTANT (DO NOT CHANGE AGAIN)
+// IMPORTANT (DO NOT CHANGE AGAIN)
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Test route

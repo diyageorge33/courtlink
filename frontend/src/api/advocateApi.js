@@ -76,4 +76,65 @@ export const cancelResignationRequest = async () => {
   });
   return response.data;
 };
-
+
+export const fetchProfile = async () => {
+  const token = localStorage.getItem("token");
+
+  const res = await axios.get(`${API_BASE}/advocate/profile`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+export const uploadProfilePhoto = async (file) => {
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("photo", file);
+
+  const res = await axios.post(
+    `${API_BASE}/advocate/upload-profile`,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const fetchAllAdvocates = async () => {
+  const res = await axios.get("http://localhost:5000/api/advocate/all");
+  return res.data;
+};
+
+export const updateAdvocateProfile = async (data) => {
+  const token = localStorage.getItem("token");
+
+  const res = await axios.put(
+    "http://localhost:5000/api/advocate/profile",
+    data,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  return res.data;
+};
+
+export const fetchBookings = async () => {
+  const token = localStorage.getItem("token");
+
+  const res = await axios.get(
+    "http://localhost:5000/api/advocate/bookings",
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  return res.data;
+};

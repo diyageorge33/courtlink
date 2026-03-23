@@ -2,6 +2,9 @@ const { verifyToken } = require("../middleware/authMiddleware");
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
+const upload = require("../middleware/upload");
+const path = require("path");
+const fs = require("fs");
 
 // GET Advocate Dashboard Stats
 router.get("/dashboard/:id", verifyToken, async (req,res)=>{
@@ -318,12 +321,184 @@ router.delete("/resignation", verifyToken, async (req, res) => {
   }
 });
 
+// ==============================
+// UPLOAD PROFILE PHOTO
+// ==============================
+
+router.post(
+  "/upload-profile",
+  verifyToken,
+  upload.single("photo"),
+  async (req, res) => {
+    const advocateId = req.user.user_id;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No valid image uploaded" });
+    }
+
+    const newFile = req.file.filename;
+
+    try {
+      // Get old image from DB
+      const oldData = await pool.query(
+        "SELECT profile_image FROM advocate_profiles WHERE advocate_id = $1",
+        [advocateId]
+      );
+
+      const oldImage = oldData.rows[0]?.profile_image;
+
+      // Delete old image from uploads folder
+      if (oldImage) {
+        const oldPath = path.join(__dirname, "../../uploads", oldImage);
+
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      }
+
+      // Update DB with new image
+      await pool.query(
+        "UPDATE advocate_profiles SET profile_image = $1 WHERE advocate_id = $2",
+        [newFile, advocateId]
+      );
+
+      res.json({
+        message: "Profile photo uploaded successfully",
+        filePath: newFile,
+      });
+
+    } catch (err) {
+      console.error("UPLOAD ERROR:", err);
+      res.status(500).json({ error: "Upload failed" });
+    }
+  }
+);
+
+// ==============================
+// GET PROFILE DATA
+// ==============================
+
+router.get("/profile", verifyToken, async (req, res) => {
+  const advocateId = req.user.user_id;
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        u.full_name,
+        u.email,
+        ap.profile_image,
+        ap.specialization,
+        ap.experience_years,
+        ap.fee_per_hour
+      FROM users u
+      JOIN advocate_profiles ap 
+        ON u.user_id = ap.advocate_id
+      WHERE u.user_id = $1
+      `,
+      [advocateId]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("PROFILE ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ==============================
+// GET ALL ADVOCATES (FOR CLIENT VIEW)
+// ==============================
+
+router.get("/all", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.user_id AS advocate_id,
+        u.full_name,
+        ap.specialization,
+        ap.experience_years AS experience,
+        ap.profile_image,
+        COALESCE(ap.fee_per_hour, 500) AS fee_per_hour
+      FROM users u
+      LEFT JOIN advocate_profiles ap 
+        ON u.user_id = ap.advocate_id
+      WHERE u.role = 'ADVOCATE'
+    `);
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("FETCH ADVOCATES ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ==============================
+// UPDATE ADVOCATE PROFILE
+// ==============================
+
+router.put("/profile", verifyToken, async (req, res) => {
+  const advocateId = req.user.user_id;
+
+  const { specialization, experience_years, fee_per_hour } = req.body;
+
+  try {
+    await pool.query(
+      `
+      UPDATE advocate_profiles
+      SET 
+        specialization = $1,
+        experience_years = $2,
+        fee_per_hour = $3
+      WHERE advocate_id = $4
+      `,
+      [specialization, experience_years, fee_per_hour, advocateId]
+    );
+
+    res.json({ message: "Profile updated successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Update failed" });
+  }
+});
+
+// ==============================
+// GET BOOKINGS FOR ADVOCATE
+// ==============================
+router.get("/bookings", verifyToken, async (req, res) => {
+  const advocateId = req.user.user_id;
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        name,
+        email,
+        phone,
+        preferred_date,
+        amount,
+        payment_id,
+        created_at,
+        advocate_name
+      FROM bookings
+      WHERE advocate_id = $1
+      ORDER BY created_at DESC
+      `,
+      [advocateId]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("FETCH BOOKINGS ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;
-
-
-
-
-
 
 
 

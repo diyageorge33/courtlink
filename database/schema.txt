@@ -282,6 +282,7 @@ ADD COLUMN advocate_change_requested BOOLEAN DEFAULT FALSE;
 
 ALTER TABLE cases
 DROP CONSTRAINT cases_status_check;
+
 ALTER TABLE cases
 ADD CONSTRAINT cases_status_check
 CHECK (status IN (
@@ -301,5 +302,6 @@ CREATE TABLE orders (
   file_url TEXT,
   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 ALTER TABLE orders
 ADD COLUMN advocate_id INT REFERENCES users(user_id) ON DELETE CASCADE;

@@ -1254,3 +1254,47 @@ nav.navbar{
   justify-content: space-between;
   margin-top: 15px;
 }
+
+/* =========================
+   LEGAL EXPERTS PAGE
+========================= */
+
+.experts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.expert-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #334155;
+  transition: 0.25s;
+}
+
+.expert-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  border-color: #3b82f6;
+}
+
+.expert-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 2px solid #6366f1;
+}
+
+.expert-card h3 {
+  margin-bottom: 8px;
+  color: #f8fafc;
+}
+
+.expert-card p {
+  font-size: 14px;
+  color: #94a3b8;
+}
