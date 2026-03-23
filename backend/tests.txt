@@ -1,0 +1,170 @@
+PS C:\Users\admin\courtlink\backend> npm install jest supertest --save-dev
+PS C:\Users\admin\courtlink\backend> npm uninstall uuid
+PS C:\Users\admin\courtlink\backend> npm install uuid@8
+PS C:\Users\admin\courtlink\backend> npm install cross-env --save-dev
+
+
+PS C:\Users\admin\courtlink\backend> npm test
+
+> backend@1.0.0 test
+> cross-env NODE_ENV=test jest
+
+ PASS  tests/unit/validation.test.js
+  ● Console
+
+    console.log
+      [dotenv@17.3.1] injecting env (15) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+ PASS  tests/unit/authController.test.js
+  ● Console
+
+    console.log
+      [dotenv@17.3.1] injecting env (15) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+    console.log
+      LOGIN API HIT
+
+      at Object.log [as login] (src/controllers/auth.controller.js:10:11)
+
+    console.log
+      Request body: {}
+
+      at Object.log [as login] (src/controllers/auth.controller.js:11:11)
+
+    console.log
+      Missing fields: { email: false, password: false, captcha: false }
+
+      at Object.log [as login] (src/controllers/auth.controller.js:16:13)
+
+    console.log
+      LOGIN API HIT
+
+      at Object.log [as login] (src/controllers/auth.controller.js:10:11)
+
+    console.log
+      Request body: { email: 'test@gmail.com', password: '123', captchaToken: 'token' }
+
+      at Object.log [as login] (src/controllers/auth.controller.js:11:11)
+
+    console.log
+      Captcha response: { success: true }
+
+      at Object.log [as login] (src/controllers/auth.controller.js:32:13)
+
+    console.log
+      User fetched: undefined
+
+      at Object.log [as login] (src/controllers/auth.controller.js:47:13)
+
+    console.log
+      LOGIN API HIT
+
+      at Object.log [as login] (src/controllers/auth.controller.js:10:11)
+
+    console.log
+      Request body: { email: 'test@gmail.com', password: '123', captchaToken: 'token' }
+
+      at Object.log [as login] (src/controllers/auth.controller.js:11:11)
+
+    console.log
+      Captcha response: { success: true }
+
+      at Object.log [as login] (src/controllers/auth.controller.js:32:13)
+
+    console.log
+      User fetched: { password: 'hashed', is_verified: true, account_status: 'ACTIVE' }
+
+      at Object.log [as login] (src/controllers/auth.controller.js:47:13)
+
+    console.log
+      Entered password: 123
+
+      at Object.log [as login] (src/controllers/auth.controller.js:109:13)
+
+    console.log
+      Stored hash: undefined
+
+      at Object.log [as login] (src/controllers/auth.controller.js:110:13)
+
+    console.log
+      Password match result: true
+
+      at Object.log [as login] (src/controllers/auth.controller.js:114:13)
+
+ PASS  tests/integration/booking.test.js
+  ● Console
+
+    console.log
+      [dotenv@17.3.1] injecting env (15) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }       
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+    console.log
+      [dotenv@17.3.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+ PASS  tests/integration/auth.test.js
+  ● Console
+                                                                                                                                    
+    console.log                                                                                                                     
+      [dotenv@17.3.1] injecting env (15) from .env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2                          
+                                                                                                                                    
+      at _log (node_modules/dotenv/lib/main.js:139:11)                                                                              
+                                                                                                                                    
+    console.log                                                                                                                     
+      [dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild          
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+    console.log
+      LOGIN API HIT
+
+      at log (src/controllers/auth.controller.js:10:11)
+
+    console.log
+      Request body: { email: 'wrong@gmail.com', password: 'wrongpass' }
+
+      at log (src/controllers/auth.controller.js:11:11)
+
+    console.log
+      Missing fields: { email: true, password: true, captcha: false }
+
+      at log (src/controllers/auth.controller.js:16:13)
+
+ PASS  tests/integration/advocate.test.js
+  ● Console
+                                                                                                                                    
+    console.log                                                                                                                     
+      [dotenv@17.3.1] injecting env (15) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2                       
+                                                                                                                                    
+      at _log (node_modules/dotenv/lib/main.js:139:11)                                                                              
+                                                                                                                                    
+    console.log                                                                                                                     
+      [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }                             
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+ PASS  tests/integration/client.test.js
+  ● Console
+
+    console.log
+      [dotenv@17.3.1] injecting env (15) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+    console.log
+      [dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+
+Test Suites: 6 passed, 6 total
+Tests:       21 passed, 21 total
+Snapshots:   0 total
+Time:        2.485 s
+Ran all test suites.
