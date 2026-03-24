@@ -166,13 +166,27 @@ function ClientDashboard() {
           <p>Submit a new legal case request.</p>
         </div>
 
-        <div
+        {/* <div
           className="action-tile-new"
           onClick={() => navigate("/dashboard/client/aisummarizer")}
         >
           <h3>AI Summarizer</h3>
           <p>Summarize legal documents.</p>
+        </div> */}
+
+          <div
+          className={`action-tile-new ${!consultationPaid ? "tile-locked" : ""}`}
+          onClick={() => consultationPaid && navigate("/dashboard/client/aisummarizer")}
+        >
+          <h3>AI Summarizer</h3>
+          <p>
+            {consultationPaid
+              ? "Summrize legal documents"
+              : "🔒 Premium Feature"}
+          </p>
         </div>
+
+
 
         <div
           className="action-tile-new"
@@ -190,7 +204,7 @@ function ClientDashboard() {
           <p>View all your transactions.</p>
         </div>
 
-        <div
+        {/* <div
           className={`action-tile-new ${!consultationPaid ? "tile-locked" : ""}`}
           onClick={() => consultationPaid && navigate("/Mycase")}
         >
@@ -200,6 +214,14 @@ function ClientDashboard() {
               ? "Track the status of your cases."
               : "🔒 Premium Feature"}
           </p>
+        </div> */}
+
+        <div
+          className="action-tile-new"
+          onClick={() => navigate("/Mycase")}
+        >
+          <h3>My Cases</h3>
+          <p>View the status of your cases.</p>
         </div>
 
         <div
