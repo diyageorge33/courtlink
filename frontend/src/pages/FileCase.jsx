@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { fileNewCase } from "../api/clientApi";
 import { generateCaseDescription } from "../api/aiApi";
 import "../newstyles.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function FileCase() {
   const navigate = useNavigate();
@@ -21,23 +23,30 @@ function FileCase() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      await fileNewCase({
-        case_title: formData.case_title,
-        case_type: formData.case_type,
-        case_description: formData.case_description,
-      });
+  try {
+    await fileNewCase({
+      case_title: formData.case_title,
+      case_type: formData.case_type,
+      case_description: formData.case_description,
+    });
 
-      alert("Case filed successfully!");
-      navigate("/dashboard/client/mycases");
+    //  SUCCESS TOAST
+    toast.success("Case filed successfully!");
 
-    } catch (err) {
-      console.error("Error filing case:", err);
-      alert("Failed to file case");
-    }
-  };
+    //  REDIRECT AFTER 2 SECONDS
+    setTimeout(() => {
+      navigate("/Mycase");
+    }, 2000);
+
+  } catch (err) {
+    console.error("Error filing case:", err);
+
+    //  ERROR TOAST
+    toast.error("Failed to file case");
+  }
+};
 
   const handleGenerateAI = async () => {
     try {

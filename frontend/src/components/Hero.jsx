@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 
 function Hero() {
-const navigate = useNavigate();
+  const navigate = useNavigate();
+
   return (
     <section className="hero">
       <div className="hero-container">
+
         <div className="hero-text">
           <h1>Justice, Simplified</h1>
 
@@ -16,28 +18,25 @@ const navigate = useNavigate();
 
           <div className="hero-buttons">
             <button
-              className="btn-primary"
+              className="primary-btn"
               onClick={() => navigate("/login")}
             >
-                Get Started
+              Get Started
             </button>
 
-
-            <button className="btn-outline"
-            onClick={() => navigate("/Bookappointment")}
+            <button
+              className="secondary-btn"
+              onClick={() => navigate("/Bookappointment")}
             >
               Book Appointment
-              {/* BACKEND: GET /api/cases/:caseId */}
             </button>
           </div>
         </div>
 
         <div className="hero-image">
-          <img
-            src="/courtlink.png"
-            alt="CourtLink illustration"
-          />
+          <img src="/courtlink.png" alt="CourtLink illustration" />
         </div>
+
       </div>
     </section>
   );

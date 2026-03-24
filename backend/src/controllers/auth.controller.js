@@ -31,60 +31,59 @@ function ensurePendingAdvocatesTable() {
   return pendingAdvocatesTableInitPromise;
 }
 
-/* LOGIN */
 exports.login = async (req, res) => {
   console.log("LOGIN API HIT");
   console.log("Request body:", req.body);
 
   const { email, password, captchaToken } = req.body;
 
-  if (!email || !password || !captchaToken) {
-    console.log("Missing fields:", { email: !!email, password: !!password, captcha: !!captchaToken });
-    return res.status(400).json({ message: "All fields are required" });
+  // Validate required fields
+  if (!email || !password) {
+    console.log("Missing fields:", { email: !!email, password: !!password });
+    return res.status(400).json({ message: "Email and password are required" });
   }
 
   try {
-    if (!process.env.RECAPTCHA_SECRET) {
-      console.error("RECAPTCHA_SECRET is missing in backend environment");
-      return res.status(500).json({ message: "reCAPTCHA is not configured on the server" });
-    }
+    // ✅ CAPTCHA only in non-test mode
+    if (process.env.NODE_ENV !== "test") {
 
-    // CAPTCHA VERIFY
-    const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
-    let captchaData;
+      if (!captchaToken) {
+        return res.status(400).json({ message: "Captcha is required" });
+      }
 
-    try {
-      const captchaRes = await axios.post(
-        verifyUrl,
-        new URLSearchParams({
-          secret: process.env.RECAPTCHA_SECRET,
-          response: captchaToken,
-        }).toString(),
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          timeout: 10000,
+      const verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
+
+      try {
+        const captchaRes = await axios.post(
+          verifyUrl,
+          new URLSearchParams({
+            secret: process.env.RECAPTCHA_SECRET,
+            response: captchaToken,
+          }).toString(),
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        );
+
+        const captchaData = captchaRes.data;
+
+        if (!captchaData.success) {
+          return res.status(403).json({
+            message: "Captcha verification failed",
+          });
         }
-      );
 
-      captchaData = captchaRes.data;
-      console.log("Captcha response:", captchaData);
-    } catch (captchaErr) {
-      console.error("Captcha verification request failed:", captchaErr.response?.data || captchaErr.message);
-      return res.status(502).json({
-        message: "Could not verify reCAPTCHA right now",
-        error: captchaErr.response?.data || captchaErr.message,
-      });
+      } catch (captchaErr) {
+        console.error("Captcha error:", captchaErr.message);
+        return res.status(502).json({
+          message: "Could not verify reCAPTCHA",
+        });
+      }
     }
 
-    if (!captchaData.success) {
-      return res.status(403).json({
-        message: "Captcha verification failed",
-        error: captchaData["error-codes"] || [],
-      });
-    }
-
+    // ✅ Normalize email
     const normalizedEmail = email.trim().toLowerCase();
 
     const result = await pool.query(
@@ -127,7 +126,6 @@ exports.login = async (req, res) => {
 
     const user = result.rows[0];
 
-    // 🔥 MAIN FIX (THIS WAS MISSING)
     if (user.account_status !== "ACTIVE") {
       return res.status(403).json({
         message: "Account is closed or inactive. Contact admin.",
@@ -140,12 +138,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    console.log("Entered password:", password);
-    console.log("Stored hash:", user.password_hash);
-
     const isMatch = await bcrypt.compare(password, user.password_hash);
-
-    console.log("Password match result:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });

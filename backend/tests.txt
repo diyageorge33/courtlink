@@ -168,3 +168,12 @@ Tests:       21 passed, 21 total
 Snapshots:   0 total
 Time:        2.485 s
 Ran all test suites.
+
+
+LOAD TESTING
+1.for load testing-TERMINAL 1 INSIDE BACKEND FOLDER
+$env:NODE_ENV="test"
+npm start
+2.TERMINAL 2 ROOT
+$env:NODE_ENV="test"
+k6 run load-test.js
