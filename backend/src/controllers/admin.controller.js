@@ -7,13 +7,14 @@ exports.getClients = async (req, res) => {
   const limit = 10;
   const offset = (page - 1) * limit;
 
+  console.log(`Admin getClients called page=${page} limit=${limit} offset=${offset}`);
+
   try {
 
     const result = await pool.query(
       `SELECT u.user_id,
               u.full_name,
               u.email,
-              cp.phone,
               cp.address,
               cp.dob,
               cp.gender,
@@ -37,13 +38,15 @@ exports.getClients = async (req, res) => {
       `SELECT COUNT(*) FROM users WHERE role='CLIENT'`
     );
 
+    console.log(`Admin getClients returning ${result.rows.length} rows (total ${total.rows[0].count})`);
+
     res.json({
       clients: result.rows,
       total: parseInt(total.rows[0].count)
     });
 
   } catch (err) {
-    console.error(err);
+    console.error('Error in getClients:', err);
     res.status(500).json({ message: "Error fetching clients" });
   }
 
@@ -62,7 +65,12 @@ exports.getAdvocates = async (req, res) => {
        WHERE u.role='ADVOCATE'`
     );
 
-    res.json(result.rows);
+    const advocates = result.rows.map(row => ({
+      ...row,
+      is_active: row.account_status === 'ACTIVE'
+    }));
+
+    res.json(advocates);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });

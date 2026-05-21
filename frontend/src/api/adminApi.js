@@ -1,8 +1,51 @@
 import api from "./api";
 
+export const debugAuth = async () => {
+  try {
+    console.log("Testing basic auth with /api/admin/debug");
+    const res = await api.get("/admin/debug");
+    console.log("Debug auth response:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error("Debug auth failed:", {
+      status: error?.response?.status,
+      data: error?.response?.data,
+      message: error?.message,
+    });
+    throw error;
+  }
+};
+
+export const debugAdminAuth = async () => {
+  try {
+    console.log("Testing admin auth with /api/admin/debug/admin");
+    const res = await api.get("/admin/debug/admin");
+    console.log("Debug admin auth response:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error("Debug admin auth failed:", {
+      status: error?.response?.status,
+      data: error?.response?.data,
+      message: error?.message,
+    });
+    throw error;
+  }
+};
+
 export const fetchAdminClients = async (page = 1) => {
-  const res = await api.get(`/admin/clients?page=${page}`);
-  return res.data;
+  try {
+    console.log("fetchAdminClients called with page:", page);
+    const token = localStorage.getItem("token");
+    console.log("Token in localStorage:", token ? "present" : "missing");
+    const res = await api.get(`/admin/clients?page=${page}`);
+    console.log("fetchAdminClients response:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error("fetchAdminClients error status:", error?.response?.status);
+    console.error("fetchAdminClients error data:", error?.response?.data);
+    console.error("fetchAdminClients error message:", error?.message);
+    throw error;
+  }
 };
 
 export const fetchAdminAdvocates = async () => {

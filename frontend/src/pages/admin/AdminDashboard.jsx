@@ -70,8 +70,33 @@ function AdminDashboard() {
   });
 
   const fetchClients = async (page = 1) => {
-    const data = await fetchAdminClients(page);
-    setClients(data.clients);
+    try {
+      const data = await fetchAdminClients(page);
+      const clientList =
+        Array.isArray(data)
+          ? data
+          : Array.isArray(data?.clients)
+          ? data.clients
+          : [];
+
+      if (!Array.isArray(clientList)) {
+        console.error("Unexpected client data:", data);
+        setClients([]);
+      } else {
+        setClients(clientList);
+      }
+    } catch (error) {
+      console.error("fetchClients full error object:", error);
+      console.error("error.response:", error?.response);
+      console.error("error.message:", error?.message);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.response?.statusText ||
+        error?.message ||
+        "Failed to load clients";
+      console.error("Final error message to show:", errorMessage);
+      throw error;
+    }
   };
 
   const fetchAdvocates = async () => {
@@ -155,8 +180,17 @@ function AdminDashboard() {
   useEffect(() => {
     if (view === "clients") {
       fetchClients().catch((error) => {
-        console.error("Error refreshing clients:", error);
-        toast.error("Failed to load clients");
+        console.error("Error refreshing clients full obj:", error);
+        console.error("error.response:", error?.response);
+        console.error("error.response?.status:", error?.response?.status);
+        console.error("error.response?.data:", error?.response?.data);
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.response?.statusText ||
+          error?.message ||
+          "Failed to load clients";
+        console.error("Toast message to display:", errorMessage);
+        toast.error(errorMessage);
       });
     }
   }, [view]);

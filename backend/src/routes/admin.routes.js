@@ -31,9 +31,27 @@ const {
     getCaseTimeline
 } = require("../controllers/admin.controller");
 
-router.get("/clients", verifyToken, getClients);
-router.get("/advocates", verifyToken, getAdvocates);
-router.get("/cases", verifyToken, getCases);
+router.get("/debug", verifyToken, (req, res) => {
+  console.log("DEBUG endpoint hit");
+  res.json({
+    message: "Debug info",
+    user: req.user,
+    timestamp: new Date()
+  });
+});
+
+router.get("/debug/admin", verifyToken, isAdmin, (req, res) => {
+  console.log("DEBUG admin endpoint hit");
+  res.json({
+    message: "Admin verified",
+    user: req.user,
+    timestamp: new Date()
+  });
+});
+
+router.get("/clients", verifyToken, isAdmin, getClients);
+router.get("/advocates", verifyToken, isAdmin, getAdvocates);
+router.get("/cases", verifyToken, isAdmin, getCases);
 router.get("/client-cases/:clientId", verifyToken, getClientCases);
 router.get("/suggest-advocates/:caseId", verifyToken, suggestAdvocates);
 router.get("/closed-cases", verifyToken, getClosedCases);
