@@ -32,6 +32,7 @@ function ensurePendingAdvocatesTable() {
 }
 
 exports.login = async (req, res) => {
+  console.log("ENV VALUE:", process.env.NODE_ENV);
   console.log("LOGIN API HIT");
   console.log("Request body:", req.body);
 
@@ -44,7 +45,6 @@ exports.login = async (req, res) => {
   }
 
   try {
-    // ✅ CAPTCHA only in non-test mode
     if (process.env.NODE_ENV !== "test") {
 
       if (!captchaToken) {
@@ -83,7 +83,6 @@ exports.login = async (req, res) => {
       }
     }
 
-    // ✅ Normalize email
     const normalizedEmail = email.trim().toLowerCase();
 
     const result = await pool.query(

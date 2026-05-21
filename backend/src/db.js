@@ -1,6 +1,6 @@
 const { Pool } = require("pg");
 
-// ✅ Ensure password is always a string
+
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -9,7 +9,7 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-// ✅ Only connect in non-test mode
+
 if (process.env.NODE_ENV !== "test") {
   pool.connect((err, client, release) => {
     if (err) {

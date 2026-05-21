@@ -1,12 +1,10 @@
 import api from "./api";
 
-/* DASHBOARD */
 export const fetchClientDashboardStats = async () => {
   const res = await api.get("/client/dashboard/stats");
   return res.data;
 };
 
-/* CASES */
 export const fetchClientCases = async (page = 1) => {
   const res = await api.get(`/client/cases?page=${page}`);
   return res.data;
@@ -17,7 +15,6 @@ export const fileNewCase = async (caseData) => {
   return res.data;
 };
 
-/* DOCUMENTS */
 export const uploadClientDocument = async (formData) => {
   const res = await api.post("/client/upload-document", formData, {
     headers: {
@@ -33,7 +30,7 @@ export const fetchClientDocuments = async (page = 1) => {
     return res.data || [];
   } catch (err) {
     console.error("Fetch documents error:", err);
-    return []; // ✅ prevents crash
+    return []; 
   }
 };
 
