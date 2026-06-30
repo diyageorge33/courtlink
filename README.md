@@ -1,4 +1,4 @@
-#CourtLink – Web-Based Legal Assistance Platform
+# CourtLink – Web-Based Legal Assistance Platform
 
 CourtLink is a web-based legal assistance platform developed as a team project to simplify legal service management through a centralized and user-friendly system. It enables clients to file cases, manage legal documents, connect with advocates, and utilize AI-powered legal assistance.
 
